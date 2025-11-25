@@ -1,215 +1,223 @@
 <script>
-  import { derived } from 'svelte/store'
-  import { plants } from '$lib/plant-data'
-  import { Leaf, Trees, Flower2, Sprout, ChevronDown } from 'lucide-svelte'
-  import { selectedCategories, selectedStatus } from '$lib/stores/filters'
+  import { derived } from "svelte/store";
+  import { plants } from "$lib/plant-data";
+  import { Leaf, Trees, Flower2, Sprout, ChevronDown } from "lucide-svelte";
+  import { selectedCategories, selectedStatus } from "$lib/stores/filters";
+  import { goto } from "$app/navigation";
+  import Filters from "$lib/components/Filters.svelte";
 
   const categoryConfig = {
     tree: { label: "Trees", icon: Trees, color: "bg-emerald-600" },
     shrub: { label: "Shrubs", icon: Sprout, color: "bg-teal-600" },
     herb: { label: "Herbs", icon: Leaf, color: "bg-lime-600" },
     vegetable: { label: "Vegetables", icon: Flower2, color: "bg-amber-600" },
-  }
+  };
 
   const statusConfig = {
     good: { label: "Good" },
     attention: { label: "Needs Attention" },
     critical: { label: "Critical" },
-  }
+  };
 
-  let speciesOpen = $state(true)
-  let statusOpen = $state(true)
+  let speciesOpen = true;
+  let statusOpen = true;
 
   function calculateStatus(current, optimal) {
-    let issueCount = 0
-    let criticalCount = 0
+    let issueCount = 0;
+    let criticalCount = 0;
 
-    const tempDiff = Math.max(optimal.temperature.min - current.temperature, current.temperature - optimal.temperature.max, 0)
+    const tempDiff = Math.max(
+      optimal.temperature.min - current.temperature,
+      current.temperature - optimal.temperature.max,
+      0,
+    );
     if (tempDiff > 0) {
-      if (tempDiff > 5) criticalCount++
-      else issueCount++
+      if (tempDiff > 5) criticalCount++;
+      else issueCount++;
     }
 
-    const humidityDiff = Math.max(optimal.humidity.min - current.humidity, current.humidity - optimal.humidity.max, 0)
+    const humidityDiff = Math.max(
+      optimal.humidity.min - current.humidity,
+      current.humidity - optimal.humidity.max,
+      0,
+    );
     if (humidityDiff > 0) {
-      if (humidityDiff > 15) criticalCount++
-      else issueCount++
+      if (humidityDiff > 15) criticalCount++;
+      else issueCount++;
     }
 
-    const phDiff = Math.max(optimal.soilPH.min - current.soilPH, current.soilPH - optimal.soilPH.max, 0)
+    const phDiff = Math.max(
+      optimal.soilPH.min - current.soilPH,
+      current.soilPH - optimal.soilPH.max,
+      0,
+    );
     if (phDiff > 0) {
-      if (phDiff > 0.5) criticalCount++
-      else issueCount++
+      if (phDiff > 0.5) criticalCount++;
+      else issueCount++;
     }
 
-    const moistureDiff = Math.max(optimal.soilMoisture.min - current.soilMoisture, current.soilMoisture - optimal.soilMoisture.max, 0)
+    const moistureDiff = Math.max(
+      optimal.soilMoisture.min - current.soilMoisture,
+      current.soilMoisture - optimal.soilMoisture.max,
+      0,
+    );
     if (moistureDiff > 0) {
-      if (moistureDiff > 20) criticalCount++
-      else issueCount++
+      if (moistureDiff > 20) criticalCount++;
+      else issueCount++;
     }
 
-    const sunlightDiff = Math.max(optimal.sunlightHours.min - current.sunlightHours, current.sunlightHours - optimal.sunlightHours.max, 0)
+    const sunlightDiff = Math.max(
+      optimal.sunlightHours.min - current.sunlightHours,
+      current.sunlightHours - optimal.sunlightHours.max,
+      0,
+    );
     if (sunlightDiff > 0) {
-      if (sunlightDiff > 2) criticalCount++
-      else issueCount++
+      if (sunlightDiff > 2) criticalCount++;
+      else issueCount++;
     }
 
-    if (criticalCount >= 2) return "critical"
-    if (criticalCount >= 1 || issueCount >= 2) return "attention"
-    return "good"
+    if (criticalCount >= 2) return "critical";
+    if (criticalCount >= 1 || issueCount >= 2) return "attention";
+    return "good";
   }
 
   function getStatusColor(status) {
     switch (status) {
-      case "good": return "bg-green-500"
-      case "attention": return "bg-orange-500"
-      case "critical": return "bg-red-500"
+      case "good":
+        return "bg-green-500";
+      case "attention":
+        return "bg-orange-500";
+      case "critical":
+        return "bg-red-500";
     }
   }
 
   function toggleCategory(category) {
-    selectedCategories.update(categories => {
+    selectedCategories.update((categories) => {
       if (categories.includes(category)) {
-        return categories.filter((c) => c !== category)
+        return categories.filter((c) => c !== category);
       } else {
-        return [...categories, category]
+        return [...categories, category];
       }
-    })
+    });
   }
 
   function toggleStatus(status) {
-    selectedStatus.update(statuses => {
+    selectedStatus.update((statuses) => {
       if (statuses.includes(status)) {
-        return statuses.filter((s) => s !== status)
+        return statuses.filter((s) => s !== status);
       } else {
-        return [...statuses, status]
+        return [...statuses, status];
       }
-    })
+    });
+  }
+
+  function viewPlant(plantId) {
+    goto(`/plant/${plantId}`);
   }
 
   const filteredPlants = derived(
     [selectedCategories, selectedStatus],
     ([$categories, $statuses]) => {
-      return plants.filter((plant) => {
-        const status = calculateStatus(plant.currentConditions, plant.optimalConditions)
-        return $categories.includes(plant.category) && $statuses.includes(status)
-      })
-    }
-  )
+      const res = plants.filter((plant) => {
+        const status = calculateStatus(
+          plant.currentConditions,
+          plant.optimalConditions,
+        );
+        return (
+          $categories.includes(plant.category) && $statuses.includes(status)
+        );
+      });
+      console.log(
+        "[species-list] filteredPlants recompute",
+        $categories,
+        $statuses,
+        "->",
+        res.length,
+      );
+      return res;
+    },
+  );
 </script>
 
 <div class="flex h-full w-full">
-  <!-- Left Sidebar - Filters -->
-  <div class="w-64 rounded-none border-y-0 border-l-0 bg-card border-r border-border">
-    <div class="p-6">
-      <div class="mb-6">
-        <button
-          onclick={() => (speciesOpen = !speciesOpen)}
-          class="flex w-full items-center justify-between text-xl font-semibold text-card-foreground"
-        >
-          Species
-          <span class="transition-transform {speciesOpen ? 'rotate-180' : ''}">
-            <ChevronDown class="h-5 w-5" />
-          </span>
-        </button>
-        {#if speciesOpen}
-          <div class="mt-4 space-y-4">
-            {#each Object.entries(categoryConfig) as [category, config]}
-              <div class="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="list-{category}"
-                  checked={$selectedCategories.includes(category)}
-                  onchange={() => toggleCategory(category)}
-                  class="rounded border-gray-300"
-                />
-                <label for="list-{category}" class="flex cursor-pointer items-center gap-2 text-sm font-medium">
-                  <config.icon class="h-4 w-4" />
-                  {config.label}
-                </label>
-              </div>
-            {/each}
-          </div>
-        {/if}
-      </div>
-
-      <div>
-        <button
-          onclick={() => (statusOpen = !statusOpen)}
-          class="flex w-full items-center justify-between text-xl font-semibold text-card-foreground"
-        >
-          Status
-          <span class="transition-transform {statusOpen ? 'rotate-180' : ''}">
-            <ChevronDown class="h-5 w-5" />
-          </span>
-        </button>
-        {#if statusOpen}
-          <div class="mt-4 space-y-4">
-            {#each Object.entries(statusConfig) as [status, config]}
-              <div class="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="list-{status}"
-                  checked={$selectedStatus.includes(status)}
-                  onchange={() => toggleStatus(status)}
-                  class="rounded border-gray-300"
-                />
-                <label for="list-{status}" class="flex cursor-pointer items-center gap-2 text-sm font-medium">
-                  <div class="h-3 w-3 rounded-full {getStatusColor(status)}" aria-hidden="true"></div>
-                  {config.label}
-                </label>
-              </div>
-            {/each}
-          </div>
-        {/if}
-      </div>
-    </div>
+  <!-- Left Sidebar - Filters (shared) -->
+  <div
+    class="w-64 rounded-none border-y-0 border-l-0 bg-card border-r border-border"
+  >
+    <Filters />
   </div>
 
   <!-- Main Content - Species Grid -->
   <div class="flex-1 overflow-y-auto bg-background p-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+    >
       {#each $filteredPlants as plant (plant.id)}
         {@const config = categoryConfig[plant.category]}
-        {@const status = calculateStatus(plant.currentConditions, plant.optimalConditions)}
+        {@const status = calculateStatus(
+          plant.currentConditions,
+          plant.optimalConditions,
+        )}
         {@const statusColor = getStatusColor(status)}
-        <div class="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-          <div class="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-muted to-muted/50">
+        <button
+          on:click={() => viewPlant(plant.id)}
+          class="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-all hover:scale-[1.02] text-left w-full"
+        >
+          <div
+            class="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-muted to-muted/50"
+          >
             <img
               src={plant.image || "/placeholder.svg"}
               alt={plant.name}
               class="w-full h-full object-cover"
             />
             <div class="absolute top-2 right-2">
-              <div class="h-4 w-4 rounded-full {statusColor} border-2 border-white shadow-md"></div>
+              <div
+                class="h-4 w-4 rounded-full {statusColor} border-2 border-white shadow-md"
+              ></div>
             </div>
           </div>
           <div class="p-4">
-            <div class="mb-2 inline-block px-2 py-1 rounded text-xs font-semibold {config.color} text-white">
+            <div
+              class="mb-2 inline-block px-2 py-1 rounded text-xs font-semibold {config.color} text-white"
+            >
               {config.label}
             </div>
-            <h3 class="text-lg font-bold text-card-foreground mb-1">{plant.name}</h3>
-            <p class="text-sm italic text-muted-foreground mb-3">{plant.scientificName}</p>
+            <h3 class="text-lg font-bold text-card-foreground mb-1">
+              {plant.name}
+            </h3>
+            <p class="text-sm italic text-muted-foreground mb-3">
+              {plant.scientificName}
+            </p>
             <div class="space-y-2 text-sm">
               <div class="flex justify-between">
                 <span class="text-muted-foreground">Harvest:</span>
-                <span class="font-medium text-card-foreground">{plant.harvestSeason}</span>
+                <span class="font-medium text-card-foreground"
+                  >{plant.harvestSeason}</span
+                >
               </div>
               <div class="flex justify-between">
                 <span class="text-muted-foreground">Height:</span>
-                <span class="font-medium text-card-foreground">{plant.height}</span>
+                <span class="font-medium text-card-foreground"
+                  >{plant.height}</span
+                >
               </div>
               <div class="flex justify-between">
                 <span class="text-muted-foreground">Sun:</span>
-                <span class="font-medium text-card-foreground">{plant.sunRequirement}</span>
+                <span class="font-medium text-card-foreground"
+                  >{plant.sunRequirement}</span
+                >
               </div>
               <div class="flex justify-between">
                 <span class="text-muted-foreground">Water:</span>
-                <span class="font-medium text-card-foreground">{plant.waterNeeds}</span>
+                <span class="font-medium text-card-foreground"
+                  >{plant.waterNeeds}</span
+                >
               </div>
             </div>
           </div>
-        </div>
+        </button>
       {/each}
     </div>
   </div>
