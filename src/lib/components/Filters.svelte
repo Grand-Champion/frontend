@@ -38,21 +38,21 @@
         selectedCategories.update((categories) => {
             if (categories.includes(category)) {
                 const next = categories.filter((c) => c !== category);
-                console.log(
-                    "[Filters] toggleCategory -> removed",
-                    category,
-                    "next:",
-                    next,
-                );
+                // console.log(
+                //     "[Filters] toggleCategory -> removed",
+                //     category,
+                //     "next:",
+                //     next,
+                // );
                 return next;
             } else {
                 const next = [...categories, category];
-                console.log(
-                    "[Filters] toggleCategory -> added",
-                    category,
-                    "next:",
-                    next,
-                );
+                // console.log(
+                //     "[Filters] toggleCategory -> added",
+                //     category,
+                //     "next:",
+                //     next,
+                // );
                 return next;
             }
         });
@@ -71,21 +71,21 @@
         selectedStatus.update((statuses) => {
             if (statuses.includes(status)) {
                 const next = statuses.filter((s) => s !== status);
-                console.log(
-                    "[Filters] toggleStatus -> removed",
-                    status,
-                    "next:",
-                    next,
-                );
+                // console.log(
+                //     "[Filters] toggleStatus -> removed",
+                //     status,
+                //     "next:",
+                //     next,
+                // );
                 return next;
             } else {
                 const next = [...statuses, status];
-                console.log(
-                    "[Filters] toggleStatus -> added",
-                    status,
-                    "next:",
-                    next,
-                );
+                // console.log(
+                //     "[Filters] toggleStatus -> added",
+                //     status,
+                //     "next:",
+                //     next,
+                // );
                 return next;
             }
         });
