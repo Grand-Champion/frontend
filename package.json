@@ -14,6 +14,7 @@
 		"lint": "eslint . --max-warnings=0 && prettier --check ."
 	},
 	"devDependencies": {
+		"@eslint/compat": "^2.0.0",
 		"@eslint/css": "^0.14.1",
 		"@eslint/js": "^9.39.1",
 		"@eslint/json": "^0.14.0",
