@@ -36,3 +36,6 @@ dist-ssr/
 
 # System files (Windows/macOS)
 Thumbs.db
+
+# Vite config (local overrides)
+vite.config.js
