@@ -12,6 +12,38 @@ import svelteConfig from './svelte.config.js';
 const gitignorePath = fileURLToPath(new URL('./.gitignore', import.meta.url));
 
 export default defineConfig(
+	{
+        ignores: ['eslint.config.js', 'node_modules'],
+		languageOptions: {
+            parser: ts.parser,
+            parserOptions: {
+                projectService: true,
+                tsconfigRootDir: fileURLToPath(new URL('./', import.meta.url))
+            }
+        }
+    },
+	{
+        files: ['eslint.config.js'],
+        rules: {
+            '@typescript-eslint/no-unnecessary-condition': 'off',
+            '@typescript-eslint/no-unused-vars': 'off',
+            '@typescript-eslint/explicit-function-return-type': 'off'
+        }
+    },
+	{
+  		files: ['**/*.d.ts'],
+  		rules: {
+    		'@typescript-eslint/no-unnecessary-condition': 'off'
+  		}
+	},
+		{
+  		files: ['**/*.ts', '**/*.tsx'],
+  		languageOptions: {
+    		parserOptions: {
+      		projectService: true
+    		}
+  		}
+	},
 	// Automatically ignore files listed in .gitignore
 	includeIgnoreFile(gitignorePath),
 	// Apply ESLint's recommended JavaScript rules
