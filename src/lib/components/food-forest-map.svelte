@@ -177,13 +177,13 @@
             calculateStatus(plant.currentConditions, plant.optimalConditions),
           ),
       );
-      console.log(
-        "[map] filteredPlants recompute",
-        $categories,
-        $statuses,
-        "->",
-        res.length,
-      );
+      // console.log(
+      //   "[map] filteredPlants recompute",
+      //   $categories,
+      //   $statuses,
+      //   "->",
+      //   res.length,
+      // );
       return res;
     },
   );

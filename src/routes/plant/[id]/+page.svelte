@@ -10,6 +10,8 @@
     Sprout,
     ArrowLeft,
     Thermometer,
+    FlaskConical,
+    Droplet,
     Droplets,
     Sun,
     MessageCircle,
@@ -362,7 +364,7 @@
                 class="flex items-center justify-between rounded-lg bg-muted p-4"
               >
                 <div class="flex items-center gap-3">
-                  <Droplets class="h-5 w-5 text-muted-foreground" />
+                  <Droplet class="h-5 w-5 text-muted-foreground" />
                   <span class="font-medium">Humidity</span>
                 </div>
                 <span
@@ -381,6 +383,7 @@
                 class="flex items-center justify-between rounded-lg bg-muted p-4"
               >
                 <div class="flex items-center gap-3">
+                  <FlaskConical class="h-5 w-5 text-muted-foreground" />
                   <span class="font-medium">Soil pH</span>
                 </div>
                 <span

@@ -128,13 +128,13 @@
           $categories.includes(plant.category) && $statuses.includes(status)
         );
       });
-      console.log(
-        "[species-list] filteredPlants recompute",
-        $categories,
-        $statuses,
-        "->",
-        res.length,
-      );
+      // console.log(
+      //   "[species-list] filteredPlants recompute",
+      //   $categories,
+      //   $statuses,
+      //   "->",
+      //   res.length,
+      // );
       return res;
     },
   );
