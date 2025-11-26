@@ -111,7 +111,7 @@
             on:click={() => (speciesOpen = !speciesOpen)}
             class="flex w-full items-center justify-between text-xl font-semibold text-card-foreground"
         >
-            Species
+            Category
             <span
                 class={"transition-transform " +
                     (speciesOpen ? "rotate-180" : "")}
