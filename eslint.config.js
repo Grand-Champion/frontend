@@ -12,6 +12,14 @@ import svelteConfig from './svelte.config.js';
 const gitignorePath = fileURLToPath(new URL('./.gitignore', import.meta.url));
 
 export default defineConfig(
+	ts.configs.recommendedTypeChecked,
+	{
+		languageOptions: {
+			parserOptions: {
+				projectService: true,
+			},
+		},
+	},
 	{
         ignores: ['eslint.config.js', 'node_modules'],
 		languageOptions: {
@@ -22,6 +30,14 @@ export default defineConfig(
             }
         }
     },
+	{
+  		files: ['**/*.ts', '**/*.tsx'],
+  		languageOptions: {
+    		parserOptions: {
+      			projectService: true
+    		}
+  		}
+	},
 	{
         files: ['eslint.config.js'],
         rules: {
@@ -36,20 +52,10 @@ export default defineConfig(
     		'@typescript-eslint/no-unnecessary-condition': 'off'
   		}
 	},
-		{
-  		files: ['**/*.ts', '**/*.tsx'],
-  		languageOptions: {
-    		parserOptions: {
-      		projectService: true
-    		}
-  		}
-	},
 	// Automatically ignore files listed in .gitignore
 	includeIgnoreFile(gitignorePath),
 	// Apply ESLint's recommended JavaScript rules
 	js.configs.recommended,
-	// Apply TypeScript ESLint's recommended rules (spread array)
-	...ts.configs.recommended,
 	// Apply Svelte's recommended rules (spread array)
 	...svelte.configs.recommended,
 	// Disable ESLint rules that conflict with Prettier
