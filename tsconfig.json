@@ -23,7 +23,11 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.js",
-    "src/**/*.svelte"
+    "src/**/*.svelte",
+    "test/**/*.js",
+    "vite.config.ts",
+    "svelte.config.js",
+    "eslint.config.js"
   ],
   "extends": "./.svelte-kit/tsconfig.json"
 }
