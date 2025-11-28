@@ -28,3 +28,19 @@ jobs:
             # Runs Tests
             - run: npm test
             - run: npm run build
+    report:
+        name: Teams integratie
+        needs: [build]
+        if: ${{always()}}
+        runs-on: ubuntu-latest
+        steps:
+            - name: teams-webhook
+              uses: FreEZer00/teams-webhook-action@v1.4.2
+              with:
+                  needs: ${{ toJson(needs) }}
+                  job: ${{ toJson(job) }}
+                  webhook_url: ${{ secrets.TEAMS_WEBHOOK }}
+
+
+        
+
