@@ -1,4 +1,4 @@
-# Food Forest Information Platform (Frontend)
+# Food Forest Informatie Platform (Frontend)
 
 ## Overview
 Dit project is een Frontend applicatie ontwikkeld om mensen te informeren over voedselbossen, en om voedselbossen te helpen om op te starten. Een voedselbos is een zelf-verzorgend ecologisch systeem dat een volledig natuurgebied nabootst, terwijl het eetbare en nuttige planten voorziet. Veel mensen die graag willen starten met voedselbossen zijn niet bekend met de systemen van een voedselbos en hoe ze met elkaar omgaan.
