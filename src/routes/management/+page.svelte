@@ -673,17 +673,36 @@
                                                     {#if $auth.currentUser?.role === "admin"}
                                                         <select
                                                             id="edit-role-{user.id}"
-                                                            bind:value={editRole[user.id]}
+                                                            bind:value={
+                                                                editRole[
+                                                                    user.id
+                                                                ]
+                                                            }
                                                             class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                                         >
-                                                            <option value="manager">{t("manager", $language)}</option>
-                                                            <option value="gardener">{t("gardener", $language)}</option>
+                                                            <option
+                                                                value="manager"
+                                                                >{t(
+                                                                    "manager",
+                                                                    $language,
+                                                                )}</option
+                                                            >
+                                                            <option
+                                                                value="gardener"
+                                                                >{t(
+                                                                    "gardener",
+                                                                    $language,
+                                                                )}</option
+                                                            >
                                                         </select>
                                                     {:else}
                                                         <input
                                                             id="edit-role-{user.id}"
                                                             type="text"
-                                                            value={t("gardener", $language)}
+                                                            value={t(
+                                                                "gardener",
+                                                                $language,
+                                                            )}
                                                             disabled
                                                             class="w-full px-4 py-2 border border-border rounded-lg bg-muted text-muted-foreground cursor-not-allowed"
                                                         />
