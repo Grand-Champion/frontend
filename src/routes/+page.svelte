@@ -1,22 +1,25 @@
 <script>
   import { Trees, ListTree, Sprout, Leaf } from "lucide-svelte";
+  import { language, t } from "$lib/stores/language";
 </script>
 
-<div
-  class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 overflow-y-auto"
->
+<div class="min-h-screen bg-background overflow-y-auto">
   <div class="container mx-auto px-4 py-16">
     <!-- Header -->
     <div class="text-center mb-16">
       <div class="flex justify-center mb-6">
         <div class="relative">
-          <Trees class="w-20 h-20 text-emerald-600" />
-          <Sprout class="w-10 h-10 text-lime-500 absolute -bottom-2 -right-2" />
+          <Trees class="w-20 h-20 text-primary" />
+          <Sprout
+            class="w-10 h-10 text-secondary absolute -bottom-2 -right-2"
+          />
         </div>
       </div>
-      <h1 class="text-5xl font-bold text-gray-800 mb-4">Food Garden</h1>
-      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-        Monitor and manage your sustainable food forest ecosystem
+      <h1 class="text-5xl font-bold text-foreground mb-4">
+        {t("foodGarden", $language)}
+      </h1>
+      <p class="text-xl text-muted-foreground max-w-2xl mx-auto">
+        {t("monitorManage", $language)}
       </p>
     </div>
 
@@ -25,32 +28,30 @@
       <!-- Map View Card -->
       <a
         href="/map"
-        class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1"
+        class="group bg-card rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1 border border-border"
       >
-        <div
-          class="bg-gradient-to-br from-emerald-500 to-teal-600 p-8 text-white"
-        >
+        <div class="bg-primary p-8 text-primary-foreground">
           <Trees
             class="w-16 h-16 mb-4 group-hover:scale-110 transition-transform"
           />
-          <h2 class="text-3xl font-bold mb-2">Garden Map</h2>
-          <p class="text-emerald-50">
-            Interactive visual layout of your food forest
+          <h2 class="text-3xl font-bold mb-2">{t("gardenMap", $language)}</h2>
+          <p class="opacity-90">
+            {t("interactiveLayout", $language)}
           </p>
         </div>
         <div class="p-6">
-          <ul class="space-y-2 text-gray-600">
+          <ul class="space-y-2 text-muted-foreground">
             <li class="flex items-center">
-              <span class="w-2 h-2 bg-emerald-500 rounded-full mr-3"></span>
-              View plant locations
+              <span class="w-2 h-2 bg-primary rounded-full mr-3"></span>
+              {t("viewPlantLocations", $language)}
             </li>
             <li class="flex items-center">
-              <span class="w-2 h-2 bg-emerald-500 rounded-full mr-3"></span>
-              Monitor plant health status
+              <span class="w-2 h-2 bg-primary rounded-full mr-3"></span>
+              {t("monitorPlantHealth", $language)}
             </li>
             <li class="flex items-center">
-              <span class="w-2 h-2 bg-emerald-500 rounded-full mr-3"></span>
-              Filter by category and condition
+              <span class="w-2 h-2 bg-primary rounded-full mr-3"></span>
+              {t("filterByCategory", $language)}
             </li>
           </ul>
         </div>
@@ -59,30 +60,28 @@
       <!-- Species List Card -->
       <a
         href="/species"
-        class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1"
+        class="group bg-card rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1 border border-border"
       >
-        <div
-          class="bg-gradient-to-br from-lime-500 to-green-600 p-8 text-white"
-        >
+        <div class="bg-secondary p-8 text-secondary-foreground">
           <ListTree
             class="w-16 h-16 mb-4 group-hover:scale-110 transition-transform"
           />
-          <h2 class="text-3xl font-bold mb-2">Species List</h2>
-          <p class="text-lime-50">Detailed information about all your plants</p>
+          <h2 class="text-3xl font-bold mb-2">{t("speciesList", $language)}</h2>
+          <p class="opacity-90">{t("detailedInfo", $language)}</p>
         </div>
         <div class="p-6">
-          <ul class="space-y-2 text-gray-600">
+          <ul class="space-y-2 text-muted-foreground">
             <li class="flex items-center">
-              <span class="w-2 h-2 bg-lime-500 rounded-full mr-3"></span>
-              Browse all species
+              <span class="w-2 h-2 bg-secondary rounded-full mr-3"></span>
+              {t("browseSpecies", $language)}
             </li>
             <li class="flex items-center">
-              <span class="w-2 h-2 bg-lime-500 rounded-full mr-3"></span>
-              View detailed plant data
+              <span class="w-2 h-2 bg-secondary rounded-full mr-3"></span>
+              {t("viewDetailedData", $language)}
             </li>
             <li class="flex items-center">
-              <span class="w-2 h-2 bg-lime-500 rounded-full mr-3"></span>
-              Track harvest schedules
+              <span class="w-2 h-2 bg-secondary rounded-full mr-3"></span>
+              {t("trackHarvest", $language)}
             </li>
           </ul>
         </div>
@@ -91,36 +90,42 @@
 
     <!-- Quick Stats -->
     <div class="mt-16 max-w-4xl mx-auto">
-      <div class="bg-white rounded-2xl shadow-lg p-8">
-        <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">
-          Garden Overview
+      <div class="bg-card rounded-2xl shadow-lg p-8 border border-border">
+        <h3 class="text-2xl font-bold text-foreground mb-6 text-center">
+          {t("gardenOverview", $language)}
         </h3>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div class="text-center">
             <div class="flex justify-center mb-2">
-              <Trees class="w-8 h-8 text-emerald-600" />
+              <Trees class="w-8 h-8 text-primary" />
             </div>
-            <div class="text-3xl font-bold text-gray-800">3</div>
-            <div class="text-sm text-gray-600">Trees</div>
+            <div class="text-3xl font-bold text-foreground">3</div>
+            <div class="text-sm text-muted-foreground">
+              {t("trees", $language)}
+            </div>
           </div>
           <div class="text-center">
             <div class="flex justify-center mb-2">
-              <Sprout class="w-8 h-8 text-teal-600" />
+              <Sprout class="w-8 h-8 text-primary" />
             </div>
-            <div class="text-3xl font-bold text-gray-800">3</div>
-            <div class="text-sm text-gray-600">Shrubs</div>
+            <div class="text-3xl font-bold text-foreground">3</div>
+            <div class="text-sm text-muted-foreground">
+              {t("shrubs", $language)}
+            </div>
           </div>
           <div class="text-center">
             <div class="flex justify-center mb-2">
-              <Leaf class="w-8 h-8 text-lime-600" />
+              <Leaf class="w-8 h-8 text-secondary" />
             </div>
-            <div class="text-3xl font-bold text-gray-800">3</div>
-            <div class="text-sm text-gray-600">Herbs</div>
+            <div class="text-3xl font-bold text-foreground">3</div>
+            <div class="text-sm text-muted-foreground">
+              {t("herbs", $language)}
+            </div>
           </div>
           <div class="text-center">
             <div class="flex justify-center mb-2">
               <svg
-                class="w-8 h-8 text-amber-600"
+                class="w-8 h-8 text-accent"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -133,8 +138,10 @@
                 />
               </svg>
             </div>
-            <div class="text-3xl font-bold text-gray-800">3</div>
-            <div class="text-sm text-gray-600">Vegetables</div>
+            <div class="text-3xl font-bold text-foreground">3</div>
+            <div class="text-sm text-muted-foreground">
+              {t("vegetables", $language)}
+            </div>
           </div>
         </div>
       </div>
