@@ -31,7 +31,7 @@
           class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
             .url.pathname === '/'
             ? 'bg-primary text-primary-foreground'
-            : 'text-muted-foreground hover:text-foreground hover:bg-emerald-200'}"
+            : 'text-muted-foreground hover:text-foreground hover:bg-muted'}"
         >
           <Home class="w-4 h-4" />
           <span class="font-medium">{t("home", $language)}</span>
@@ -42,7 +42,7 @@
           class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
             .url.pathname === '/map'
             ? 'bg-primary text-primary-foreground'
-            : 'text-muted-foreground hover:text-foreground hover:bg-emerald-200'}"
+            : 'text-muted-foreground hover:text-foreground hover:bg-muted'}"
         >
           <Map class="w-4 h-4" />
           <span class="font-medium">{t("mapView", $language)}</span>
@@ -53,7 +53,7 @@
           class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
             .url.pathname === '/species'
             ? 'bg-primary text-primary-foreground'
-            : 'text-muted-foreground hover:text-foreground hover:bg-emerald-200'}"
+            : 'text-muted-foreground hover:text-foreground hover:bg-muted'}"
         >
           <Grid3X3 class="w-4 h-4" />
           <span class="font-medium">{t("speciesList", $language)}</span>
