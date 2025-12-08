@@ -2,11 +2,20 @@
   import "../app.css";
   import Navigation from "$lib/components/navigation.svelte";
   import { page } from "$app/stores";
+  import { onMount } from "svelte";
+  import { theme } from "$lib/stores/theme";
 
   // Make plant detail pages and home page scrollable
   $: isPlantPage = $page.url.pathname.startsWith("/plant/");
   $: isHomePage = $page.url.pathname === "/";
   $: isScrollable = isPlantPage || isHomePage;
+
+  // Initialize theme on mount
+  onMount(() => {
+    if ($theme === "dark") {
+      document.documentElement.classList.add("dark");
+    }
+  });
 </script>
 
 <div class="h-screen w-full flex flex-col">
