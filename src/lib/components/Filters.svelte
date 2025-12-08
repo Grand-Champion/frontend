@@ -1,22 +1,35 @@
 <script>
     import { selectedCategories, selectedStatus } from "$lib/stores/filters";
     import { Leaf, Trees, Flower2, Sprout, ChevronDown } from "lucide-svelte";
+    import { language, t } from "$lib/stores/language";
 
-    const categoryConfig = {
-        tree: { label: "Trees", icon: Trees, color: "bg-emerald-600" },
-        shrub: { label: "Shrubs", icon: Sprout, color: "bg-teal-600" },
-        herb: { label: "Herbs", icon: Leaf, color: "bg-lime-600" },
+    $: categoryConfig = {
+        tree: {
+            label: t("trees", $language),
+            icon: Trees,
+            color: "bg-emerald-600",
+        },
+        shrub: {
+            label: t("shrubs", $language),
+            icon: Sprout,
+            color: "bg-teal-600",
+        },
+        herb: {
+            label: t("herbs", $language),
+            icon: Leaf,
+            color: "bg-lime-600",
+        },
         vegetable: {
-            label: "Vegetables",
+            label: t("vegetables", $language),
             icon: Flower2,
             color: "bg-amber-600",
         },
     };
 
-    const statusConfig = {
-        good: { label: "Good" },
-        attention: { label: "Needs Attention" },
-        critical: { label: "Critical" },
+    $: statusConfig = {
+        good: { label: t("good", $language) },
+        attention: { label: t("needsAttention", $language) },
+        critical: { label: t("critical", $language) },
     };
 
     let speciesOpen = true;
@@ -38,21 +51,9 @@
         selectedCategories.update((categories) => {
             if (categories.includes(category)) {
                 const next = categories.filter((c) => c !== category);
-                // console.log(
-                //     "[Filters] toggleCategory -> removed",
-                //     category,
-                //     "next:",
-                //     next,
-                // );
                 return next;
             } else {
                 const next = [...categories, category];
-                // console.log(
-                //     "[Filters] toggleCategory -> added",
-                //     category,
-                //     "next:",
-                //     next,
-                // );
                 return next;
             }
         });
@@ -71,21 +72,9 @@
         selectedStatus.update((statuses) => {
             if (statuses.includes(status)) {
                 const next = statuses.filter((s) => s !== status);
-                // console.log(
-                //     "[Filters] toggleStatus -> removed",
-                //     status,
-                //     "next:",
-                //     next,
-                // );
                 return next;
             } else {
                 const next = [...statuses, status];
-                // console.log(
-                //     "[Filters] toggleStatus -> added",
-                //     status,
-                //     "next:",
-                //     next,
-                // );
                 return next;
             }
         });
@@ -111,7 +100,7 @@
             on:click={() => (speciesOpen = !speciesOpen)}
             class="flex w-full items-center justify-between text-xl font-semibold text-card-foreground"
         >
-            Category
+            {t("filterBySpecies", $language)}
             <span
                 class={"transition-transform " +
                     (speciesOpen ? "rotate-180" : "")}
@@ -144,7 +133,7 @@
             on:click={() => (statusOpen = !statusOpen)}
             class="flex w-full items-center justify-between text-xl font-semibold text-card-foreground"
         >
-            Status
+            {t("filterByStatus", $language)}
             <span
                 class={"transition-transform " +
                     (statusOpen ? "rotate-180" : "")}

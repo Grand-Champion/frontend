@@ -1,6 +1,7 @@
 <script>
   import { derived } from "svelte/store";
-  import { plants } from "$lib/plant-data";
+  import { localizedPlants } from "$lib/localized-plants";
+  import { language, t } from "$lib/stores/language";
   import {
     Leaf,
     Trees,
@@ -20,17 +21,29 @@
   import Filters from "$lib/components/Filters.svelte";
 
   // Small configs used for icons/labels
-  const categoryConfig = {
-    tree: { label: "Trees", icon: Trees, color: "bg-emerald-600" },
-    shrub: { label: "Shrubs", icon: Sprout, color: "bg-teal-600" },
-    herb: { label: "Herbs", icon: Leaf, color: "bg-lime-600" },
-    vegetable: { label: "Vegetables", icon: Flower2, color: "bg-amber-600" },
+  $: categoryConfig = {
+    tree: {
+      label: t("trees", $language),
+      icon: Trees,
+      color: "bg-emerald-600",
+    },
+    shrub: {
+      label: t("shrubs", $language),
+      icon: Sprout,
+      color: "bg-teal-600",
+    },
+    herb: { label: t("herbs", $language), icon: Leaf, color: "bg-lime-600" },
+    vegetable: {
+      label: t("vegetables", $language),
+      icon: Flower2,
+      color: "bg-amber-600",
+    },
   };
 
-  const statusConfig = {
-    good: { label: "Good" },
-    attention: { label: "Needs Attention" },
-    critical: { label: "Critical" },
+  $: statusConfig = {
+    good: { label: t("good", $language) },
+    attention: { label: t("needsAttention", $language) },
+    critical: { label: t("critical", $language) },
   };
 
   // Local UI state
@@ -168,9 +181,9 @@
   }
 
   const filteredPlants = derived(
-    [selectedCategories, selectedStatus],
-    ([$categories, $statuses]) => {
-      const res = plants.filter(
+    [selectedCategories, selectedStatus, localizedPlants],
+    ([$categories, $statuses, $plants]) => {
+      const res = $plants.filter(
         (plant) =>
           $categories.includes(plant.category) &&
           $statuses.includes(
