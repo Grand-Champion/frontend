@@ -218,7 +218,7 @@
 
           {#if showUserMenu}
             <div
-              class="absolute right-0 mt-4 w-64 bg-card border border-border rounded-b-lg shadow-lg border-t-0"
+              class="absolute right-0 mt-3.5 w-64 bg-card border border-border rounded-b-lg shadow-lg border-t-0"
               style="z-index: 100;"
             >
               <div class="p-4 border-b border-border">
