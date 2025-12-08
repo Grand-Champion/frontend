@@ -295,13 +295,13 @@
               plant.currentConditions,
               plant.optimalConditions,
             ) === 'good'
-              ? 'bg-green-500/10 border-green-500/30 dark:bg-green-500/20'
+              ? 'bg-green-500/10 border-green-500/30'
               : calculateStatus(
                     plant.currentConditions,
                     plant.optimalConditions,
                   ) === 'attention'
-                ? 'bg-orange-500/10 border-orange-500/30 dark:bg-orange-500/20'
-                : 'bg-red-500/10 border-red-500/30 dark:bg-red-500/20'}"
+                ? 'bg-orange-500/10 border-orange-500/30'
+                : 'bg-red-500/10 border-red-500/30'}"
           >
             <div class="flex items-center justify-between mb-4">
               <h2 class="text-xl font-semibold text-foreground">
@@ -460,7 +460,7 @@
               {t("careAdvice", $language)}
             </h2>
             <div
-              class="space-y-3 rounded-lg bg-blue-500/10 border border-blue-500/30 dark:bg-blue-500/20 p-4"
+              class="space-y-3 rounded-lg bg-blue-500/10 border border-blue-500/30 p-4"
             >
               {#each generateAdvice(plant) as advice}
                 <p class="text-sm text-foreground leading-relaxed">{advice}</p>

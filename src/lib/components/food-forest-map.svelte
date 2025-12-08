@@ -267,7 +267,7 @@
 
     {#if selectedPlant}
       <div
-        class="map-overlay absolute right-6 top-6 bottom-6 w-96 max-w-[95%] rounded-lg border border-border bg-white/40 dark:bg-gray-900/40 backdrop-blur-md shadow-lg z-50 overflow-y-auto pointer-events-auto"
+        class="map-overlay absolute right-6 top-6 bottom-6 w-96 max-w-[95%] rounded-lg border border-border bg-card backdrop-blur-md shadow-lg z-50 overflow-y-auto pointer-events-auto"
       >
         <div class="p-6">
           <div class="mb-4 flex items-start justify-between">
@@ -305,17 +305,17 @@
             </div>
 
             <div
-              class="rounded-lg p-4 {calculateStatus(
+              class="rounded-lg p-4 border {calculateStatus(
                 selectedPlant.currentConditions,
                 selectedPlant.optimalConditions,
               ) === 'good'
-                ? 'bg-green-50 border border-green-200'
+                ? 'bg-green-500/10 border-green-500/30'
                 : calculateStatus(
                       selectedPlant.currentConditions,
                       selectedPlant.optimalConditions,
                     ) === 'attention'
-                  ? 'bg-orange-50 border border-orange-200'
-                  : 'bg-red-50 border border-red-200'}"
+                  ? 'bg-orange-500/10 border-orange-500/30'
+                  : 'bg-red-500/10 border-red-500/30'}"
             >
               <div class="flex items-center justify-between">
                 <h3 class="text-sm font-semibold text-card-foreground">
@@ -349,10 +349,10 @@
                 Care Advice
               </h3>
               <div
-                class="space-y-2 rounded-lg bg-blue-50 border border-blue-200 p-4"
+                class="space-y-2 rounded-lg bg-blue-500/10 border border-blue-500/30 p-4"
               >
                 {#each generateAdvice(selectedPlant) as advice}
-                  <p class="text-sm text-blue-900">{advice}</p>
+                  <p class="text-sm text-foreground">{advice}</p>
                 {/each}
               </div>
             </div>

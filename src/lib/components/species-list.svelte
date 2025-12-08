@@ -164,7 +164,8 @@
   <!-- Main Content - Species Grid -->
   <div class="flex-1 overflow-y-auto bg-background p-6">
     <div
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+      class="grid gap-6"
+      style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))"
     >
       {#each $filteredPlants as plant (plant.id)}
         {@const config = categoryConfig[plant.category]}
