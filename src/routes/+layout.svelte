@@ -8,7 +8,10 @@
   // Make plant detail pages and home page scrollable
   $: isPlantPage = $page.url.pathname.startsWith("/plant/");
   $: isHomePage = $page.url.pathname === "/";
-  $: isScrollable = isPlantPage || isHomePage;
+  $: isManagementPage = $page.url.pathname === "/management";
+  $: isLoginPage = $page.url.pathname === "/login";
+  $: isScrollable =
+    isPlantPage || isHomePage || isManagementPage || isLoginPage;
 
   // Initialize theme on mount
   onMount(() => {

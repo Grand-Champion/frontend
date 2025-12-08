@@ -1,8 +1,35 @@
 <script>
-  import { Map, Grid3X3, Home, Sun, Moon, Languages } from "lucide-svelte";
+  import {
+    Map,
+    Grid3X3,
+    Home,
+    Sun,
+    Moon,
+    Languages,
+    LogIn,
+    LogOut,
+    UserCog,
+    ChevronDown,
+    Key,
+    Eye,
+    EyeOff,
+  } from "lucide-svelte";
   import { page } from "$app/stores";
   import { theme } from "$lib/stores/theme";
   import { language, t } from "$lib/stores/language";
+  import { auth } from "$lib/stores/auth";
+  import { goto } from "$app/navigation";
+
+  let showUserMenu = false;
+  let showChangePassword = false;
+  let currentPassword = "";
+  let newPassword = "";
+  let confirmPassword = "";
+  let passwordError = "";
+  let showCurrentPassword = false;
+  let showNewPassword = false;
+  let showConfirmPassword = false;
+  let userMenuElement;
 
   function toggleTheme() {
     theme.update((current) => (current === "light" ? "dark" : "light"));
@@ -11,7 +38,93 @@
   function toggleLanguage() {
     language.update((current) => (current === "en" ? "nl" : "en"));
   }
+
+  function handleLogin() {
+    goto("/login");
+  }
+
+  function handleLogout() {
+    auth.logout();
+    showUserMenu = false;
+    goto("/");
+  }
+
+  function toggleUserMenu() {
+    showUserMenu = !showUserMenu;
+    if (!showUserMenu) {
+      showChangePassword = false;
+      resetPasswordForm();
+    }
+  }
+
+  function goToAdmin() {
+    goto("/management");
+    showUserMenu = false;
+  }
+
+  function toggleChangePassword() {
+    showChangePassword = !showChangePassword;
+    if (!showChangePassword) {
+      resetPasswordForm();
+    }
+  }
+
+  function resetPasswordForm() {
+    currentPassword = "";
+    newPassword = "";
+    confirmPassword = "";
+    passwordError = "";
+    showCurrentPassword = false;
+    showNewPassword = false;
+    showConfirmPassword = false;
+  }
+
+  function handleChangePassword() {
+    passwordError = "";
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      passwordError = t("pleaseEnterAllFields", $language);
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      passwordError = t("passwordsDoNotMatch", $language);
+      return;
+    }
+
+    if (newPassword.length < 3) {
+      passwordError = t("passwordTooShort", $language);
+      return;
+    }
+
+    if ($auth.currentUser) {
+      const success = auth.changePassword(
+        $auth.currentUser.id,
+        currentPassword,
+        newPassword,
+      );
+
+      if (success) {
+        showChangePassword = false;
+        showUserMenu = false;
+        resetPasswordForm();
+        alert(t("passwordChanged", $language));
+      } else {
+        passwordError = t("incorrectCurrentPassword", $language);
+      }
+    }
+  }
+
+  function handleClickOutside(event) {
+    if (showUserMenu && userMenuElement && !userMenuElement.contains(event.target)) {
+      showUserMenu = false;
+      showChangePassword = false;
+      resetPasswordForm();
+    }
+  }
 </script>
+
+<svelte:window on:click={handleClickOutside} />
 
 <nav class="bg-background border-b border-border">
   <div class="flex items-center justify-between h-16 px-6">
@@ -62,6 +175,18 @@
     </div>
 
     <div class="flex items-center gap-2">
+      <!-- Language Toggle -->
+      <button
+        on:click={toggleLanguage}
+        class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+        aria-label="Toggle language"
+      >
+        <Languages class="w-4 h-4" />
+        <span class="font-medium text-sm"
+          >{$language === "en" ? "NL" : "EN"}</span
+        >
+      </button>
+
       <!-- Theme Toggle -->
       <button
         on:click={toggleTheme}
@@ -75,17 +200,213 @@
         {/if}
       </button>
 
-      <!-- Language Toggle -->
-      <button
-        on:click={toggleLanguage}
-        class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
-        aria-label="Toggle language"
-      >
-        <Languages class="w-4 h-4" />
-        <span class="font-medium text-sm"
-          >{$language === "en" ? "NL" : "EN"}</span
+      {#if $auth.currentUser}
+        <!-- User Menu -->
+        <div class="relative ml-4 pl-4 border-l border-border" bind:this={userMenuElement}>
+          <button
+            on:click={toggleUserMenu}
+            class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+            aria-label="User menu"
+          >
+            <span class="text-sm font-bold text-foreground"
+              >{$auth.currentUser.fullName}</span
+            >
+            <ChevronDown class="w-4 h-4" />
+          </button>
+
+          {#if showUserMenu}
+            <div
+              class="absolute right-0 mt-2 w-64 bg-card border border-border rounded-lg shadow-lg z-50"
+            >
+              {#if !showChangePassword}
+                <div class="p-4 border-b border-border">
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <p class="text-xs text-muted-foreground mb-1">
+                        {t("username", $language)}
+                      </p>
+                      <p class="text-sm font-medium text-foreground">
+                        {$auth.currentUser.username}
+                      </p>
+                    </div>
+                    <div>
+                      <p class="text-xs text-muted-foreground mb-1">
+                        {t("role", $language)}
+                      </p>
+                      <p class="text-sm font-medium text-foreground capitalize">
+                        {t($auth.currentUser.role, $language)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {#if $auth.currentUser.role === "admin" || $auth.currentUser.role === "manager"}
+                  <button
+                    on:click={goToAdmin}
+                    class="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2 border-b border-border"
+                  >
+                    <UserCog class="w-4 h-4" />
+                    {t("accountManagement", $language)}
+                  </button>
+                {/if}
+
+                <button
+                  on:click={toggleChangePassword}
+                  class="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2 border-b border-border"
+                >
+                  <Key class="w-4 h-4" />
+                  {t("changePassword", $language)}
+                </button>
+
+                <button
+                  on:click={handleLogout}
+                  class="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-muted transition-colors flex items-center gap-2"
+                >
+                  <LogOut class="w-4 h-4" />
+                  {t("logout", $language)}
+                </button>
+              {:else}
+                <div class="p-4">
+                  <h3 class="text-sm font-semibold text-foreground mb-4">
+                    {t("changePassword", $language)}
+                  </h3>
+
+                  <form
+                    on:submit|preventDefault={handleChangePassword}
+                    class="space-y-3"
+                  >
+                    <div>
+                      <label
+                        for="current-password"
+                        class="block text-xs font-medium text-foreground mb-1"
+                      >
+                        {t("currentPassword", $language)}
+                      </label>
+                      <div class="relative">
+                        <input
+                          id="current-password"
+                          type={showCurrentPassword ? "text" : "password"}
+                          bind:value={currentPassword}
+                          class="w-full px-3 py-2 pr-10 text-sm border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                          placeholder={t("enterCurrentPassword", $language)}
+                        />
+                        <button
+                          type="button"
+                          on:click={() =>
+                            (showCurrentPassword = !showCurrentPassword)}
+                          class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          aria-label="Toggle password visibility"
+                        >
+                          {#if showCurrentPassword}
+                            <EyeOff class="w-4 h-4" />
+                          {:else}
+                            <Eye class="w-4 h-4" />
+                          {/if}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label
+                        for="new-password"
+                        class="block text-xs font-medium text-foreground mb-1"
+                      >
+                        {t("newPassword", $language)}
+                      </label>
+                      <div class="relative">
+                        <input
+                          id="new-password"
+                          type={showNewPassword ? "text" : "password"}
+                          bind:value={newPassword}
+                          class="w-full px-3 py-2 pr-10 text-sm border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                          placeholder={t("enterNewPassword", $language)}
+                        />
+                        <button
+                          type="button"
+                          on:click={() => (showNewPassword = !showNewPassword)}
+                          class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          aria-label="Toggle password visibility"
+                        >
+                          {#if showNewPassword}
+                            <EyeOff class="w-4 h-4" />
+                          {:else}
+                            <Eye class="w-4 h-4" />
+                          {/if}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label
+                        for="confirm-password"
+                        class="block text-xs font-medium text-foreground mb-1"
+                      >
+                        {t("confirmPassword", $language)}
+                      </label>
+                      <div class="relative">
+                        <input
+                          id="confirm-password"
+                          type={showConfirmPassword ? "text" : "password"}
+                          bind:value={confirmPassword}
+                          class="w-full px-3 py-2 pr-10 text-sm border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                          placeholder={t("confirmNewPassword", $language)}
+                        />
+                        <button
+                          type="button"
+                          on:click={() =>
+                            (showConfirmPassword = !showConfirmPassword)}
+                          class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          aria-label="Toggle password visibility"
+                        >
+                          {#if showConfirmPassword}
+                            <EyeOff class="w-4 h-4" />
+                          {:else}
+                            <Eye class="w-4 h-4" />
+                          {/if}
+                        </button>
+                      </div>
+                    </div>
+
+                    {#if passwordError}
+                      <div
+                        class="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-400 px-3 py-2 rounded-lg text-xs"
+                      >
+                        {passwordError}
+                      </div>
+                    {/if}
+
+                    <div class="flex gap-2">
+                      <button
+                        type="submit"
+                        class="flex-1 bg-primary text-primary-foreground px-3 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+                      >
+                        {t("change", $language)}
+                      </button>
+                      <button
+                        type="button"
+                        on:click={toggleChangePassword}
+                        class="flex-1 bg-muted text-foreground px-3 py-2 rounded-lg text-sm font-medium hover:bg-muted/80 transition-colors"
+                      >
+                        {t("cancel", $language)}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              {/if}
+            </div>
+          {/if}
+        </div>
+      {:else}
+        <!-- Login Button -->
+        <button
+          on:click={handleLogin}
+          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors bg-primary text-primary-foreground hover:bg-primary/90"
+          aria-label="Login"
         >
-      </button>
+          <LogIn class="w-4 h-4" />
+          <span class="font-medium">{t("login", $language)}</span>
+        </button>
+      {/if}
     </div>
   </div>
 </nav>
