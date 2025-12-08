@@ -131,6 +131,9 @@
 
     $: sortedUsers = [...$auth.users]
         .filter((user) => {
+            // Hide admin accounts for managers
+            if ($auth.currentUser?.role === "manager" && user.role === "admin")
+                return false;
             if (!searchFilter.trim()) return true;
             const search = searchFilter.toLowerCase();
             return (
@@ -184,7 +187,10 @@
     }
 </script>
 
-<div class="min-h-screen bg-background p-6 overflow-y-auto">
+<div
+    class="min-h-screen bg-background p-6 overflow-y-auto"
+    style="max-height: 100vh;"
+>
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
         <div class="mb-8">
@@ -305,20 +311,28 @@
                             >
                                 {t("role", $language)}
                             </label>
-                            <select
-                                id="new-role"
-                                bind:value={newRole}
-                                class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                            >
-                                {#if $auth.currentUser?.role === "admin"}
+                            {#if $auth.currentUser?.role === "admin"}
+                                <select
+                                    id="new-role"
+                                    bind:value={newRole}
+                                    class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                >
                                     <option value="manager"
                                         >{t("manager", $language)}</option
                                     >
-                                {/if}
-                                <option value="gardener"
-                                    >{t("gardener", $language)}</option
-                                >
-                            </select>
+                                    <option value="gardener"
+                                        >{t("gardener", $language)}</option
+                                    >
+                                </select>
+                            {:else}
+                                <input
+                                    id="new-role"
+                                    type="text"
+                                    value={t("gardener", $language)}
+                                    disabled
+                                    class="w-full px-4 py-2 border border-border rounded-lg bg-muted text-muted-foreground cursor-not-allowed"
+                                />
+                            {/if}
                         </div>
                     </div>
 
@@ -454,69 +468,82 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm">
                                     <div class="flex items-center gap-2">
-                                        {#if user.role !== "admin" && !($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id)}
-                                            <button
-                                                on:click={() => {
-                                                    // Close all other edit forms
-                                                    Object.keys(
-                                                        editingUser,
-                                                    ).forEach((id) => {
-                                                        if (id !== user.id) {
-                                                            editingUser[id] =
-                                                                false;
-                                                            editError[id] = "";
-                                                            editPassword[id] =
+                                        {#if user.id === $auth.currentUser?.id && $auth.currentUser?.role === "manager"}
+                                            <span
+                                                class="text-muted-foreground text-xs"
+                                                >-</span
+                                            >
+                                        {:else}
+                                            {#if user.role !== "admin" && !($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id)}
+                                                <button
+                                                    on:click={() => {
+                                                        // Close all other edit forms
+                                                        Object.keys(
+                                                            editingUser,
+                                                        ).forEach((id) => {
+                                                            if (
+                                                                id !== user.id
+                                                            ) {
+                                                                editingUser[
+                                                                    id
+                                                                ] = false;
+                                                                editError[id] =
+                                                                    "";
+                                                                editPassword[
+                                                                    id
+                                                                ] = "";
+                                                                passwordVisibility[
+                                                                    id
+                                                                ] = false;
+                                                            }
+                                                        });
+                                                        editingUser[user.id] =
+                                                            !editingUser[
+                                                                user.id
+                                                            ];
+                                                        if (
+                                                            editingUser[user.id]
+                                                        ) {
+                                                            editUsername[
+                                                                user.id
+                                                            ] = user.username;
+                                                            editFullName[
+                                                                user.id
+                                                            ] = user.fullName;
+                                                            editPassword[
+                                                                user.id
+                                                            ] = user.password;
+                                                            editRole[user.id] =
+                                                                user.role;
+                                                            editError[user.id] =
                                                                 "";
-                                                            passwordVisibility[
-                                                                id
-                                                            ] = false;
                                                         }
-                                                    });
-
-                                                    editingUser[user.id] =
-                                                        !editingUser[user.id];
-                                                    if (editingUser[user.id]) {
-                                                        editUsername[user.id] =
-                                                            user.username;
-                                                        editFullName[user.id] =
-                                                            user.fullName;
-                                                        editPassword[user.id] =
-                                                            user.password;
-                                                        editRole[user.id] =
-                                                            user.role;
-                                                        editError[user.id] = "";
-                                                    }
-                                                }}
-                                                class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                                                aria-label="Edit user"
-                                            >
-                                                <Pencil class="w-4 h-4" />
-                                            </button>
-                                        {:else}
-                                            <span
-                                                class="text-muted-foreground text-xs"
-                                                >-</span
-                                            >
-                                        {/if}
-                                        {#if user.role === "admin" || ($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id)}
-                                            <span
-                                                class="text-muted-foreground text-xs"
-                                                >-</span
-                                            >
-                                        {:else if $auth.currentUser?.role === "manager" && user.role !== "gardener" && user.id !== $auth.currentUser?.id}
-                                            <span
-                                                class="text-muted-foreground text-xs"
-                                                >-</span
-                                            >
-                                        {:else}
-                                            <button
-                                                on:click={() =>
-                                                    handleDeleteUser(user.id)}
-                                                class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                                                aria-label="Delete user"
-                                            >
-                                                <Trash2 class="w-4 h-4" />
-                                            </button>
+                                                    }}
+                                                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                                                    aria-label="Edit user"
+                                                >
+                                                    <Pencil class="w-4 h-4" />
+                                                </button>
+                                            {:else}
+                                                <span
+                                                    class="text-muted-foreground text-xs"
+                                                    >-</span
+                                                >
+                                            {/if}
+                                            {#if user.role === "admin" || ($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id) || ($auth.currentUser?.role === "manager" && user.role !== "gardener" && user.id !== $auth.currentUser?.id)}
+                                                <!-- Only show one '-' if both actions are unavailable -->
+                                            {:else}
+                                                <button
+                                                    on:click={() =>
+                                                        handleDeleteUser(
+                                                            user.id,
+                                                        )}
+                                                    class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                                                    aria-label="Delete user"
+                                                >
+                                                    <Trash2 class="w-4 h-4" />
+                                                </button>
+                                            {/if}
                                         {/if}
                                     </div>
                                 </td>
@@ -643,29 +670,24 @@
                                                     >
                                                         {t("role", $language)}
                                                     </label>
-                                                    <select
-                                                        id="edit-role-{user.id}"
-                                                        bind:value={
-                                                            editRole[user.id]
-                                                        }
-                                                        class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                                                    >
-                                                        {#if $auth.currentUser?.role === "admin"}
-                                                            <option
-                                                                value="manager"
-                                                                >{t(
-                                                                    "manager",
-                                                                    $language,
-                                                                )}</option
-                                                            >
-                                                        {/if}
-                                                        <option value="gardener"
-                                                            >{t(
-                                                                "gardener",
-                                                                $language,
-                                                            )}</option
+                                                    {#if $auth.currentUser?.role === "admin"}
+                                                        <select
+                                                            id="edit-role-{user.id}"
+                                                            bind:value={editRole[user.id]}
+                                                            class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                                         >
-                                                    </select>
+                                                            <option value="manager">{t("manager", $language)}</option>
+                                                            <option value="gardener">{t("gardener", $language)}</option>
+                                                        </select>
+                                                    {:else}
+                                                        <input
+                                                            id="edit-role-{user.id}"
+                                                            type="text"
+                                                            value={t("gardener", $language)}
+                                                            disabled
+                                                            class="w-full px-4 py-2 border border-border rounded-lg bg-muted text-muted-foreground cursor-not-allowed"
+                                                        />
+                                                    {/if}
                                                 </div>
                                             </div>
                                             {#if editError[user.id]}
