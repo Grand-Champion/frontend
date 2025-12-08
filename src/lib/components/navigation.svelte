@@ -1,5 +1,5 @@
 <script>
-  import { Map, Grid3X3 } from "lucide-svelte";
+  import { Map, Grid3X3, Home } from "lucide-svelte";
   import { page } from "$app/stores";
 </script>
 
@@ -19,6 +19,17 @@
         href="/"
         class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
           .url.pathname === '/'
+          ? 'bg-primary text-primary-foreground'
+          : 'text-muted-foreground hover:text-foreground hover:bg-emerald-200'}"
+      >
+        <Home class="w-4 h-4" />
+        <span class="font-medium">Home</span>
+      </a>
+
+      <a
+        href="/map"
+        class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
+          .url.pathname === '/map'
           ? 'bg-primary text-primary-foreground'
           : 'text-muted-foreground hover:text-foreground hover:bg-emerald-200'}"
       >
