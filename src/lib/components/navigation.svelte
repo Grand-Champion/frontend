@@ -116,7 +116,11 @@
   }
 
   function handleClickOutside(event) {
-    if (showUserMenu && userMenuElement && !userMenuElement.contains(event.target)) {
+    if (
+      showUserMenu &&
+      userMenuElement &&
+      !userMenuElement.contains(event.target)
+    ) {
       showUserMenu = false;
       showChangePassword = false;
       resetPasswordForm();
@@ -202,7 +206,10 @@
 
       {#if $auth.currentUser}
         <!-- User Menu -->
-        <div class="relative ml-4 pl-4 border-l border-border" bind:this={userMenuElement}>
+        <div
+          class="relative ml-4 pl-4 border-l border-border"
+          bind:this={userMenuElement}
+        >
           <button
             on:click={toggleUserMenu}
             class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
