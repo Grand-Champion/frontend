@@ -542,6 +542,7 @@
                                             >
                                                 <div>
                                                     <label
+                                                        for="edit-username-{user.id}"
                                                         class="block text-sm font-medium text-foreground mb-2"
                                                     >
                                                         {t(
@@ -550,6 +551,7 @@
                                                         )}
                                                     </label>
                                                     <input
+                                                        id="edit-username-{user.id}"
                                                         type="text"
                                                         bind:value={
                                                             editUsername[
@@ -562,6 +564,7 @@
                                                 </div>
                                                 <div>
                                                     <label
+                                                        for="edit-fullname-{user.id}"
                                                         class="block text-sm font-medium text-foreground mb-2"
                                                     >
                                                         {t(
@@ -570,6 +573,7 @@
                                                         )}
                                                     </label>
                                                     <input
+                                                        id="edit-fullname-{user.id}"
                                                         type="text"
                                                         bind:value={
                                                             editFullName[
@@ -582,23 +586,17 @@
                                                 </div>
                                                 <div>
                                                     <label
+                                                        for="edit-password-{user.id}"
                                                         class="block text-sm font-medium text-foreground mb-2"
                                                     >
                                                         {t(
                                                             "password",
                                                             $language,
                                                         )}
-                                                        <span
-                                                            class="text-xs text-muted-foreground ml-1"
-                                                        >
-                                                            ({t(
-                                                                "leaveEmptyToKeep",
-                                                                $language,
-                                                            )})
-                                                        </span>
                                                     </label>
                                                     <div class="relative">
                                                         <input
+                                                            id="edit-password-{user.id}"
                                                             type={passwordVisibility[
                                                                 user.id
                                                             ]
@@ -640,11 +638,13 @@
                                                 </div>
                                                 <div>
                                                     <label
+                                                        for="edit-role-{user.id}"
                                                         class="block text-sm font-medium text-foreground mb-2"
                                                     >
                                                         {t("role", $language)}
                                                     </label>
                                                     <select
+                                                        id="edit-role-{user.id}"
                                                         bind:value={
                                                             editRole[user.id]
                                                         }

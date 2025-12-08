@@ -28,7 +28,7 @@ const defaultAdmin: User = {
 };
 
 const storedAuth = browser ? localStorage.getItem('auth') : null;
-let initialAuth: AuthState = storedAuth
+const initialAuth: AuthState = storedAuth
     ? JSON.parse(storedAuth)
     : { currentUser: null, users: [defaultAdmin] };
 
@@ -45,14 +45,14 @@ if (initialAuth.users.length === 0) {
 }
 
 function createAuthStore() {
-    const { subscribe, set, update } = writable<AuthState>(initialAuth);
+    const { subscribe, update } = writable<AuthState>(initialAuth);
 
     return {
         subscribe,
         login: (username: string, password: string) => {
-            update(state => {
+            update((state: AuthState) => {
                 const user = state.users.find(
-                    u => u.username === username && u.password === password
+                    (u: User) => u.username === username && u.password === password
                 );
                 if (user) {
                     const newState = { ...state, currentUser: user };
@@ -65,7 +65,7 @@ function createAuthStore() {
             });
         },
         logout: () => {
-            update(state => {
+            update((state: AuthState) => {
                 const newState = { ...state, currentUser: null };
                 if (browser) {
                     localStorage.setItem('auth', JSON.stringify(newState));
@@ -74,7 +74,7 @@ function createAuthStore() {
             });
         },
         createUser: (username: string, fullName: string, password: string, role: UserRole, createdBy: string) => {
-            update(state => {
+            update((state: AuthState) => {
                 const newUser: User = {
                     id: `user-${Date.now()}`,
                     username,
@@ -95,10 +95,10 @@ function createAuthStore() {
             });
         },
         deleteUser: (userId: string) => {
-            update(state => {
+            update((state: AuthState) => {
                 const newState = {
                     ...state,
-                    users: state.users.filter(u => u.id !== userId)
+                    users: state.users.filter((u: User) => u.id !== userId)
                 };
                 if (browser) {
                     localStorage.setItem('auth', JSON.stringify(newState));
@@ -107,10 +107,10 @@ function createAuthStore() {
             });
         },
         updateUser: (userId: string, updates: Partial<User>) => {
-            update(state => {
+            update((state: AuthState) => {
                 const newState = {
                     ...state,
-                    users: state.users.map(u =>
+                    users: state.users.map((u: User) =>
                         u.id === userId ? { ...u, ...updates } : u
                     )
                 };
@@ -122,12 +122,12 @@ function createAuthStore() {
         },
         changePassword: (userId: string, currentPassword: string, newPassword: string): boolean => {
             let success = false;
-            update(state => {
-                const user = state.users.find(u => u.id === userId);
+            update((state: AuthState) => {
+                const user = state.users.find((u: User) => u.id === userId);
                 if (user && user.password === currentPassword) {
                     const newState = {
                         ...state,
-                        users: state.users.map(u =>
+                        users: state.users.map((u: User) =>
                             u.id === userId ? { ...u, password: newPassword } : u
                         ),
                         currentUser: state.currentUser?.id === userId

@@ -17,7 +17,6 @@
             return;
         }
 
-        const beforeLogin = $auth.currentUser;
         auth.login(username, password);
 
         // Check if login was successful
