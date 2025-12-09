@@ -1,0 +1,292 @@
+import { writable } from 'svelte/store';
+import { browser } from '$app/environment';
+
+type Language = 'en' | 'nl';
+
+const storedLanguage = browser ? (localStorage.getItem('language') as Language) || 'en' : 'en';
+
+export const language = writable<Language>(storedLanguage);
+
+language.subscribe((value) => {
+    if (browser) {
+        localStorage.setItem('language', value);
+    }
+});
+
+// Translation dictionary
+export const translations = {
+    en: {
+        // Navigation
+        home: 'Home',
+        mapView: 'Map View',
+        speciesList: 'Species List',
+        light: 'Light',
+        dark: 'Dark',
+        english: 'English',
+        dutch: 'Dutch',
+
+        // Auth
+        login: 'Login',
+        logout: 'Logout',
+        username: 'Username',
+        fullName: 'Full Name',
+        password: 'Password',
+        welcomeBack: 'Welcome Back',
+        loginToAccount: 'Sign in to your account',
+        enterUsername: 'Enter your username',
+        enterFullName: 'Enter your full name',
+        enterPassword: 'Enter your password',
+        pleaseEnterCredentials: 'Please enter all required fields',
+        invalidCredentials: 'Invalid username or password',
+        defaultCredentials: 'Default admin credentials',
+        accountManagement: 'Account Management',
+        manageUserAccounts: 'Manage user accounts and permissions',
+        createNewAccount: 'Create New Account',
+        role: 'Role',
+        admin: 'Admin',
+        manager: 'Manager',
+        gardener: 'Gardener',
+        createdAt: 'Created At',
+        createdBy: 'Created By',
+        actions: 'Actions',
+        create: 'Create',
+        cancel: 'Cancel',
+        usernameExists: 'Username already exists',
+        confirmDelete: 'Are you sure you want to delete this user?',
+        managerCanOnlyCreateKeepers: 'Managers can only create Gardener accounts',
+        changePassword: 'Change Password',
+        currentPassword: 'Current Password',
+        newPassword: 'New Password',
+        confirmPassword: 'Confirm Password',
+        enterCurrentPassword: 'Enter current password',
+        enterNewPassword: 'Enter new password',
+        confirmNewPassword: 'Confirm new password',
+        pleaseEnterAllFields: 'Please enter all fields',
+        passwordsDoNotMatch: 'Passwords do not match',
+        passwordTooShort: 'Password must be at least 3 characters',
+        incorrectCurrentPassword: 'Current password is incorrect',
+        passwordChanged: 'Password changed successfully',
+        change: 'Change',
+        editUser: 'Edit User',
+        save: 'Save',
+        leaveEmptyToKeep: 'leave empty to keep current',
+        search: 'Search',
+
+        // Home page
+        foodGarden: 'Food Garden',
+        monitorManage: 'Monitor and manage your sustainable food forest ecosystem',
+        gardenMap: 'Garden Map',
+        interactiveLayout: 'Interactive visual layout of your food forest',
+        viewPlantLocations: 'View plant locations',
+        monitorPlantHealth: 'Monitor plant health status',
+        filterByCategory: 'Filter by category and condition',
+        detailedInfo: 'Detailed information about all your plants',
+        browseSpecies: 'Browse all species',
+        viewDetailedData: 'View detailed plant data',
+        trackHarvest: 'Track harvest schedules',
+        gardenOverview: 'Garden Overview',
+        trees: 'Trees',
+        shrubs: 'Shrubs',
+        herbs: 'Herbs',
+        vegetables: 'Vegetables',
+
+        // Species list / Filters
+        filterBySpecies: 'Filter by Species',
+        filterByStatus: 'Filter by Status',
+        good: 'Good',
+        needsAttention: 'Needs Attention',
+        critical: 'Critical',
+        noPlants: 'No plants match your filters',
+        adjustFilters: 'Try adjusting your filter settings',
+
+        // Plant detail page
+        back: 'Back',
+        about: 'About',
+        growingInformation: 'Growing Information',
+        harvestSeason: 'Harvest Season',
+        sunRequirement: 'Sun Requirement',
+        waterNeeds: 'Water Needs',
+        matureHeight: 'Mature Height',
+        maintenanceLevel: 'Maintenance Level',
+        overallStatus: 'Overall Status',
+        optimal: 'Optimal',
+        currentStage: 'Current Stage',
+        harvestIn: 'Harvest In',
+        ready: 'Ready',
+        days: 'days',
+        currentConditions: 'Current Conditions',
+        temperature: 'Temperature',
+        humidity: 'Humidity',
+        soilPH: 'Soil pH',
+        soilMoisture: 'Soil Moisture',
+        sunlight: 'Sunlight',
+        careAdvice: 'Care Advice',
+        comments: 'Comments',
+        addComment: 'Add a comment...',
+        send: 'Send',
+
+        // Maintenance levels
+        maintenanceHigh: 'High',
+        maintenanceMedium: 'Medium',
+        maintenanceLow: 'Low',
+
+        // Plant stages
+        stageSeedling: 'Seedling',
+        stageGrowing: 'Growing',
+        stageFlowering: 'Flowering',
+        stageFruiting: 'Fruiting',
+        stageDormant: 'Dormant',
+
+        // Care advice messages
+        adviceTempTooCold: 'Temperature too cold. Move plant to warmer location or provide protection.',
+        adviceTempTooHot: 'Temperature too hot. Provide shade or increase air circulation.',
+        adviceHumidityTooLow: 'Humidity too low. Mist plant regularly or increase water in surrounding soil.',
+        adviceHumidityTooHigh: 'Humidity too high. Improve air circulation to prevent fungal disease.',
+        adviceSoilTooAcidic: 'Soil too acidic. Add lime or alkaline materials to raise pH.',
+        adviceSoilTooAlkaline: 'Soil too alkaline. Add sulfur or acidifying materials to lower pH.',
+        adviceSoilTooDry: 'Soil too dry. Water more frequently and deeply.',
+        adviceSoilTooWet: 'Soil too wet. Reduce watering and improve drainage.',
+        adviceNotEnoughSun: 'Not enough sunlight. Move plant to a sunnier location if possible.',
+        adviceTooMuchSun: 'Too much direct sun. Provide partial shade during intense afternoon heat.',
+        adviceOptimal: 'All conditions are optimal. Continue current care routine.'
+    },
+    nl: {
+        // Navigation
+        home: 'Home',
+        mapView: 'Kaart',
+        speciesList: 'Soorten',
+        light: 'Licht',
+        dark: 'Donker',
+        english: 'Engels',
+        dutch: 'Nederlands',
+
+        // Auth
+        login: 'Inloggen',
+        logout: 'Uitloggen',
+        username: 'Gebruikersnaam',
+        fullName: 'Volledige Naam',
+        password: 'Wachtwoord',
+        welcomeBack: 'Welkom Terug',
+        loginToAccount: 'Log in op je account',
+        enterUsername: 'Voer je gebruikersnaam in',
+        enterFullName: 'Voer je volledige naam in',
+        enterPassword: 'Voer je wachtwoord in',
+        pleaseEnterCredentials: 'Vul alle vereiste velden in',
+        invalidCredentials: 'Ongeldige gebruikersnaam of wachtwoord',
+        defaultCredentials: 'Standaard admin inloggegevens',
+        accountManagement: 'Accountbeheer',
+        manageUserAccounts: 'Beheer gebruikersaccounts en rechten',
+        createNewAccount: 'Nieuw Account Aanmaken',
+        role: 'Rol',
+        admin: 'Beheerder',
+        manager: 'Manager',
+        gardener: 'Tuinier',
+        createdAt: 'Aangemaakt Op',
+        createdBy: 'Aangemaakt Door',
+        actions: 'Acties',
+        create: 'Aanmaken',
+        cancel: 'Annuleren',
+        usernameExists: 'Gebruikersnaam bestaat al',
+        confirmDelete: 'Weet je zeker dat je deze gebruiker wilt verwijderen?',
+        managerCanOnlyCreateKeepers: 'Managers kunnen alleen Tuinier-accounts aanmaken',
+        changePassword: 'Wachtwoord Wijzigen',
+        currentPassword: 'Huidig Wachtwoord',
+        newPassword: 'Nieuw Wachtwoord',
+        confirmPassword: 'Bevestig Wachtwoord',
+        enterCurrentPassword: 'Voer huidig wachtwoord in',
+        enterNewPassword: 'Voer nieuw wachtwoord in',
+        confirmNewPassword: 'Bevestig nieuw wachtwoord',
+        pleaseEnterAllFields: 'Vul alle velden in',
+        passwordsDoNotMatch: 'Wachtwoorden komen niet overeen',
+        passwordTooShort: 'Wachtwoord moet minimaal 3 tekens zijn',
+        incorrectCurrentPassword: 'Huidig wachtwoord is onjuist',
+        passwordChanged: 'Wachtwoord succesvol gewijzigd',
+        change: 'Wijzigen',
+        editUser: 'Gebruiker Bewerken',
+        save: 'Opslaan',
+        leaveEmptyToKeep: 'laat leeg om huidig te behouden',
+        search: 'Zoeken',
+
+        // Home page
+        foodGarden: 'Voedseltuin',
+        monitorManage: 'Monitor en beheer je duurzame voedselbos ecosysteem',
+        gardenMap: 'Tuinkaart',
+        interactiveLayout: 'Interactieve visuele weergave van je voedselbos',
+        viewPlantLocations: 'Bekijk plantlocaties',
+        monitorPlantHealth: 'Monitor plantgezondheid',
+        filterByCategory: 'Filter op categorie en conditie',
+        detailedInfo: 'Gedetailleerde informatie over al je planten',
+        browseSpecies: 'Bekijk alle soorten',
+        viewDetailedData: 'Bekijk gedetailleerde plantgegevens',
+        trackHarvest: 'Volg oogstschema\'s',
+        gardenOverview: 'Tuinoverzicht',
+        trees: 'Bomen',
+        shrubs: 'Struiken',
+        herbs: 'Kruiden',
+        vegetables: 'Groenten',
+
+        // Species list / Filters
+        filterBySpecies: 'Filter op Soorten',
+        filterByStatus: 'Filter op Status',
+        good: 'Goed',
+        needsAttention: 'Aandacht Nodig',
+        critical: 'Kritiek',
+        noPlants: 'Geen planten komen overeen met je filters',
+        adjustFilters: 'Probeer je filterinstellingen aan te passen',
+
+        // Plant detail page
+        back: 'Terug',
+        about: 'Over',
+        growingInformation: 'Groei-informatie',
+        harvestSeason: 'Oogstseizoen',
+        sunRequirement: 'Zonbehoefte',
+        waterNeeds: 'Waterbehoefte',
+        matureHeight: 'Volwassen Hoogte',
+        maintenanceLevel: 'Onderhoudsniveau',
+        overallStatus: 'Algemene Status',
+        optimal: 'Optimaal',
+        currentStage: 'Huidige Fase',
+        harvestIn: 'Oogst Over',
+        ready: 'Klaar',
+        days: 'dagen',
+        currentConditions: 'Huidige Omstandigheden',
+        temperature: 'Temperatuur',
+        humidity: 'Luchtvochtigheid',
+        soilPH: 'Bodem pH',
+        soilMoisture: 'Bodemvocht',
+        sunlight: 'Zonlicht',
+        careAdvice: 'Verzorgingsadvies',
+        comments: 'Reacties',
+        addComment: 'Voeg een reactie toe...',
+        send: 'Verstuur',
+
+        // Maintenance levels
+        maintenanceHigh: 'Hoog',
+        maintenanceMedium: 'Gemiddeld',
+        maintenanceLow: 'Laag',
+
+        // Plant stages
+        stageSeedling: 'Zaailing',
+        stageGrowing: 'Groeiend',
+        stageFlowering: 'Bloeiend',
+        stageFruiting: 'Vruchtdragend',
+        stageDormant: 'Rustend',
+
+        // Care advice messages
+        adviceTempTooCold: 'Temperatuur te koud. Verplaats plant naar warmere locatie of bied bescherming.',
+        adviceTempTooHot: 'Temperatuur te heet. Bied schaduw of verhoog luchtcirculatie.',
+        adviceHumidityTooLow: 'Luchtvochtigheid te laag. Besproei plant regelmatig of verhoog water in omliggende grond.',
+        adviceHumidityTooHigh: 'Luchtvochtigheid te hoog. Verbeter luchtcirculatie om schimmelziekten te voorkomen.',
+        adviceSoilTooAcidic: 'Grond te zuur. Voeg kalk of alkalische materialen toe om pH te verhogen.',
+        adviceSoilTooAlkaline: 'Grond te alkalisch. Voeg zwavel of verzurende materialen toe om pH te verlagen.',
+        adviceSoilTooDry: 'Grond te droog. Water vaker en dieper.',
+        adviceSoilTooWet: 'Grond te nat. Verminder water geven en verbeter drainage.',
+        adviceNotEnoughSun: 'Onvoldoende zonlicht. Verplaats plant naar zonnigere locatie indien mogelijk.',
+        adviceTooMuchSun: 'Te veel direct zonlicht. Bied gedeeltelijke schaduw tijdens intense middaghitte.',
+        adviceOptimal: 'Alle omstandigheden zijn optimaal. Blijf de huidige verzorging voortzetten.'
+    }
+};
+
+export function t(key: keyof typeof translations.en, lang: Language): string {
+    return translations[lang][key];
+}

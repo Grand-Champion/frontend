@@ -1,22 +1,35 @@
 <script>
     import { selectedCategories, selectedStatus } from "$lib/stores/filters";
     import { Leaf, Trees, Flower2, Sprout, ChevronDown } from "lucide-svelte";
+    import { language, t } from "$lib/stores/language";
 
-    const categoryConfig = {
-        tree: { label: "Trees", icon: Trees, color: "bg-emerald-600" },
-        shrub: { label: "Shrubs", icon: Sprout, color: "bg-teal-600" },
-        herb: { label: "Herbs", icon: Leaf, color: "bg-lime-600" },
+    $: categoryConfig = {
+        tree: {
+            label: t("trees", $language),
+            icon: Trees,
+            color: "bg-emerald-600",
+        },
+        shrub: {
+            label: t("shrubs", $language),
+            icon: Sprout,
+            color: "bg-teal-600",
+        },
+        herb: {
+            label: t("herbs", $language),
+            icon: Leaf,
+            color: "bg-lime-600",
+        },
         vegetable: {
-            label: "Vegetables",
+            label: t("vegetables", $language),
             icon: Flower2,
             color: "bg-amber-600",
         },
     };
 
-    const statusConfig = {
-        good: { label: "Good" },
-        attention: { label: "Needs Attention" },
-        critical: { label: "Critical" },
+    $: statusConfig = {
+        good: { label: t("good", $language) },
+        attention: { label: t("needsAttention", $language) },
+        critical: { label: t("critical", $language) },
     };
 
     let speciesOpen = true;
@@ -38,21 +51,9 @@
         selectedCategories.update((categories) => {
             if (categories.includes(category)) {
                 const next = categories.filter((c) => c !== category);
-                // console.log(
-                //     "[Filters] toggleCategory -> removed",
-                //     category,
-                //     "next:",
-                //     next,
-                // );
                 return next;
             } else {
                 const next = [...categories, category];
-                // console.log(
-                //     "[Filters] toggleCategory -> added",
-                //     category,
-                //     "next:",
-                //     next,
-                // );
                 return next;
             }
         });
@@ -71,21 +72,9 @@
         selectedStatus.update((statuses) => {
             if (statuses.includes(status)) {
                 const next = statuses.filter((s) => s !== status);
-                // console.log(
-                //     "[Filters] toggleStatus -> removed",
-                //     status,
-                //     "next:",
-                //     next,
-                // );
                 return next;
             } else {
                 const next = [...statuses, status];
-                // console.log(
-                //     "[Filters] toggleStatus -> added",
-                //     status,
-                //     "next:",
-                //     next,
-                // );
                 return next;
             }
         });
@@ -109,9 +98,9 @@
     <div class="mb-6">
         <button
             on:click={() => (speciesOpen = !speciesOpen)}
-            class="flex w-full items-center justify-between text-xl font-semibold text-card-foreground"
+            class="flex w-full items-center justify-between text-xl font-semibold text-card-foreground cursor-pointer"
         >
-            Category
+            {t("filterBySpecies", $language)}
             <span
                 class={"transition-transform " +
                     (speciesOpen ? "rotate-180" : "")}
@@ -123,13 +112,15 @@
         {#if speciesOpen}
             <div class="mt-4 space-y-4">
                 {#each Object.entries(categoryConfig) as [category, config]}
-                    <label class="flex items-center gap-2 text-sm">
+                    <label
+                        class="flex items-center gap-2 text-sm cursor-pointer"
+                    >
                         <input
                             type="checkbox"
                             checked={$selectedCategories.includes(category)}
                             on:change={(e) =>
                                 toggleCategory(category, e.target.checked)}
-                            class="rounded"
+                            class="rounded cursor-pointer"
                         />
                         <svelte:component this={config.icon} class="h-4 w-4" />
                         {config.label}
@@ -142,9 +133,9 @@
     <div>
         <button
             on:click={() => (statusOpen = !statusOpen)}
-            class="flex w-full items-center justify-between text-xl font-semibold text-card-foreground"
+            class="flex w-full items-center justify-between text-xl font-semibold text-card-foreground cursor-pointer"
         >
-            Status
+            {t("filterByStatus", $language)}
             <span
                 class={"transition-transform " +
                     (statusOpen ? "rotate-180" : "")}
@@ -156,13 +147,15 @@
         {#if statusOpen}
             <div class="mt-4 space-y-4">
                 {#each Object.entries(statusConfig) as [status, config]}
-                    <label class="flex items-center gap-2 text-sm">
+                    <label
+                        class="flex items-center gap-2 text-sm cursor-pointer"
+                    >
                         <input
                             type="checkbox"
                             checked={$selectedStatus.includes(status)}
                             on:change={(e) =>
                                 toggleStatus(status, e.target.checked)}
-                            class="rounded"
+                            class="rounded cursor-pointer"
                         />
                         <div
                             class={"inline-block h-3 w-3 rounded-full " +

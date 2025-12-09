@@ -1,6 +1,7 @@
 <script>
   import { derived } from "svelte/store";
-  import { plants } from "$lib/plant-data";
+  import { localizedPlants } from "$lib/localized-plants";
+  import { language, t } from "$lib/stores/language";
   import {
     Leaf,
     Trees,
@@ -20,17 +21,29 @@
   import Filters from "$lib/components/Filters.svelte";
 
   // Small configs used for icons/labels
-  const categoryConfig = {
-    tree: { label: "Trees", icon: Trees, color: "bg-emerald-600" },
-    shrub: { label: "Shrubs", icon: Sprout, color: "bg-teal-600" },
-    herb: { label: "Herbs", icon: Leaf, color: "bg-lime-600" },
-    vegetable: { label: "Vegetables", icon: Flower2, color: "bg-amber-600" },
+  $: categoryConfig = {
+    tree: {
+      label: t("trees", $language),
+      icon: Trees,
+      color: "bg-emerald-600",
+    },
+    shrub: {
+      label: t("shrubs", $language),
+      icon: Sprout,
+      color: "bg-teal-600",
+    },
+    herb: { label: t("herbs", $language), icon: Leaf, color: "bg-lime-600" },
+    vegetable: {
+      label: t("vegetables", $language),
+      icon: Flower2,
+      color: "bg-amber-600",
+    },
   };
 
-  const statusConfig = {
-    good: { label: "Good" },
-    attention: { label: "Needs Attention" },
-    critical: { label: "Critical" },
+  $: statusConfig = {
+    good: { label: t("good", $language) },
+    attention: { label: t("needsAttention", $language) },
+    critical: { label: t("critical", $language) },
   };
 
   // Local UI state
@@ -168,9 +181,9 @@
   }
 
   const filteredPlants = derived(
-    [selectedCategories, selectedStatus],
-    ([$categories, $statuses]) => {
-      const res = plants.filter(
+    [selectedCategories, selectedStatus, localizedPlants],
+    ([$categories, $statuses, $plants]) => {
+      const res = $plants.filter(
         (plant) =>
           $categories.includes(plant.category) &&
           $statuses.includes(
@@ -233,7 +246,7 @@
           on:click={() => (selectedPlant = plant)}
           on:mouseenter={() => (hoveredPlantId = plant.id)}
           on:mouseleave={() => (hoveredPlantId = null)}
-          class="absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full {statusColor} text-white shadow-lg transition-transform hover:scale-110"
+          class="absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full {statusColor} text-white shadow-lg transition-transform hover:scale-110 cursor-pointer"
           style="left: {plant.position.x}%; top: {plant.position.y}%"
           aria-label="View {plant.name}"
         >
@@ -254,7 +267,7 @@
 
     {#if selectedPlant}
       <div
-        class="map-overlay absolute right-6 top-6 bottom-6 w-96 max-w-[95%] rounded-lg border border-border bg-white/40 dark:bg-gray-900/40 backdrop-blur-md shadow-lg z-50 overflow-y-auto pointer-events-auto"
+        class="map-overlay absolute right-6 top-6 bottom-6 w-96 max-w-[95%] rounded-lg border border-border bg-card backdrop-blur-md shadow-lg z-50 overflow-y-auto pointer-events-auto"
       >
         <div class="p-6">
           <div class="mb-4 flex items-start justify-between">
@@ -275,7 +288,7 @@
             </div>
             <button
               on:click={() => (selectedPlant = null)}
-              class="p-2 hover:bg-muted rounded-lg"
+              class="p-2 hover:bg-muted rounded-lg cursor-pointer"
               aria-label="Close details"><X class="h-4 w-4" /></button
             >
           </div>
@@ -292,17 +305,17 @@
             </div>
 
             <div
-              class="rounded-lg p-4 {calculateStatus(
+              class="rounded-lg p-4 border {calculateStatus(
                 selectedPlant.currentConditions,
                 selectedPlant.optimalConditions,
               ) === 'good'
-                ? 'bg-green-50 border border-green-200'
+                ? 'bg-green-500/10 border-green-500/30'
                 : calculateStatus(
                       selectedPlant.currentConditions,
                       selectedPlant.optimalConditions,
                     ) === 'attention'
-                  ? 'bg-orange-50 border border-orange-200'
-                  : 'bg-red-50 border border-red-200'}"
+                  ? 'bg-orange-500/10 border-orange-500/30'
+                  : 'bg-red-500/10 border-red-500/30'}"
             >
               <div class="flex items-center justify-between">
                 <h3 class="text-sm font-semibold text-card-foreground">
@@ -336,10 +349,10 @@
                 Care Advice
               </h3>
               <div
-                class="space-y-2 rounded-lg bg-blue-50 border border-blue-200 p-4"
+                class="space-y-2 rounded-lg bg-blue-500/10 border border-blue-500/30 p-4"
               >
                 {#each generateAdvice(selectedPlant) as advice}
-                  <p class="text-sm text-blue-900">{advice}</p>
+                  <p class="text-sm text-foreground">{advice}</p>
                 {/each}
               </div>
             </div>
@@ -347,7 +360,7 @@
             <div>
               <button
                 on:click={() => viewPlantDetails(selectedPlant.id)}
-                class="w-full mb-3 flex items-center justify-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
+                class="w-full mb-3 flex items-center justify-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium cursor-pointer"
                 >View Full Details <ExternalLink class="h-4 w-4" /></button
               >
 
@@ -376,7 +389,7 @@
                 />
                 <button
                   on:click={addComment}
-                  class="px-3 py-2 rounded-lg border border-border hover:bg-muted"
+                  class="px-3 py-2 rounded-lg border border-border hover:bg-muted cursor-pointer"
                   ><Send class="h-3 w-3" /></button
                 >
               </div>

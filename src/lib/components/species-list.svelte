@@ -1,22 +1,35 @@
 <script>
   import { derived } from "svelte/store";
-  import { plants } from "$lib/plant-data";
+  import { localizedPlants } from "$lib/localized-plants";
   import { Leaf, Trees, Flower2, Sprout, ChevronDown } from "lucide-svelte";
   import { selectedCategories, selectedStatus } from "$lib/stores/filters";
   import { goto } from "$app/navigation";
   import Filters from "$lib/components/Filters.svelte";
+  import { language, t } from "$lib/stores/language";
 
-  const categoryConfig = {
-    tree: { label: "Trees", icon: Trees, color: "bg-emerald-600" },
-    shrub: { label: "Shrubs", icon: Sprout, color: "bg-teal-600" },
-    herb: { label: "Herbs", icon: Leaf, color: "bg-lime-600" },
-    vegetable: { label: "Vegetables", icon: Flower2, color: "bg-amber-600" },
+  $: categoryConfig = {
+    tree: {
+      label: t("trees", $language),
+      icon: Trees,
+      color: "bg-emerald-600",
+    },
+    shrub: {
+      label: t("shrubs", $language),
+      icon: Sprout,
+      color: "bg-teal-600",
+    },
+    herb: { label: t("herbs", $language), icon: Leaf, color: "bg-lime-600" },
+    vegetable: {
+      label: t("vegetables", $language),
+      icon: Flower2,
+      color: "bg-amber-600",
+    },
   };
 
-  const statusConfig = {
-    good: { label: "Good" },
-    attention: { label: "Needs Attention" },
-    critical: { label: "Critical" },
+  $: statusConfig = {
+    good: { label: t("good", $language) },
+    attention: { label: t("needsAttention", $language) },
+    critical: { label: t("critical", $language) },
   };
 
   let speciesOpen = true;
@@ -117,9 +130,9 @@
   }
 
   const filteredPlants = derived(
-    [selectedCategories, selectedStatus],
-    ([$categories, $statuses]) => {
-      const res = plants.filter((plant) => {
+    [selectedCategories, selectedStatus, localizedPlants],
+    ([$categories, $statuses, $plants]) => {
+      const res = $plants.filter((plant) => {
         const status = calculateStatus(
           plant.currentConditions,
           plant.optimalConditions,
@@ -151,7 +164,8 @@
   <!-- Main Content - Species Grid -->
   <div class="flex-1 overflow-y-auto bg-background p-6">
     <div
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+      class="grid gap-6"
+      style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))"
     >
       {#each $filteredPlants as plant (plant.id)}
         {@const config = categoryConfig[plant.category]}
@@ -162,7 +176,7 @@
         {@const statusColor = getStatusColor(status)}
         <button
           on:click={() => viewPlant(plant.id)}
-          class="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-all hover:scale-[1.02] text-left w-full"
+          class="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-all hover:scale-[1.02] text-left w-full cursor-pointer"
         >
           <div
             class="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-muted to-muted/50"
