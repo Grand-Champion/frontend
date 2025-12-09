@@ -1,0 +1,11 @@
+# Ignore node modules, build outputs and local files
+node_modules
+dist
+build
+.svelte-kit
+.git
+.vscode
+npm-debug.log
+pnpm-lock.yaml
+yarn.lock
+
