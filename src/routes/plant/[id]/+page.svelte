@@ -192,7 +192,7 @@
       <!-- Back button -->
       <button
         onclick={goBack}
-        class="mb-6 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+        class="mb-6 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
       >
         <ArrowLeft class="h-4 w-4" />
         {t("back", $language)}
@@ -493,7 +493,7 @@
               />
               <button
                 onclick={addComment}
-                class="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                class="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer"
               >
                 <Send class="h-4 w-4" />
               </button>
@@ -507,7 +507,7 @@
   <div class="bg-background py-20">
     <div class="text-center">
       <h1 class="text-2xl font-bold text-foreground mb-2">Plant Not Found</h1>
-      <button onclick={() => goto("/")} class="text-primary hover:underline">
+      <button onclick={() => goto("/")} class="text-primary hover:underline cursor-pointer">
         Go back to map
       </button>
     </div>

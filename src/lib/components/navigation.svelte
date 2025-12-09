@@ -177,7 +177,7 @@
       <!-- Language Toggle -->
       <button
         on:click={toggleLanguage}
-        class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+        class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
         aria-label="Toggle language"
       >
         <Languages class="w-4 h-4" />
@@ -189,7 +189,7 @@
       <!-- Theme Toggle -->
       <button
         on:click={toggleTheme}
-        class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+        class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
         aria-label="Toggle theme"
       >
         {#if $theme === "light"}
@@ -207,7 +207,7 @@
         >
           <button
             on:click={toggleUserMenu}
-            class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+            class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
             aria-label="User menu"
           >
             <span class="text-sm font-bold text-foreground"
@@ -245,7 +245,7 @@
               {#if $auth.currentUser.role === "admin" || $auth.currentUser.role === "manager"}
                 <button
                   on:click={goToAdmin}
-                  class="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2 border-b border-border"
+                  class="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2 border-b border-border cursor-pointer"
                 >
                   <UserCog class="w-4 h-4" />
                   {t("accountManagement", $language)}
@@ -254,7 +254,7 @@
 
               <button
                 on:click={openChangePasswordModal}
-                class="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2 border-b border-border"
+                class="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2 border-b border-border cursor-pointer"
               >
                 <Key class="w-4 h-4" />
                 {t("changePassword", $language)}
@@ -262,7 +262,7 @@
 
               <button
                 on:click={handleLogout}
-                class="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-muted transition-colors flex items-center gap-2"
+                class="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-muted transition-colors flex items-center gap-2 cursor-pointer"
               >
                 <LogOut class="w-4 h-4" />
                 {t("logout", $language)}
@@ -274,7 +274,7 @@
         <!-- Login Button -->
         <button
           on:click={handleLogin}
-          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors bg-primary text-primary-foreground hover:bg-primary/90"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
           aria-label="Login"
         >
           <LogIn class="w-4 h-4" />
@@ -324,7 +324,7 @@
             <button
               type="button"
               on:click={() => (showCurrentPassword = !showCurrentPassword)}
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
               aria-label="Toggle password visibility"
             >
               {#if showCurrentPassword}
@@ -354,7 +354,7 @@
             <button
               type="button"
               on:click={() => (showNewPassword = !showNewPassword)}
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
               aria-label="Toggle password visibility"
             >
               {#if showNewPassword}
@@ -384,7 +384,7 @@
             <button
               type="button"
               on:click={() => (showConfirmPassword = !showConfirmPassword)}
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
               aria-label="Toggle password visibility"
             >
               {#if showConfirmPassword}
@@ -408,13 +408,13 @@
           <button
             type="button"
             on:click={closeChangePasswordModal}
-            class="flex-1 bg-muted text-foreground px-4 py-2 rounded-lg font-medium hover:bg-muted/80 transition-colors"
+            class="flex-1 bg-muted text-foreground px-4 py-2 rounded-lg font-medium hover:bg-muted/80 transition-colors cursor-pointer"
           >
             {t("cancel", $language)}
           </button>
           <button
             type="submit"
-            class="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+            class="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors cursor-pointer"
           >
             {t("change", $language)}
           </button>

@@ -206,7 +206,7 @@
         <div class="mb-6 flex items-center justify-between gap-4">
             <button
                 on:click={() => (showCreateForm = !showCreateForm)}
-                class="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+                class="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
             >
                 <UserPlus class="w-4 h-4" />
                 {t("createNewAccount", $language)}
@@ -293,7 +293,7 @@
                                             !passwordVisibility["new"];
                                         passwordVisibility = passwordVisibility;
                                     }}
-                                    class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                    class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                                 >
                                     {#if passwordVisibility["new"]}
                                         <EyeOff class="w-4 h-4" />
@@ -315,7 +315,7 @@
                                 <select
                                     id="new-role"
                                     bind:value={newRole}
-                                    class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                    class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
                                 >
                                     <option value="manager"
                                         >{t("manager", $language)}</option
@@ -347,7 +347,7 @@
                     <div class="flex gap-2">
                         <button
                             type="submit"
-                            class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+                            class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
                         >
                             {t("create", $language)}
                         </button>
@@ -361,7 +361,7 @@
                                 newPassword = "";
                                 passwordVisibility["new"] = false;
                             }}
-                            class="bg-muted text-foreground px-4 py-2 rounded-lg hover:bg-muted/80 transition-colors"
+                            class="bg-muted text-foreground px-4 py-2 rounded-lg hover:bg-muted/80 transition-colors cursor-pointer"
                         >
                             {t("cancel", $language)}
                         </button>
@@ -519,7 +519,7 @@
                                                                 "";
                                                         }
                                                     }}
-                                                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                                                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
                                                     aria-label="Edit user"
                                                 >
                                                     <Pencil class="w-4 h-4" />
@@ -538,7 +538,7 @@
                                                         handleDeleteUser(
                                                             user.id,
                                                         )}
-                                                    class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                                                    class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
                                                     aria-label="Delete user"
                                                 >
                                                     <Trash2 class="w-4 h-4" />
@@ -649,7 +649,7 @@
                                                                 passwordVisibility =
                                                                     passwordVisibility;
                                                             }}
-                                                            class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                                            class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                                                         >
                                                             {#if passwordVisibility[user.id]}
                                                                 <EyeOff
@@ -678,7 +678,7 @@
                                                                     user.id
                                                                 ]
                                                             }
-                                                            class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                                            class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
                                                         >
                                                             <option
                                                                 value="manager"
@@ -719,7 +719,7 @@
                                             <div class="flex gap-2">
                                                 <button
                                                     type="submit"
-                                                    class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+                                                    class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
                                                 >
                                                     {t("save", $language)}
                                                 </button>
@@ -735,7 +735,7 @@
                                                             user.id
                                                         ] = false;
                                                     }}
-                                                    class="bg-muted text-foreground px-4 py-2 rounded-lg hover:bg-muted/80 transition-colors"
+                                                    class="bg-muted text-foreground px-4 py-2 rounded-lg hover:bg-muted/80 transition-colors cursor-pointer"
                                                 >
                                                     {t("cancel", $language)}
                                                 </button>

@@ -86,7 +86,7 @@
                         <button
                             type="button"
                             on:click={() => (showPassword = !showPassword)}
-                            class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                         >
                             {#if showPassword}
                                 <EyeOff class="w-4 h-4" />
@@ -107,7 +107,7 @@
 
                 <button
                     type="submit"
-                    class="w-full bg-primary text-primary-foreground py-2 px-4 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                    class="w-full bg-primary text-primary-foreground py-2 px-4 rounded-lg font-medium hover:bg-primary/90 transition-colors cursor-pointer"
                 >
                     {t("login", $language)}
                 </button>

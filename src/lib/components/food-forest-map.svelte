@@ -246,7 +246,7 @@
           on:click={() => (selectedPlant = plant)}
           on:mouseenter={() => (hoveredPlantId = plant.id)}
           on:mouseleave={() => (hoveredPlantId = null)}
-          class="absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full {statusColor} text-white shadow-lg transition-transform hover:scale-110"
+          class="absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full {statusColor} text-white shadow-lg transition-transform hover:scale-110 cursor-pointer"
           style="left: {plant.position.x}%; top: {plant.position.y}%"
           aria-label="View {plant.name}"
         >
@@ -288,7 +288,7 @@
             </div>
             <button
               on:click={() => (selectedPlant = null)}
-              class="p-2 hover:bg-muted rounded-lg"
+              class="p-2 hover:bg-muted rounded-lg cursor-pointer"
               aria-label="Close details"><X class="h-4 w-4" /></button
             >
           </div>
@@ -360,7 +360,7 @@
             <div>
               <button
                 on:click={() => viewPlantDetails(selectedPlant.id)}
-                class="w-full mb-3 flex items-center justify-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
+                class="w-full mb-3 flex items-center justify-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium cursor-pointer"
                 >View Full Details <ExternalLink class="h-4 w-4" /></button
               >
 
@@ -389,7 +389,7 @@
                 />
                 <button
                   on:click={addComment}
-                  class="px-3 py-2 rounded-lg border border-border hover:bg-muted"
+                  class="px-3 py-2 rounded-lg border border-border hover:bg-muted cursor-pointer"
                   ><Send class="h-3 w-3" /></button
                 >
               </div>

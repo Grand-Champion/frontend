@@ -98,7 +98,7 @@
     <div class="mb-6">
         <button
             on:click={() => (speciesOpen = !speciesOpen)}
-            class="flex w-full items-center justify-between text-xl font-semibold text-card-foreground"
+            class="flex w-full items-center justify-between text-xl font-semibold text-card-foreground cursor-pointer"
         >
             {t("filterBySpecies", $language)}
             <span
@@ -112,13 +112,15 @@
         {#if speciesOpen}
             <div class="mt-4 space-y-4">
                 {#each Object.entries(categoryConfig) as [category, config]}
-                    <label class="flex items-center gap-2 text-sm">
+                    <label
+                        class="flex items-center gap-2 text-sm cursor-pointer"
+                    >
                         <input
                             type="checkbox"
                             checked={$selectedCategories.includes(category)}
                             on:change={(e) =>
                                 toggleCategory(category, e.target.checked)}
-                            class="rounded"
+                            class="rounded cursor-pointer"
                         />
                         <svelte:component this={config.icon} class="h-4 w-4" />
                         {config.label}
@@ -131,7 +133,7 @@
     <div>
         <button
             on:click={() => (statusOpen = !statusOpen)}
-            class="flex w-full items-center justify-between text-xl font-semibold text-card-foreground"
+            class="flex w-full items-center justify-between text-xl font-semibold text-card-foreground cursor-pointer"
         >
             {t("filterByStatus", $language)}
             <span
@@ -145,13 +147,15 @@
         {#if statusOpen}
             <div class="mt-4 space-y-4">
                 {#each Object.entries(statusConfig) as [status, config]}
-                    <label class="flex items-center gap-2 text-sm">
+                    <label
+                        class="flex items-center gap-2 text-sm cursor-pointer"
+                    >
                         <input
                             type="checkbox"
                             checked={$selectedStatus.includes(status)}
                             on:change={(e) =>
                                 toggleStatus(status, e.target.checked)}
-                            class="rounded"
+                            class="rounded cursor-pointer"
                         />
                         <div
                             class={"inline-block h-3 w-3 rounded-full " +
