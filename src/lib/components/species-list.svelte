@@ -176,7 +176,7 @@
         {@const statusColor = getStatusColor(status)}
         <button
           on:click={() => viewPlant(plant.id)}
-          class="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-all hover:scale-[1.02] text-left w-full"
+          class="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-all hover:scale-[1.02] text-left w-full cursor-pointer"
         >
           <div
             class="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-muted to-muted/50"
