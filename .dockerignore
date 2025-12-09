@@ -6,6 +6,5 @@ build
 .git
 .vscode
 npm-debug.log
-pnpm-lock.yaml
-yarn.lock
-
+.env
+.env.*
