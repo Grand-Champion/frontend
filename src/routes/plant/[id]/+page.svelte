@@ -507,7 +507,10 @@
   <div class="bg-background py-20">
     <div class="text-center">
       <h1 class="text-2xl font-bold text-foreground mb-2">Plant Not Found</h1>
-      <button onclick={() => goto("/")} class="text-primary hover:underline cursor-pointer">
+      <button
+        onclick={() => goto("/")}
+        class="text-primary hover:underline cursor-pointer"
+      >
         Go back to map
       </button>
     </div>
