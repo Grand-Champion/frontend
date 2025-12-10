@@ -202,7 +202,7 @@
       {#if $auth.currentUser}
         <!-- User Menu -->
         <div
-          class="relative ml-4 pl-8 border-l border-border"
+          class="relative ml-4 pl-[1.625rem] border-l border-border"
           bind:this={userMenuElement}
         >
           <button

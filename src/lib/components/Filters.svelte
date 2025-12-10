@@ -122,7 +122,11 @@
                                 toggleCategory(category, e.target.checked)}
                             class="rounded cursor-pointer"
                         />
-                        <svelte:component this={config.icon} class="h-4 w-4" />
+                        <svelte:component
+                            this={config.icon}
+                            class="h-4 w-4"
+                            style="color: {config.color}"
+                        />
                         {config.label}
                     </label>
                 {/each}

@@ -4,6 +4,8 @@
     import { t, language } from "$lib/stores/language";
     import { Eye, EyeOff } from "lucide-svelte";
 
+    $: pageTitle = `${t("login", $language)} - Food Forest`;
+
     let username = "";
     let password = "";
     let errorMessage = "";
@@ -29,6 +31,10 @@
         }, 100);
     }
 </script>
+
+<svelte:head>
+    <title>{pageTitle}</title>
+</svelte:head>
 
 <div class="min-h-screen flex items-center justify-center bg-background px-4">
     <div class="w-full max-w-md">

@@ -227,16 +227,17 @@
                   >{plant.waterNeeds}</span
                 >
               </div>
-              <div class="flex justify-between">
-                <div class="mt-3 text-xs">
-                  <div
-                    class="inline-block px-2 py-1 rounded-full font-semibold text-white"
-                    style={`background-color: ${getStatusColor(status)};`}
-                  >
-                    {status}
-                  </div>
-                </div>
-                >
+            </div>
+            <div class="mt-3 text-xs">
+              <div
+                class="inline-block px-2 py-1 rounded-full font-semibold text-white"
+                style={`background-color: ${getStatusColor(status)};`}
+              >
+                {status === "good"
+                  ? t("good", $language)
+                  : status === "attention"
+                    ? t("needsAttention", $language)
+                    : t("critical", $language)}
               </div>
             </div>
           </div>

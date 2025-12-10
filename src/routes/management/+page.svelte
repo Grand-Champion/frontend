@@ -12,6 +12,8 @@
         Pencil,
     } from "lucide-svelte";
 
+    $: pageTitle = `${t("accountManagement", $language)} - Food Forest`;
+
     // Redirect if not admin or manager
     $: if (
         !$auth.currentUser ||
@@ -185,6 +187,10 @@
         return `background-color: color-mix(in oklch, ${roleColor} 12%, transparent); color: ${roleColor};`;
     }
 </script>
+
+<svelte:head>
+    <title>{pageTitle}</title>
+</svelte:head>
 
 <div class="min-h-screen bg-background p-6">
     <div class="max-w-6xl mx-auto">

@@ -207,6 +207,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>{pageTitle}</title>
+</svelte:head>
+
 {#if plant}
   <div class="bg-background">
     <div class="max-w-5xl mx-auto px-6 py-8">
@@ -222,9 +226,8 @@
       <!-- Header -->
       <div class="mb-8">
         <div
-          class="mb-3 inline-block px-3 py-1 rounded text-sm font-semibold {categoryConfig[
-            plant.category
-          ].color} text-white"
+          class="mb-3 inline-block px-3 py-1 rounded text-sm font-semibold text-white"
+          style="background-color: {categoryConfig[plant.category].color}"
         >
           {categoryConfig[plant.category].label}
         </div>

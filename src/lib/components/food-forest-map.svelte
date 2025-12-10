@@ -292,7 +292,7 @@
 
     {#if selectedPlant}
       <div
-        class="map-overlay absolute right-6 top-6 bottom-6 w-96 max-w-[95%] rounded-lg border border-white/40 dark:border-white/10 bg-white/70 dark:bg-gray-900/60 backdrop-blur-lg shadow-xl z-50 overflow-y-auto pointer-events-auto"
+        class="map-overlay absolute right-6 top-6 bottom-6 w-96 max-w-[95%] rounded-lg border border-white/40 dark:border-white/10 bg-white/70 dark:bg-green-950/25 backdrop-blur-lg shadow-xl z-50 overflow-y-auto pointer-events-auto"
       >
         <div class="p-6">
           <div class="mb-4 flex items-start justify-between">
@@ -408,41 +408,5 @@
 </div>
 
 <style>
-  :global(.map-overlay::-webkit-scrollbar) {
-    width: 6px;
-    height: 6px;
-  }
-
-  :global(.map-overlay::-webkit-scrollbar-track) {
-    background: transparent;
-  }
-
-  :global(.map-overlay::-webkit-scrollbar-thumb) {
-    background: rgba(0, 0, 0, 0.06);
-    border-radius: 9999px;
-    border: 1px solid transparent;
-    background-clip: padding-box;
-    transition: background-color 120ms ease;
-  }
-
-  :global(.map-overlay:hover::-webkit-scrollbar-thumb) {
-    background: rgba(0, 0, 0, 0.12);
-  }
-
-  :global(.dark .map-overlay::-webkit-scrollbar-thumb) {
-    background: rgba(255, 255, 255, 0.06);
-  }
-
-  :global(.dark .map-overlay:hover::-webkit-scrollbar-thumb) {
-    background: rgba(255, 255, 255, 0.12);
-  }
-
-  :global(.map-overlay) {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0.06) transparent;
-  }
-
-  :global(.dark .map-overlay) {
-    scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
-  }
+  /* Component-specific styles can go here if needed */
 </style>

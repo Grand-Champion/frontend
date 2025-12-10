@@ -18,7 +18,7 @@
         if ($page.error) {
             const errorInfo = `Error: ${$page.error.message || "Unknown error"}`;
             consoleLogs = [errorInfo];
-            if ($page.error.stack) {
+            if (($page.error as any).stack) {
                 consoleLogs.push("Stack trace available in details section");
             }
         }
@@ -271,10 +271,11 @@
                     </div>
                 {/if}
 
-                {#if $page.error?.stack}
+                {#if ($page.error as any)?.stack}
                     <div class="detail-section">
                         <h3 class="detail-title">{t.stackTrace}</h3>
-                        <pre class="stack-trace">{$page.error.stack}</pre>
+                        <pre class="stack-trace">{($page.error as any)
+                                .stack}</pre>
                     </div>
                 {/if}
             </div>
@@ -301,7 +302,7 @@
         height: 65vh;
         max-width: 90vw;
         border-radius: var(--radius);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--shadow-sm);
         border: 1px solid var(--border);
         overflow: hidden;
         transition: width 0.4s ease;
@@ -365,7 +366,7 @@
         border-radius: var(--radius);
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--shadow-sm);
     }
 
     .details-button {
@@ -376,7 +377,7 @@
     .back-button:hover,
     .details-button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        box-shadow: var(--shadow-md);
         opacity: 0.9;
     }
 
