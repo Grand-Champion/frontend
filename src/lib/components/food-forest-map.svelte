@@ -27,10 +27,10 @@
 
   // calculate status based on species optimal ranges
   function getStatus(plant) {
-    if (!plant.conditions) return 'critical';
+    if (!plant.conditions || !plant.conditions[0]) return 'critical';
     if (!plant.species) return 'critical';
     
-    const c = plant.conditions;
+    const c = plant.conditions[0];
     const s = plant.species;
     let issuesCount = 0;
     
@@ -107,7 +107,7 @@
     const advice = [];
     
     // Check of conditions bestaan
-    if (!plant.conditions) {
+    if (!plant.conditions || !plant.conditions[0]) {
       return ["No condition data available."];
     }
     
@@ -116,7 +116,7 @@
       return ["No species data available for optimal range comparison."];
     }
     
-    const c = plant.conditions;
+    const c = plant.conditions[0];
     const s = plant.species;
 
     // Check of temperature binnen range zit

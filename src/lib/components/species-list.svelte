@@ -38,10 +38,10 @@
 
   // Calculate plant status based on conditions vs species optimal ranges
   function getStatus(plant) {
-    if (!plant.conditions || !plant.species) return 'critical';
+    if (!plant.conditions || !plant.conditions[0] || !plant.species) return 'critical';
     
     let issuesCount = 0;
-    const conditions = plant.conditions;
+    const conditions = plant.conditions[0];
     const species = plant.species;
 
     // Check elke condition tegen min/max ranges van species
