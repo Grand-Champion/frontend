@@ -1,29 +1,30 @@
 <script>
   import { derived } from "svelte/store";
-  import { localizedPlants } from "$lib/localized-plants";
-  import { Leaf, Trees, Flower2, Sprout, ChevronDown } from "lucide-svelte";
+  import { Leaf, Trees, Flower2, Sprout } from "lucide-svelte";
   import { selectedCategories, selectedStatus } from "$lib/stores/filters";
   import { goto } from "$app/navigation";
   import Filters from "$lib/components/Filters.svelte";
   import { language, t } from "$lib/stores/language";
 
+  // API data
+  export let forestData;
+
+  // Get plants array from API
+  $: plants = forestData?.data?.plants || [];
+
+  // Gebruik backend species types direct (Tree, Shrub, Plant)
   $: categoryConfig = {
-    tree: {
+    Tree: {
       label: t("trees", $language),
       icon: Trees,
       color: "bg-emerald-600",
     },
-    shrub: {
+    Shrub: {
       label: t("shrubs", $language),
       icon: Sprout,
       color: "bg-teal-600",
     },
-    herb: { label: t("herbs", $language), icon: Leaf, color: "bg-lime-600" },
-    vegetable: {
-      label: t("vegetables", $language),
-      icon: Flower2,
-      color: "bg-amber-600",
-    },
+    Plant: { label: t("herbs", $language), icon: Leaf, color: "bg-lime-600" },
   };
 
   $: statusConfig = {
@@ -35,63 +36,34 @@
   let speciesOpen = true;
   let statusOpen = true;
 
-  function calculateStatus(current, optimal) {
-    let issueCount = 0;
-    let criticalCount = 0;
+  // Calculate plant status based on conditions vs species optimal ranges
+  function getStatus(plant) {
+    if (!plant.conditions || !plant.species) return 'critical';
+    
+    let issuesCount = 0;
+    const conditions = plant.conditions;
+    const species = plant.species;
 
-    const tempDiff = Math.max(
-      optimal.temperature.min - current.temperature,
-      current.temperature - optimal.temperature.max,
-      0,
-    );
-    if (tempDiff > 0) {
-      if (tempDiff > 5) criticalCount++;
-      else issueCount++;
+    // Check elke condition tegen min/max ranges van species
+    if (conditions.temperature < species.minTemperature || conditions.temperature > species.maxTemperature) {
+      issuesCount++;
+    }
+    if (conditions.humidity < species.minHumidity || conditions.humidity > species.maxHumidity) {
+      issuesCount++;
+    }
+    if (conditions.soilMoisture < species.minSoilMoisture || conditions.soilMoisture > species.maxSoilMoisture) {
+      issuesCount++;
+    }
+    if (conditions.soilPH < species.minSoilPH || conditions.soilPH > species.maxSoilPH) {
+      issuesCount++;
+    }
+    if (conditions.sunlight < species.minSunlight || conditions.sunlight > species.maxSunlight) {
+      issuesCount++;
     }
 
-    const humidityDiff = Math.max(
-      optimal.humidity.min - current.humidity,
-      current.humidity - optimal.humidity.max,
-      0,
-    );
-    if (humidityDiff > 0) {
-      if (humidityDiff > 15) criticalCount++;
-      else issueCount++;
-    }
-
-    const phDiff = Math.max(
-      optimal.soilPH.min - current.soilPH,
-      current.soilPH - optimal.soilPH.max,
-      0,
-    );
-    if (phDiff > 0) {
-      if (phDiff > 0.5) criticalCount++;
-      else issueCount++;
-    }
-
-    const moistureDiff = Math.max(
-      optimal.soilMoisture.min - current.soilMoisture,
-      current.soilMoisture - optimal.soilMoisture.max,
-      0,
-    );
-    if (moistureDiff > 0) {
-      if (moistureDiff > 20) criticalCount++;
-      else issueCount++;
-    }
-
-    const sunlightDiff = Math.max(
-      optimal.sunlightHours.min - current.sunlightHours,
-      current.sunlightHours - optimal.sunlightHours.max,
-      0,
-    );
-    if (sunlightDiff > 0) {
-      if (sunlightDiff > 2) criticalCount++;
-      else issueCount++;
-    }
-
-    if (criticalCount >= 2) return "critical";
-    if (criticalCount >= 1 || issueCount >= 2) return "attention";
-    return "good";
+    if (issuesCount === 0) return 'good';
+    if (issuesCount <= 2) return 'attention';
+    return 'critical';
   }
 
   function getStatusColor(status) {
@@ -102,27 +74,9 @@
         return "bg-orange-500";
       case "critical":
         return "bg-red-500";
+      default:
+        return "bg-gray-500";
     }
-  }
-
-  function toggleCategory(category) {
-    selectedCategories.update((categories) => {
-      if (categories.includes(category)) {
-        return categories.filter((c) => c !== category);
-      } else {
-        return [...categories, category];
-      }
-    });
-  }
-
-  function toggleStatus(status) {
-    selectedStatus.update((statuses) => {
-      if (statuses.includes(status)) {
-        return statuses.filter((s) => s !== status);
-      } else {
-        return [...statuses, status];
-      }
-    });
   }
 
   function viewPlant(plantId) {
@@ -130,25 +84,14 @@
   }
 
   const filteredPlants = derived(
-    [selectedCategories, selectedStatus, localizedPlants],
-    ([$categories, $statuses, $plants]) => {
-      const res = $plants.filter((plant) => {
-        const status = calculateStatus(
-          plant.currentConditions,
-          plant.optimalConditions,
-        );
-        return (
-          $categories.includes(plant.category) && $statuses.includes(status)
-        );
-      });
-      // console.log(
-      //   "[species-list] filteredPlants recompute",
-      //   $categories,
-      //   $statuses,
-      //   "->",
-      //   res.length,
-      // );
-      return res;
+    [selectedCategories, selectedStatus],
+    ([$categories, $statuses]) => {
+      if (!plants || plants.length === 0) return [];
+      
+      return plants.filter((plant) =>
+        $categories.includes(plant.species?.type || 'Tree') &&
+        $statuses.includes(getStatus(plant))
+      );
     },
   );
 </script>
@@ -164,26 +107,23 @@
   <!-- Main Content - Species Grid -->
   <div class="flex-1 overflow-y-auto bg-background p-6">
     <div
-      class="grid gap-6"
-      style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))"
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
     >
       {#each $filteredPlants as plant (plant.id)}
-        {@const config = categoryConfig[plant.category]}
-        {@const status = calculateStatus(
-          plant.currentConditions,
-          plant.optimalConditions,
-        )}
+        {@const category = plant.species?.type || 'Tree'}
+        {@const config = categoryConfig[category]}
+        {@const status = getStatus(plant)}
         {@const statusColor = getStatusColor(status)}
         <button
           on:click={() => viewPlant(plant.id)}
-          class="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-all hover:scale-[1.02] text-left w-full cursor-pointer"
+          class="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-all hover:scale-[1.02] text-left w-full"
         >
           <div
-            class="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-muted to-muted/50"
+            class="relative aspect-4/3 w-full overflow-hidden bg-linear-to-br from-muted to-muted/50"
           >
             <img
               src={plant.image || "/placeholder.svg"}
-              alt={plant.name}
+              alt={plant.species?.name || 'Plant'}
               class="w-full h-full object-cover"
             />
             <div class="absolute top-2 right-2">
@@ -199,34 +139,34 @@
               {config.label}
             </div>
             <h3 class="text-lg font-bold text-card-foreground mb-1">
-              {plant.name}
+              {plant.species?.name || 'Unknown'}
             </h3>
             <p class="text-sm italic text-muted-foreground mb-3">
-              {plant.scientificName}
+              {plant.species?.scientificName || ''}
             </p>
             <div class="space-y-2 text-sm">
               <div class="flex justify-between">
-                <span class="text-muted-foreground">Harvest:</span>
+                <span class="text-muted-foreground">Stage:</span>
                 <span class="font-medium text-card-foreground"
-                  >{plant.harvestSeason}</span
+                  >{plant.plantStage || "Unknown"}</span
                 >
               </div>
               <div class="flex justify-between">
                 <span class="text-muted-foreground">Height:</span>
                 <span class="font-medium text-card-foreground"
-                  >{plant.height}</span
+                  >{plant.height || "N/A"}</span
                 >
               </div>
               <div class="flex justify-between">
                 <span class="text-muted-foreground">Sun:</span>
                 <span class="font-medium text-card-foreground"
-                  >{plant.sunRequirement}</span
+                  >{plant.species ? `${plant.species.minSunlight}-${plant.species.maxSunlight}h` : 'N/A'}</span
                 >
               </div>
               <div class="flex justify-between">
-                <span class="text-muted-foreground">Water:</span>
+                <span class="text-muted-foreground">Maintenance:</span>
                 <span class="font-medium text-card-foreground"
-                  >{plant.waterNeeds}</span
+                  >{plant.species?.maintenanceLevel || 'Low'}</span
                 >
               </div>
             </div>
