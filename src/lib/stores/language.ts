@@ -148,7 +148,28 @@ export const translations = {
         adviceSoilTooWet: 'Soil too wet. Reduce watering and improve drainage.',
         adviceNotEnoughSun: 'Not enough sunlight. Move plant to a sunnier location if possible.',
         adviceTooMuchSun: 'Too much direct sun. Provide partial shade during intense afternoon heat.',
-        adviceOptimal: 'All conditions are optimal. Continue current care routine.'
+        adviceOptimal: 'All conditions are optimal. Continue current care routine.',
+
+        // Error page
+        pageNotFound: 'Page Not Found',
+        internalServerError: 'Internal Server Error',
+        error: 'Error',
+        goBack: 'Go Back',
+        showDetails: 'Show Details',
+        hideDetails: 'Hide Details',
+        errorType: 'Error Type',
+        timestamp: 'Timestamp',
+        possibleCauses: 'Possible Causes',
+        suggestions: 'Suggestions',
+        consoleOutput: 'Console Output',
+        stackTrace: 'Stack Trace',
+        networkError: 'Network Error',
+        databaseError: 'Database Error',
+        serviceUnavailable: 'Service Unavailable',
+        forbidden: 'Forbidden',
+        unauthorized: 'Unauthorized',
+        serverError: 'Server Error',
+        clientError: 'Client Error',
     },
     nl: {
         // Navigation
@@ -283,7 +304,28 @@ export const translations = {
         adviceSoilTooWet: 'Grond te nat. Verminder water geven en verbeter drainage.',
         adviceNotEnoughSun: 'Onvoldoende zonlicht. Verplaats plant naar zonnigere locatie indien mogelijk.',
         adviceTooMuchSun: 'Te veel direct zonlicht. Bied gedeeltelijke schaduw tijdens intense middaghitte.',
-        adviceOptimal: 'Alle omstandigheden zijn optimaal. Blijf de huidige verzorging voortzetten.'
+        adviceOptimal: 'Alle omstandigheden zijn optimaal. Blijf de huidige verzorging voortzetten.',
+
+        // Error page
+        pageNotFound: 'Pagina Niet Gevonden',
+        internalServerError: 'Interne Serverfout',
+        error: 'Fout',
+        goBack: 'Ga Terug',
+        showDetails: 'Toon Details',
+        hideDetails: 'Verberg Details',
+        errorType: 'Fouttype',
+        timestamp: 'Tijdstempel',
+        possibleCauses: 'Mogelijke Oorzaken',
+        suggestions: 'Suggesties',
+        consoleOutput: 'Console Output',
+        stackTrace: 'Stack Trace',
+        networkError: 'Netwerkfout',
+        databaseError: 'Databasefout',
+        serviceUnavailable: 'Service Niet Beschikbaar',
+        forbidden: 'Verboden',
+        unauthorized: 'Ongeautoriseerd',
+        serverError: 'Serverfout',
+        clientError: 'Clientfout',
     }
 };
 
