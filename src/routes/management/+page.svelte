@@ -175,15 +175,14 @@
             return 0;
         });
 
-    function getRoleBadgeClass(role: UserRole) {
-        switch (role) {
-            case "admin":
-                return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
-            case "manager":
-                return "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400";
-            case "gardener":
-                return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400";
-        }
+    function getRoleBadgeStyle(role: UserRole) {
+        const roleColor =
+            {
+                admin: "var(--role-admin)",
+                manager: "var(--role-manager)",
+                gardener: "var(--role-gardener)",
+            }[role] || "var(--foreground)";
+        return `background-color: color-mix(in oklch, ${roleColor} 12%, transparent); color: ${roleColor};`;
     }
 </script>
 
@@ -335,7 +334,8 @@
 
                     {#if createError}
                         <div
-                            class="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg"
+                            class="px-4 py-3 rounded-lg"
+                            style={`background-color: color-mix(in oklch, var(--status-critical) 12%, transparent); border: 1px solid color-mix(in oklch, var(--status-critical) 32%, transparent); color: var(--status-critical);`}
                         >
                             {createError}
                         </div>
@@ -451,9 +451,8 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm">
                                     <span
-                                        class="px-2 py-1 rounded-full text-xs font-medium {getRoleBadgeClass(
-                                            user.role,
-                                        )}"
+                                        class="px-2 py-1 rounded-full text-xs font-medium"
+                                        style={getRoleBadgeStyle(user.role)}
                                     >
                                         {t(user.role, $language)}
                                     </span>
@@ -516,7 +515,8 @@
                                                                 "";
                                                         }
                                                     }}
-                                                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                                                    class="cursor-pointer hover:opacity-80 transition-opacity"
+                                                    style="color: var(--action-icon);"
                                                     aria-label="Edit user"
                                                 >
                                                     <Pencil class="w-4 h-4" />
@@ -535,7 +535,8 @@
                                                         handleDeleteUser(
                                                             user.id,
                                                         )}
-                                                    class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
+                                                    class="cursor-pointer"
+                                                    style="color: var(--status-critical);"
                                                     aria-label="Delete user"
                                                 >
                                                     <Trash2 class="w-4 h-4" />
@@ -708,7 +709,8 @@
                                             </div>
                                             {#if editError[user.id]}
                                                 <div
-                                                    class="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg"
+                                                    class="px-4 py-3 rounded-lg"
+                                                    style={`background-color: color-mix(in oklch, var(--status-critical) 12%, transparent); border: 1px solid color-mix(in oklch, var(--status-critical) 32%, transparent); color: var(--status-critical);`}
                                                 >
                                                     {editError[user.id]}
                                                 </div>

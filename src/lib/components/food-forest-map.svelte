@@ -25,18 +25,22 @@
     tree: {
       label: t("trees", $language),
       icon: Trees,
-      color: "bg-emerald-600",
+      color: "var(--category-tree)",
     },
     shrub: {
       label: t("shrubs", $language),
       icon: Sprout,
-      color: "bg-teal-600",
+      color: "var(--category-shrub)",
     },
-    herb: { label: t("herbs", $language), icon: Leaf, color: "bg-lime-600" },
+    herb: {
+      label: t("herbs", $language),
+      icon: Leaf,
+      color: "var(--category-herb)",
+    },
     vegetable: {
       label: t("vegetables", $language),
       icon: Flower2,
-      color: "bg-amber-600",
+      color: "var(--category-vegetable)",
     },
   };
 
@@ -48,6 +52,8 @@
 
   // Local UI state
   let selectedPlant = null;
+  let overallStatus = null;
+  let overallColor = null;
   let speciesOpen = true;
   let maintenanceOpen = true;
   let hoveredPlantId = null;
@@ -95,13 +101,17 @@
   function getStatusColor(status) {
     switch (status) {
       case "good":
-        return "bg-green-500";
+        return "var(--status-good)";
       case "attention":
-        return "bg-orange-500";
+        return "var(--status-attention)";
       case "critical":
-        return "bg-red-500";
+        return "var(--status-critical)";
     }
   }
+
+  const statusBg = (color) => `color-mix(in oklch, ${color} 12%, transparent)`;
+  const statusBorder = (color) =>
+    `color-mix(in oklch, ${color} 32%, transparent)`;
 
   function formatStage(stage) {
     return stage.charAt(0).toUpperCase() + stage.slice(1);
@@ -202,15 +212,26 @@
   );
 
   function getConditionColor(current, min, max, criticalThreshold) {
-    if (current >= min && current <= max) return "text-green-600";
+    if (current >= min && current <= max) return getStatusColor("good");
     const midpoint = (min + max) / 2;
     return Math.abs(current - midpoint) > criticalThreshold
-      ? "text-red-600"
-      : "text-orange-600";
+      ? getStatusColor("critical")
+      : getStatusColor("attention");
   }
 
   function viewPlantDetails(plantId) {
     goto(`/plant/${plantId}`);
+  }
+
+  $: if (selectedPlant) {
+    overallStatus = calculateStatus(
+      selectedPlant.currentConditions,
+      selectedPlant.optimalConditions,
+    );
+    overallColor = getStatusColor(overallStatus);
+  } else {
+    overallStatus = null;
+    overallColor = null;
   }
 </script>
 
@@ -246,11 +267,12 @@
           on:click={() => (selectedPlant = plant)}
           on:mouseenter={() => (hoveredPlantId = plant.id)}
           on:mouseleave={() => (hoveredPlantId = null)}
-          class="absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full {statusColor} text-white shadow-lg transition-transform hover:scale-110 cursor-pointer {selectedPlant?.id ===
+          class="absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-110 cursor-pointer {selectedPlant?.id ===
           plant.id
             ? 'ring-4 ring-white scale-110'
             : ''}"
-          style="left: {plant.position.x}%; top: {plant.position.y}%"
+          style="left: {plant.position.x}%; top: {plant.position
+            .y}%; background-color: {statusColor};"
           aria-label="View {plant.name}"
         >
           <svelte:component this={config.icon} class="h-5 w-5" />
@@ -276,9 +298,8 @@
           <div class="mb-4 flex items-start justify-between">
             <div class="flex-1">
               <div
-                class="mb-2 inline-block px-2 py-1 rounded text-xs font-semibold {categoryConfig[
-                  selectedPlant.category
-                ].color} text-primary-foreground"
+                class="mb-2 inline-block px-2 py-1 rounded text-xs font-semibold text-primary-foreground"
+                style={`background-color: ${categoryConfig[selectedPlant.category].color};`}
               >
                 {categoryConfig[selectedPlant.category].label}
               </div>
@@ -308,39 +329,20 @@
             </div>
 
             <div
-              class="rounded-lg p-4 border {calculateStatus(
-                selectedPlant.currentConditions,
-                selectedPlant.optimalConditions,
-              ) === 'good'
-                ? 'bg-green-500/10 border-green-500/30'
-                : calculateStatus(
-                      selectedPlant.currentConditions,
-                      selectedPlant.optimalConditions,
-                    ) === 'attention'
-                  ? 'bg-orange-500/10 border-orange-500/30'
-                  : 'bg-red-500/10 border-red-500/30'}"
+              class="rounded-lg p-4 border"
+              style={`background-color: ${statusBg(overallColor)}; border-color: ${statusBorder(overallColor)};`}
             >
               <div class="flex items-center justify-between">
                 <h3 class="text-sm font-semibold text-card-foreground">
                   Overall Status
                 </h3>
                 <div
-                  class="px-2 py-1 rounded text-xs font-semibold {getStatusColor(
-                    calculateStatus(
-                      selectedPlant.currentConditions,
-                      selectedPlant.optimalConditions,
-                    ),
-                  )} text-white"
+                  class="px-2 py-1 rounded text-xs font-semibold text-white"
+                  style={`background-color: ${overallColor};`}
                 >
-                  {calculateStatus(
-                    selectedPlant.currentConditions,
-                    selectedPlant.optimalConditions,
-                  ) === "good"
+                  {overallStatus === "good"
                     ? "Optimal"
-                    : calculateStatus(
-                          selectedPlant.currentConditions,
-                          selectedPlant.optimalConditions,
-                        ) === "attention"
+                    : overallStatus === "attention"
                       ? "Needs Attention"
                       : "Critical"}
                 </div>
@@ -352,7 +354,8 @@
                 Care Advice
               </h3>
               <div
-                class="space-y-2 rounded-lg bg-blue-500/10 border border-blue-500/30 p-4"
+                class="space-y-2 rounded-lg border p-4"
+                style="background-color: color-mix(in oklch, var(--primary) 12%, transparent); border-color: color-mix(in oklch, var(--primary) 32%, transparent);"
               >
                 {#each generateAdvice(selectedPlant) as advice}
                   <p class="text-sm text-foreground">{advice}</p>

@@ -23,18 +23,22 @@
     tree: {
       label: t("trees", $language),
       icon: Trees,
-      color: "bg-emerald-600",
+      color: "var(--category-tree)",
     },
     shrub: {
       label: t("shrubs", $language),
       icon: Sprout,
-      color: "bg-teal-600",
+      color: "var(--category-shrub)",
     },
-    herb: { label: t("herbs", $language), icon: Leaf, color: "bg-lime-600" },
+    herb: {
+      label: t("herbs", $language),
+      icon: Leaf,
+      color: "var(--category-herb)",
+    },
     vegetable: {
       label: t("vegetables", $language),
       icon: Flower2,
-      color: "bg-amber-600",
+      color: "var(--category-vegetable)",
     },
   };
 
@@ -43,6 +47,8 @@
 
   let comments = [];
   let commentText = "";
+  let overallStatus = null;
+  let overallColor = null;
 
   function calculateStatus(current, optimal) {
     let issueCount = 0;
@@ -106,13 +112,17 @@
   function getStatusColor(status) {
     switch (status) {
       case "good":
-        return "bg-green-500";
+        return "var(--status-good)";
       case "attention":
-        return "bg-orange-500";
+        return "var(--status-attention)";
       case "critical":
-        return "bg-red-500";
+        return "var(--status-critical)";
     }
   }
+
+  const statusBg = (color) => `color-mix(in oklch, ${color} 12%, transparent)`;
+  const statusBorder = (color) =>
+    `color-mix(in oklch, ${color} 32%, transparent)`;
 
   function formatStage(stage) {
     const stageKey = `stage${stage.charAt(0).toUpperCase() + stage.slice(1)}`;
@@ -163,11 +173,11 @@
   }
 
   function getConditionColor(current, min, max, criticalThreshold) {
-    if (current >= min && current <= max) return "text-green-600";
+    if (current >= min && current <= max) return getStatusColor("good");
     const midpoint = (min + max) / 2;
     return Math.abs(current - midpoint) > criticalThreshold
-      ? "text-red-600"
-      : "text-orange-600";
+      ? getStatusColor("critical")
+      : getStatusColor("attention");
   }
 
   function addComment() {
@@ -183,6 +193,17 @@
     } else {
       goto("/");
     }
+  }
+
+  $: if (plant) {
+    overallStatus = calculateStatus(
+      plant.currentConditions,
+      plant.optimalConditions,
+    );
+    overallColor = getStatusColor(overallStatus);
+  } else {
+    overallStatus = null;
+    overallColor = null;
   }
 </script>
 
@@ -291,39 +312,20 @@
         <div class="space-y-6">
           <!-- Overall Status -->
           <div
-            class="rounded-xl p-6 border {calculateStatus(
-              plant.currentConditions,
-              plant.optimalConditions,
-            ) === 'good'
-              ? 'bg-green-500/10 border-green-500/30'
-              : calculateStatus(
-                    plant.currentConditions,
-                    plant.optimalConditions,
-                  ) === 'attention'
-                ? 'bg-orange-500/10 border-orange-500/30'
-                : 'bg-red-500/10 border-red-500/30'}"
+            class="rounded-xl p-6 border"
+            style={`--status-color: ${overallColor || "var(--status-good)"}; background-color: color-mix(in oklch, var(--status-color) 12%, transparent); border-color: color-mix(in oklch, var(--status-color) 32%, transparent);`}
           >
             <div class="flex items-center justify-between mb-4">
               <h2 class="text-xl font-semibold text-foreground">
                 {t("overallStatus", $language)}
               </h2>
               <div
-                class="px-3 py-1 rounded-lg text-sm font-semibold {getStatusColor(
-                  calculateStatus(
-                    plant.currentConditions,
-                    plant.optimalConditions,
-                  ),
-                )} text-white"
+                class="px-3 py-1 rounded-lg text-sm font-semibold text-white"
+                style={`background-color: ${overallColor || "var(--status-good)"};`}
               >
-                {calculateStatus(
-                  plant.currentConditions,
-                  plant.optimalConditions,
-                ) === "good"
+                {overallStatus === "good"
                   ? t("optimal", $language)
-                  : calculateStatus(
-                        plant.currentConditions,
-                        plant.optimalConditions,
-                      ) === "attention"
+                  : overallStatus === "attention"
                     ? t("needsAttention", $language)
                     : t("critical", $language)}
               </div>
@@ -364,12 +366,13 @@
                   <span class="font-medium">{t("temperature", $language)}</span>
                 </div>
                 <span
-                  class="text-lg font-semibold {getConditionColor(
+                  class="text-lg font-semibold"
+                  style={`color: ${getConditionColor(
                     plant.currentConditions.temperature,
                     plant.optimalConditions.temperature.min,
                     plant.optimalConditions.temperature.max,
                     5,
-                  )}"
+                  )}`}
                 >
                   {plant.currentConditions.temperature}°C
                 </span>
@@ -383,12 +386,13 @@
                   <span class="font-medium">{t("humidity", $language)}</span>
                 </div>
                 <span
-                  class="text-lg font-semibold {getConditionColor(
+                  class="text-lg font-semibold"
+                  style={`color: ${getConditionColor(
                     plant.currentConditions.humidity,
                     plant.optimalConditions.humidity.min,
                     plant.optimalConditions.humidity.max,
                     15,
-                  )}"
+                  )}`}
                 >
                   {plant.currentConditions.humidity}%
                 </span>
@@ -402,12 +406,13 @@
                   <span class="font-medium">{t("soilPH", $language)}</span>
                 </div>
                 <span
-                  class="text-lg font-semibold {getConditionColor(
+                  class="text-lg font-semibold"
+                  style={`color: ${getConditionColor(
                     plant.currentConditions.soilPH,
                     plant.optimalConditions.soilPH.min,
                     plant.optimalConditions.soilPH.max,
                     0.5,
-                  )}"
+                  )}`}
                 >
                   {plant.currentConditions.soilPH.toFixed(1)}
                 </span>
@@ -422,12 +427,13 @@
                   >
                 </div>
                 <span
-                  class="text-lg font-semibold {getConditionColor(
+                  class="text-lg font-semibold"
+                  style={`color: ${getConditionColor(
                     plant.currentConditions.soilMoisture,
                     plant.optimalConditions.soilMoisture.min,
                     plant.optimalConditions.soilMoisture.max,
                     20,
-                  )}"
+                  )}`}
                 >
                   {plant.currentConditions.soilMoisture}%
                 </span>
@@ -441,12 +447,13 @@
                   <span class="font-medium">{t("sunlight", $language)}</span>
                 </div>
                 <span
-                  class="text-lg font-semibold {getConditionColor(
+                  class="text-lg font-semibold"
+                  style={`color: ${getConditionColor(
                     plant.currentConditions.sunlightHours,
                     plant.optimalConditions.sunlightHours.min,
                     plant.optimalConditions.sunlightHours.max,
                     2,
-                  )}"
+                  )}`}
                 >
                   {plant.currentConditions.sunlightHours}h/day
                 </span>
@@ -460,7 +467,8 @@
               {t("careAdvice", $language)}
             </h2>
             <div
-              class="space-y-3 rounded-lg bg-blue-500/10 border border-blue-500/30 p-4"
+              class="space-y-3 rounded-lg border p-4"
+              style="background-color: color-mix(in oklch, var(--primary) 12%, transparent); border-color: color-mix(in oklch, var(--primary) 32%, transparent);"
             >
               {#each generateAdvice(plant) as advice}
                 <p class="text-sm text-foreground leading-relaxed">{advice}</p>

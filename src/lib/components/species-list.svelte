@@ -11,18 +11,22 @@
     tree: {
       label: t("trees", $language),
       icon: Trees,
-      color: "bg-emerald-600",
+      color: "var(--category-tree)",
     },
     shrub: {
       label: t("shrubs", $language),
       icon: Sprout,
-      color: "bg-teal-600",
+      color: "var(--category-shrub)",
     },
-    herb: { label: t("herbs", $language), icon: Leaf, color: "bg-lime-600" },
+    herb: {
+      label: t("herbs", $language),
+      icon: Leaf,
+      color: "var(--category-herb)",
+    },
     vegetable: {
       label: t("vegetables", $language),
       icon: Flower2,
-      color: "bg-amber-600",
+      color: "var(--category-vegetable)",
     },
   };
 
@@ -97,13 +101,17 @@
   function getStatusColor(status) {
     switch (status) {
       case "good":
-        return "bg-green-500";
+        return "var(--status-good)";
       case "attention":
-        return "bg-orange-500";
+        return "var(--status-attention)";
       case "critical":
-        return "bg-red-500";
+        return "var(--status-critical)";
     }
   }
+
+  const statusBg = (color) => `color-mix(in oklch, ${color} 12%, transparent)`;
+  const statusBorder = (color) =>
+    `color-mix(in oklch, ${color} 32%, transparent)`;
 
   function toggleCategory(category) {
     selectedCategories.update((categories) => {
@@ -188,13 +196,15 @@
             />
             <div class="absolute top-2 right-2">
               <div
-                class="h-4 w-4 rounded-full {statusColor} border-2 border-white shadow-md"
+                class="h-4 w-4 rounded-full border-2 border-white shadow-md"
+                style={`background-color: ${statusColor};`}
               ></div>
             </div>
           </div>
           <div class="p-4">
             <div
-              class="mb-2 inline-block px-2 py-1 rounded text-xs font-semibold {config.color} text-white"
+              class="mb-2 inline-block px-2 py-1 rounded text-xs font-semibold text-white"
+              style={`background-color: ${config.color};`}
             >
               {config.label}
             </div>
@@ -212,21 +222,20 @@
                 >
               </div>
               <div class="flex justify-between">
-                <span class="text-muted-foreground">Height:</span>
-                <span class="font-medium text-card-foreground"
-                  >{plant.height}</span
-                >
-              </div>
-              <div class="flex justify-between">
-                <span class="text-muted-foreground">Sun:</span>
-                <span class="font-medium text-card-foreground"
-                  >{plant.sunRequirement}</span
-                >
-              </div>
-              <div class="flex justify-between">
                 <span class="text-muted-foreground">Water:</span>
                 <span class="font-medium text-card-foreground"
                   >{plant.waterNeeds}</span
+                >
+              </div>
+              <div class="flex justify-between">
+                <div class="mt-3 text-xs">
+                  <div
+                    class="inline-block px-2 py-1 rounded-full font-semibold text-white"
+                    style={`background-color: ${getStatusColor(status)};`}
+                  >
+                    {status}
+                  </div>
+                </div>
                 >
               </div>
             </div>

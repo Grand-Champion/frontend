@@ -99,7 +99,8 @@
 
                 {#if errorMessage}
                     <div
-                        class="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg"
+                        class="px-4 py-3 rounded-lg"
+                        style={`background-color: color-mix(in oklch, var(--status-critical) 12%, transparent); border: 1px solid color-mix(in oklch, var(--status-critical) 32%, transparent); color: var(--status-critical);`}
                     >
                         {errorMessage}
                     </div>

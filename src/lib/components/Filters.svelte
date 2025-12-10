@@ -7,22 +7,22 @@
         tree: {
             label: t("trees", $language),
             icon: Trees,
-            color: "bg-emerald-600",
+            color: "var(--category-tree)",
         },
         shrub: {
             label: t("shrubs", $language),
             icon: Sprout,
-            color: "bg-teal-600",
+            color: "var(--category-shrub)",
         },
         herb: {
             label: t("herbs", $language),
             icon: Leaf,
-            color: "bg-lime-600",
+            color: "var(--category-herb)",
         },
         vegetable: {
             label: t("vegetables", $language),
             icon: Flower2,
-            color: "bg-amber-600",
+            color: "var(--category-vegetable)",
         },
     };
 
@@ -80,16 +80,16 @@
         });
     }
 
-    function statusDotClass(status) {
+    function getStatusColor(status) {
         switch (status) {
             case "good":
-                return "bg-green-500";
+                return "var(--status-good)";
             case "attention":
-                return "bg-orange-500";
+                return "var(--status-attention)";
             case "critical":
-                return "bg-red-500";
+                return "var(--status-critical)";
             default:
-                return "bg-gray-300";
+                return "var(--muted-foreground)";
         }
     }
 </script>
@@ -158,8 +158,8 @@
                             class="rounded cursor-pointer"
                         />
                         <div
-                            class={"inline-block h-3 w-3 rounded-full " +
-                                statusDotClass(status)}
+                            class="inline-block h-3 w-3 rounded-full"
+                            style={`background-color: ${getStatusColor(status)};`}
                             aria-hidden="true"
                         ></div>
                         {config.label}

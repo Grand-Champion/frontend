@@ -262,7 +262,8 @@
 
               <button
                 on:click={handleLogout}
-                class="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-muted transition-colors flex items-center gap-2 cursor-pointer"
+                class="w-full px-4 py-2 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2 cursor-pointer"
+                style="color: var(--status-critical);"
               >
                 <LogOut class="w-4 h-4" />
                 {t("logout", $language)}
@@ -398,7 +399,8 @@
 
         {#if passwordError}
           <div
-            class="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-sm"
+            class="px-4 py-3 rounded-lg text-sm"
+            style={`background-color: color-mix(in oklch, var(--status-critical) 12%, transparent); border: 1px solid color-mix(in oklch, var(--status-critical) 32%, transparent); color: var(--status-critical);`}
           >
             {passwordError}
           </div>
