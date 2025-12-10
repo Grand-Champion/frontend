@@ -4,7 +4,7 @@
     import { t, language } from "$lib/stores/language";
     import { Eye, EyeOff } from "lucide-svelte";
 
-    let username = "";
+    let identifier = "";
     let password = "";
     let errorMessage = "";
     let showPassword = false;
@@ -12,12 +12,12 @@
     function handleLogin() {
         errorMessage = "";
 
-        if (!username || !password) {
+        if (!identifier || !password) {
             errorMessage = t("pleaseEnterCredentials", $language);
             return;
         }
 
-        auth.login(username, password);
+        auth.login(identifier, password);
 
         // Check if login was successful
         setTimeout(() => {
@@ -54,17 +54,17 @@
             <form on:submit|preventDefault={handleLogin} class="space-y-4">
                 <div>
                     <label
-                        for="username"
+                        for="identifier"
                         class="block text-sm font-medium text-foreground mb-2"
                     >
-                        {t("username", $language)}
+                        {t("username", $language)} / Email
                     </label>
                     <input
-                        id="username"
+                        id="identifier"
                         type="text"
-                        bind:value={username}
+                        bind:value={identifier}
                         class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder={t("enterUsername", $language)}
+                        placeholder={t("enterUsername", $language) + " / Email"}
                     />
                 </div>
 
