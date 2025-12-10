@@ -187,10 +187,7 @@
     }
 </script>
 
-<div
-    class="min-h-screen bg-background p-6 overflow-y-auto"
-    style="max-height: 100vh;"
->
+<div class="min-h-screen bg-background p-6">
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
         <div class="mb-8">

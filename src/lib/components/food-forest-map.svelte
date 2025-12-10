@@ -246,7 +246,10 @@
           on:click={() => (selectedPlant = plant)}
           on:mouseenter={() => (hoveredPlantId = plant.id)}
           on:mouseleave={() => (hoveredPlantId = null)}
-          class="absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full {statusColor} text-white shadow-lg transition-transform hover:scale-110 cursor-pointer"
+          class="absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full {statusColor} text-white shadow-lg transition-transform hover:scale-110 cursor-pointer {selectedPlant?.id ===
+          plant.id
+            ? 'ring-4 ring-white scale-110'
+            : ''}"
           style="left: {plant.position.x}%; top: {plant.position.y}%"
           aria-label="View {plant.name}"
         >
