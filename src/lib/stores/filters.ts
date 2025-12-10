@@ -1,4 +1,5 @@
-import { writable } from "svelte/store"
+import { writable } from "svelte/store";
 
-export const selectedCategories = writable(["tree", "shrub", "herb", "vegetable"])
-export const selectedStatus = writable(["good", "attention", "critical"])
+// Gebruik backend species types (Tree, Shrub, Plant)
+export const selectedCategories = writable(["Tree", "Shrub", "Plant"]);
+export const selectedStatus = writable(["good", "attention", "critical"]);

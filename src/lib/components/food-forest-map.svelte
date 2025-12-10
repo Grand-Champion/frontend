@@ -25,20 +25,6 @@
   // Get plants array directly from API
   $: plants = forestData?.data?.plants || [];
 
-  
-   // Bepaal de category van een plant op basis van species.
-  function getCategory(plant) {
-    if (!plant.species || !plant.species.type) return 'tree';
-    
-    const type = plant.species.type.toLowerCase();
-    
-    // Map database type naar frontend category
-    if (type === 'tree') return 'tree';
-    if (type === 'shrub') return 'shrub';
-    if (type === 'plant') return 'herb'; // Database "Plant" → Frontend "herb"
-    return 'vegetable';
-  }
-
   // calculate status based on species optimal ranges
   function getStatus(plant) {
     if (!plant.conditions) return 'critical';
@@ -85,24 +71,19 @@
     return 'critical';
   }
 
-  // Dit is een test voor hoe we van engels naar nederlands kunnen translaten
+  // Gebruik backend species types (Tree, Shrub, Plant)
   $: categoryConfig = {
-    tree: {
+    Tree: {
       label: t("trees", $language),
       icon: Trees,
       color: "bg-emerald-600",
     },
-    shrub: {
+    Shrub: {
       label: t("shrubs", $language),
       icon: Sprout,
       color: "bg-teal-600",
     },
-    herb: { label: t("herbs", $language), icon: Leaf, color: "bg-lime-600" },
-    vegetable: {
-      label: t("vegetables", $language),
-      icon: Flower2,
-      color: "bg-amber-600",
-    },
+    Plant: { label: t("herbs", $language), icon: Leaf, color: "bg-lime-600" },
   };
 
   // Local UI state
@@ -201,7 +182,7 @@
       
       return plants.filter(
         (plant) =>
-          $categories.includes(getCategory(plant)) &&
+          $categories.includes(plant.species?.type || 'Tree') &&
           $statuses.includes(getStatus(plant))
       );
     },
@@ -233,7 +214,7 @@
 
     <div class="absolute inset-0">
       {#each $filteredPlants as plant (plant.id)}
-        {@const config = categoryConfig[getCategory(plant)]}
+        {@const config = categoryConfig[plant.species?.type || 'Tree']}
         {@const status = getStatus(plant)}
         {@const statusColor = getStatusColor(status)}
 
@@ -268,10 +249,10 @@
             <div class="flex-1">
               <div
                 class="mb-2 inline-block px-2 py-1 rounded text-xs font-semibold {categoryConfig[
-                  getCategory(selectedPlant)
+                  selectedPlant.species?.type || 'Tree'
                 ].color} text-primary-foreground"
               >
-                {categoryConfig[getCategory(selectedPlant)].label}
+                {categoryConfig[selectedPlant.species?.type || 'Tree'].label}
               </div>
               <h2 class="text-2xl font-bold text-card-foreground">
                 {selectedPlant.species?.name || `Plant ${selectedPlant.id}`}
