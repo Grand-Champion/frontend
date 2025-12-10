@@ -3,6 +3,9 @@ import { browser } from '$app/environment';
 
 export type UserRole = 'admin' | 'manager' | 'gardener';
 
+// Admin key for changing admin password
+export const ADMIN_KEY = 'A9f!3Lq2$W7n#K8sR1p&Z4m?Tb6Jx9Gv5Hc0YdQeMu';
+
 export interface User {
     id: string;
     username: string;
@@ -131,6 +134,30 @@ function createAuthStore() {
                             u.id === userId ? { ...u, password: newPassword } : u
                         ),
                         currentUser: state.currentUser?.id === userId
+                            ? { ...state.currentUser, password: newPassword }
+                            : state.currentUser
+                    };
+                    if (browser) {
+                        localStorage.setItem('auth', JSON.stringify(newState));
+                    }
+                    success = true;
+                    return newState;
+                }
+                return state;
+            });
+            return success;
+        },
+        changeAdminPassword: (adminKey: string, currentPassword: string, newPassword: string): boolean => {
+            let success = false;
+            update((state: AuthState) => {
+                const admin = state.users.find((u: User) => u.id === 'admin-1');
+                if (admin && adminKey === ADMIN_KEY && admin.password === currentPassword) {
+                    const newState = {
+                        ...state,
+                        users: state.users.map((u: User) =>
+                            u.id === 'admin-1' ? { ...u, password: newPassword } : u
+                        ),
+                        currentUser: state.currentUser?.id === 'admin-1'
                             ? { ...state.currentUser, password: newPassword }
                             : state.currentUser
                     };
