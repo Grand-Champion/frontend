@@ -175,8 +175,8 @@
           href="/"
           class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
             .url.pathname === '/'
-            ? 'bg-primary text-primary-foreground'
-            : 'text-muted-foreground hover:text-foreground hover:bg-muted'}"
+            ? 'bg-primary text-primary-foreground hover:bg-primary/80'
+            : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
           <Home class="w-4 h-4" />
           <span class="font-medium">{t("home", $language)}</span>
@@ -186,8 +186,8 @@
           href="/map"
           class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
             .url.pathname === '/map'
-            ? 'bg-primary text-primary-foreground'
-            : 'text-muted-foreground hover:text-foreground hover:bg-muted'}"
+            ? 'bg-primary text-primary-foreground hover:bg-primary/80'
+            : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
           <Map class="w-4 h-4" />
           <span class="font-medium">{t("mapView", $language)}</span>
@@ -197,8 +197,8 @@
           href="/species"
           class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
             .url.pathname === '/species'
-            ? 'bg-primary text-primary-foreground'
-            : 'text-muted-foreground hover:text-foreground hover:bg-muted'}"
+            ? 'bg-primary text-primary-foreground hover:bg-primary/80'
+            : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
           <Grid3X3 class="w-4 h-4" />
           <span class="font-medium">{t("speciesList", $language)}</span>
@@ -235,7 +235,7 @@
       {#if $auth.currentUser}
         <!-- User Menu -->
         <div
-          class="relative ml-4 pl-8 border-l border-border"
+          class="relative ml-4 pl-[1.625rem] border-l border-border"
           bind:this={userMenuElement}
         >
           <button
@@ -295,7 +295,8 @@
 
               <button
                 on:click={handleLogout}
-                class="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-muted transition-colors flex items-center gap-2 cursor-pointer"
+                class="w-full px-4 py-2 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2 cursor-pointer"
+                style="color: var(--status-critical);"
               >
                 <LogOut class="w-4 h-4" />
                 {t("logout", $language)}
@@ -463,7 +464,8 @@
 
         {#if passwordError}
           <div
-            class="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-sm"
+            class="px-4 py-3 rounded-lg text-sm"
+            style={`background-color: color-mix(in oklch, var(--status-critical) 12%, transparent); border: 1px solid color-mix(in oklch, var(--status-critical) 32%, transparent); color: var(--status-critical);`}
           >
             {passwordError}
           </div>

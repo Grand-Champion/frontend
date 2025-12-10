@@ -12,6 +12,8 @@
         Pencil,
     } from "lucide-svelte";
 
+    $: pageTitle = `${t("accountManagement", $language)} - Food Forest`;
+
     // Redirect if not admin or manager
     $: if (
         !$auth.currentUser ||
@@ -43,7 +45,23 @@
     let editError: Record<string, string> = {};
     let passwordVisibility: Record<string, boolean> = {};
 
-    // Admin password change state
+    // Delete confirmation modal
+    let showDeleteConfirm = false;
+    let userToDelete: string | null = null;
+    let userToDeleteName = "";
+    let deleteConfirmPassword = "";
+    let deleteError = "";
+    let showDeletePassword = false;
+
+    // Admin save modal
+    let showAdminSaveModal = false;
+    let pendingAdminSaveUserId = "";
+    let pendingAdminSavePassword = "";
+    let adminSaveKey = "";
+    let adminSaveError = "";
+    let adminSaveShowKey = false;
+
+    // Admin password change
     let showAdminPasswordChange = false;
     let adminKey = "";
     let adminCurrentPassword = "";
@@ -51,13 +69,53 @@
     let adminPasswordError = "";
     let adminPasswordVisibility: Record<string, boolean> = {};
 
-    // Admin save modal state
-    let showAdminSaveModal = false;
-    let adminSaveKey = "";
-    let adminSaveError = "";
-    let adminSaveShowKey = false;
-    let pendingAdminSaveUserId = "";
-    let pendingAdminSavePassword = "";
+    function openDeleteConfirm(userId: string) {
+        const user = $auth.users.find((u) => u.id === userId);
+        if (user && user.role !== "admin") {
+            userToDelete = userId;
+            userToDeleteName = user.fullName;
+            showDeleteConfirm = true;
+            deleteConfirmPassword = "";
+            deleteError = "";
+            showDeletePassword = false;
+        }
+    }
+
+    function closeDeleteConfirm() {
+        showDeleteConfirm = false;
+        userToDelete = null;
+        userToDeleteName = "";
+        deleteConfirmPassword = "";
+        deleteError = "";
+        showDeletePassword = false;
+    }
+
+    function confirmDelete() {
+        deleteError = "";
+
+        if (!deleteConfirmPassword) {
+            deleteError =
+                $language === "en"
+                    ? "Please enter your password"
+                    : "Voer je wachtwoord in";
+            return;
+        }
+
+        // Verify current user's password
+        if ($auth.currentUser) {
+            const user = $auth.users.find(
+                (u) => u.username === $auth.currentUser?.username,
+            );
+            if (user && user.password === deleteConfirmPassword) {
+                if (userToDelete) {
+                    auth.deleteUser(userToDelete);
+                    closeDeleteConfirm();
+                }
+            } else {
+                deleteError = t("invalidCredentials", $language);
+            }
+        }
+    }
 
     function handleEditUser(userId: string) {
         const user = $auth.users.find((u) => u.id === userId);
@@ -72,6 +130,14 @@
         // Validate required fields
         if (!newUsername.trim() || !newFullName.trim() || !newEmail.trim()) {
             editError[userId] = t("pleaseEnterCredentials", $language);
+            return;
+        }
+
+        // Validate email format (must have TLD)
+        if (
+            !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(newEmail)
+        ) {
+            editError[userId] = t("emailFormatError", $language);
             return;
         }
 
@@ -161,6 +227,14 @@
             return;
         }
 
+        // Validate email format (must have TLD)
+        if (
+            !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(newEmail)
+        ) {
+            createError = t("emailFormatError", $language);
+            return;
+        }
+
         // Check if username already exists
         if ($auth.users.find((u) => u.username === newUsername)) {
             createError = t("usernameExists", $language);
@@ -195,9 +269,7 @@
     }
 
     function handleDeleteUser(userId: string) {
-        if (confirm(t("confirmDelete", $language))) {
-            auth.deleteUser(userId);
-        }
+        openDeleteConfirm(userId);
     }
 
     function handleAdminPasswordChange() {
@@ -290,22 +362,22 @@
             return 0;
         });
 
-    function getRoleBadgeClass(role: UserRole) {
-        switch (role) {
-            case "admin":
-                return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
-            case "manager":
-                return "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400";
-            case "gardener":
-                return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400";
-        }
+    function getRoleBadgeStyle(role: UserRole) {
+        const roleColor =
+            {
+                admin: "var(--role-admin)",
+                manager: "var(--role-manager)",
+                gardener: "var(--role-gardener)",
+            }[role] || "var(--foreground)";
+        return `background-color: color-mix(in oklch, ${roleColor} 12%, transparent); color: ${roleColor};`;
     }
 </script>
 
-<div
-    class="min-h-screen bg-background p-6 overflow-y-auto"
-    style="max-height: 100vh;"
->
+<svelte:head>
+    <title>{pageTitle}</title>
+</svelte:head>
+
+<div class="min-h-screen bg-background p-6">
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
         <div class="mb-8">
@@ -329,10 +401,7 @@
             <input
                 type="text"
                 bind:value={searchFilter}
-                placeholder="{t('search', $language)} {t(
-                    'username',
-                    $language,
-                )}/{t('fullName', $language)}..."
+                placeholder="{t('search', $language)}..."
                 class="px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary w-80"
             />
         </div>
@@ -395,6 +464,7 @@
                                 type="email"
                                 bind:value={newEmail}
                                 required
+                                title="Email should be in format: example@domain.com"
                                 class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                 placeholder="example@domain.com"
                             />
@@ -470,7 +540,8 @@
 
                     {#if createError}
                         <div
-                            class="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg"
+                            class="px-4 py-3 rounded-lg"
+                            style={`background-color: color-mix(in oklch, var(--status-critical) 12%, transparent); border: 1px solid color-mix(in oklch, var(--status-critical) 32%, transparent); color: var(--status-critical);`}
                         >
                             {createError}
                         </div>
@@ -597,9 +668,8 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm">
                                     <span
-                                        class="px-2 py-1 rounded-full text-xs font-medium {getRoleBadgeClass(
-                                            user.role,
-                                        )}"
+                                        class="px-2 py-1 rounded-full text-xs font-medium"
+                                        style={getRoleBadgeStyle(user.role)}
                                     >
                                         {t(user.role, $language)}
                                     </span>
@@ -611,62 +681,81 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm">
                                     <div class="flex items-center gap-2">
-                                        {#if !($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id)}
-                                            <button
-                                                on:click={() => {
-                                                    // Close all other edit forms
-                                                    Object.keys(
-                                                        editingUser,
-                                                    ).forEach((id) => {
-                                                        if (id !== user.id) {
-                                                            editingUser[id] =
-                                                                false;
-                                                            editError[id] = "";
-                                                            editPassword[id] =
-                                                                "";
-                                                            passwordVisibility[
-                                                                id
-                                                            ] = false;
-                                                        }
-                                                    });
-                                                    editingUser[user.id] =
-                                                        !editingUser[user.id];
-                                                    if (editingUser[user.id]) {
-                                                        editUsername[user.id] =
-                                                            user.username;
-                                                        editFullName[user.id] =
-                                                            user.fullName;
-                                                        editEmail[user.id] =
-                                                            user.email;
-                                                        editPassword[user.id] =
-                                                            user.password;
-                                                        editRole[user.id] =
-                                                            user.role;
-                                                        editError[user.id] = "";
-                                                    }
-                                                }}
-                                                class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
-                                                aria-label="Edit user"
-                                            >
-                                                <Pencil class="w-4 h-4" />
-                                            </button>
-                                        {:else}
-                                            <span
-                                                class="text-muted-foreground text-xs"
-                                                >-</span
-                                            >
-                                        {/if}
-                                        {#if user.role === "admin" || ($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id) || ($auth.currentUser?.role === "manager" && user.role !== "gardener" && user.id !== $auth.currentUser?.id)}
+                                        {#if ($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id) || ($auth.currentUser?.role === "manager" && user.role !== "gardener" && user.id !== $auth.currentUser?.id)}
                                             <!-- Only show one '-' if both actions are unavailable -->
                                         {:else}
-                                            <button
-                                                on:click={() =>
-                                                    handleDeleteUser(user.id)}
-                                                class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
-                                                aria-label="Delete user"
-                                            >
-                                                <Trash2 class="w-4 h-4" />
-                                            </button>
+                                            {#if !($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id)}
+                                                <button
+                                                    on:click={() => {
+                                                        // Close all other edit forms
+                                                        Object.keys(
+                                                            editingUser,
+                                                        ).forEach((id) => {
+                                                            if (
+                                                                id !== user.id
+                                                            ) {
+                                                                editingUser[
+                                                                    id
+                                                                ] = false;
+                                                                editError[id] =
+                                                                    "";
+                                                                editPassword[
+                                                                    id
+                                                                ] = "";
+                                                                passwordVisibility[
+                                                                    id
+                                                                ] = false;
+                                                            }
+                                                        });
+                                                        editingUser[user.id] =
+                                                            !editingUser[
+                                                                user.id
+                                                            ];
+                                                        if (
+                                                            editingUser[user.id]
+                                                        ) {
+                                                            editUsername[
+                                                                user.id
+                                                            ] = user.username;
+                                                            editFullName[
+                                                                user.id
+                                                            ] = user.fullName;
+                                                            editPassword[
+                                                                user.id
+                                                            ] = user.password;
+                                                            editRole[user.id] =
+                                                                user.role;
+                                                            editError[user.id] =
+                                                                "";
+                                                        }
+                                                    }}
+                                                    class="cursor-pointer hover:opacity-80 transition-opacity"
+                                                    style="color: var(--action-icon);"
+                                                    aria-label="Edit user"
+                                                >
+                                                    <Pencil class="w-4 h-4" />
+                                                </button>
+                                            {:else}
+                                                <span
+                                                    class="text-muted-foreground text-xs"
+                                                    >-</span
+                                                >
+                                            {/if}
+                                            {#if ($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id) || ($auth.currentUser?.role === "manager" && user.role !== "gardener" && user.id !== $auth.currentUser?.id) || user.role === "admin"}
+                                                <!-- Only show one '-' if both actions are unavailable or if user is admin -->
+                                            {:else}
+                                                <button
+                                                    on:click={() =>
+                                                        handleDeleteUser(
+                                                            user.id,
+                                                        )}
+                                                    class="cursor-pointer"
+                                                    style="color: var(--status-critical);"
+                                                    aria-label="Delete user"
+                                                >
+                                                    <Trash2 class="w-4 h-4" />
+                                                </button>
+                                            {/if}
                                         {/if}
                                     </div>
                                 </td>
@@ -802,6 +891,7 @@
                                                             editEmail[user.id]
                                                         }
                                                         required
+                                                        title="Email should be in format: example@domain.com"
                                                         disabled={user.role ===
                                                             "admin" ||
                                                             ($auth.currentUser
@@ -974,7 +1064,8 @@
                                             </div>
                                             {#if editError[user.id]}
                                                 <div
-                                                    class="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg"
+                                                    class="px-4 py-3 rounded-lg"
+                                                    style={`background-color: color-mix(in oklch, var(--status-critical) 12%, transparent); border: 1px solid color-mix(in oklch, var(--status-critical) 32%, transparent); color: var(--status-critical);`}
                                                 >
                                                     {editError[user.id]}
                                                 </div>
@@ -1258,3 +1349,87 @@
         {/if}
     </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+{#if showDeleteConfirm}
+    <div
+        class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm"
+        on:click={closeDeleteConfirm}
+        on:keydown={(e) => e.key === "Escape" && closeDeleteConfirm()}
+        role="button"
+        tabindex="0"
+    >
+        <div
+            class="bg-card border border-border rounded-lg shadow-xl p-6 max-w-md w-full mx-4"
+            role="dialog"
+            aria-modal="true"
+            tabindex="-1"
+            on:click|stopPropagation
+            on:keydown|stopPropagation
+        >
+            <h2 class="text-xl font-bold text-foreground mb-4">
+                {t("confirmDelete", $language)}
+            </h2>
+            <p class="text-muted-foreground mb-4">
+                {$language === "en"
+                    ? `Are you sure you want to delete ${userToDeleteName}? This action cannot be undone.`
+                    : `Weet je zeker dat je ${userToDeleteName} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.`}
+            </p>
+
+            <div class="mb-4">
+                <label
+                    for="delete-password"
+                    class="block text-sm font-medium text-foreground mb-2"
+                >
+                    {t("enterPassword", $language)}
+                </label>
+                <div class="relative">
+                    <input
+                        id="delete-password"
+                        type={showDeletePassword ? "text" : "password"}
+                        bind:value={deleteConfirmPassword}
+                        class="w-full px-4 py-2 pr-10 bg-background border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                        placeholder={t("password", $language)}
+                    />
+                    <button
+                        type="button"
+                        on:click={() =>
+                            (showDeletePassword = !showDeletePassword)}
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                        aria-label="Toggle password visibility"
+                    >
+                        {#if showDeletePassword}
+                            <EyeOff class="w-4 h-4" />
+                        {:else}
+                            <Eye class="w-4 h-4" />
+                        {/if}
+                    </button>
+                </div>
+                {#if deleteError}
+                    <p
+                        class="text-sm mt-2"
+                        style="color: var(--status-critical);"
+                    >
+                        {deleteError}
+                    </p>
+                {/if}
+            </div>
+
+            <div class="flex gap-3">
+                <button
+                    on:click={closeDeleteConfirm}
+                    class="flex-1 bg-muted text-foreground px-4 py-2 rounded-lg font-medium hover:bg-muted/80 transition-colors cursor-pointer"
+                >
+                    {t("cancel", $language)}
+                </button>
+                <button
+                    on:click={confirmDelete}
+                    class="flex-1 px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer"
+                    style="background-color: var(--status-critical); color: white;"
+                >
+                    {$language === "en" ? "Delete" : "Verwijderen"}
+                </button>
+            </div>
+        </div>
+    </div>
+{/if}

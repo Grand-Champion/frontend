@@ -3,22 +3,27 @@
     import { Leaf, Trees, Flower2, Sprout, ChevronDown } from "lucide-svelte";
     import { language, t } from "$lib/stores/language";
 
-    // Gebruik backend types direct (Tree, Shrub, Plant)
+    // Gebruik backend types direct (lowercase: tree, shrub, herb, vegetable)
     $: categoryConfig = {
-        Tree: {
+        tree: {
             label: t("trees", $language),
             icon: Trees,
-            color: "bg-emerald-600",
+            color: "var(--category-tree)",
         },
-        Shrub: {
+        shrub: {
             label: t("shrubs", $language),
             icon: Sprout,
-            color: "bg-teal-600",
+            color: "var(--category-shrub)",
         },
-        Plant: {
+        herb: {
             label: t("herbs", $language),
             icon: Leaf,
-            color: "bg-lime-600",
+            color: "var(--category-herb)",
+        },
+        vegetable: {
+            label: t("vegetables", $language),
+            icon: Flower2,
+            color: "var(--category-vegetable)",
         },
     };
 
@@ -76,16 +81,16 @@
         });
     }
 
-    function statusDotClass(status) {
+    function getStatusColor(status) {
         switch (status) {
             case "good":
-                return "bg-green-500";
+                return "var(--status-good)";
             case "attention":
-                return "bg-orange-500";
+                return "var(--status-attention)";
             case "critical":
-                return "bg-red-500";
+                return "var(--status-critical)";
             default:
-                return "bg-gray-300";
+                return "var(--muted-foreground)";
         }
     }
 </script>
@@ -118,7 +123,11 @@
                                 toggleCategory(category, e.target.checked)}
                             class="rounded cursor-pointer"
                         />
-                        <svelte:component this={config.icon} class="h-4 w-4" />
+                        <svelte:component
+                            this={config.icon}
+                            class="h-4 w-4"
+                            style="color: {config.color}"
+                        />
                         {config.label}
                     </label>
                 {/each}
@@ -154,8 +163,8 @@
                             class="rounded cursor-pointer"
                         />
                         <div
-                            class={"inline-block h-3 w-3 rounded-full " +
-                                statusDotClass(status)}
+                            class="inline-block h-3 w-3 rounded-full"
+                            style={`background-color: ${getStatusColor(status)};`}
                             aria-hidden="true"
                         ></div>
                         {config.label}

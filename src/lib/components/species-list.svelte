@@ -12,19 +12,28 @@
   // Get plants array from API
   $: plants = forestData?.data?.plants || [];
 
-  // Gebruik backend species types direct (Tree, Shrub, Plant)
+  // Gebruik backend species types direct (lowercase: tree, shrub, herb, vegetable)
   $: categoryConfig = {
-    Tree: {
+    tree: {
       label: t("trees", $language),
       icon: Trees,
-      color: "bg-emerald-600",
+      color: "var(--category-tree)",
     },
-    Shrub: {
+    shrub: {
       label: t("shrubs", $language),
       icon: Sprout,
-      color: "bg-teal-600",
+      color: "var(--category-shrub)",
     },
-    Plant: { label: t("herbs", $language), icon: Leaf, color: "bg-lime-600" },
+    herb: {
+      label: t("herbs", $language),
+      icon: Leaf,
+      color: "var(--category-herb)",
+    },
+    vegetable: {
+      label: t("vegetables", $language),
+      icon: Flower2,
+      color: "var(--category-vegetable)",
+    },
   };
 
   $: statusConfig = {
@@ -45,38 +54,75 @@
     const species = plant.species;
 
     // Check elke condition tegen min/max ranges van species
-    if (conditions.temperature < species.minTemperature || conditions.temperature > species.maxTemperature) {
+    if (
+      conditions.temperature < species.minTemperature ||
+      conditions.temperature > species.maxTemperature
+    ) {
       issuesCount++;
     }
-    if (conditions.humidity < species.minHumidity || conditions.humidity > species.maxHumidity) {
+    if (
+      conditions.humidity < species.minHumidity ||
+      conditions.humidity > species.maxHumidity
+    ) {
       issuesCount++;
     }
-    if (conditions.soilMoisture < species.minSoilMoisture || conditions.soilMoisture > species.maxSoilMoisture) {
+    if (
+      conditions.soilMoisture < species.minSoilMoisture ||
+      conditions.soilMoisture > species.maxSoilMoisture
+    ) {
       issuesCount++;
     }
-    if (conditions.soilPH < species.minSoilPH || conditions.soilPH > species.maxSoilPH) {
+    if (
+      conditions.soilPH < species.minSoilPH ||
+      conditions.soilPH > species.maxSoilPH
+    ) {
       issuesCount++;
     }
-    if (conditions.sunlight < species.minSunlight || conditions.sunlight > species.maxSunlight) {
+    if (
+      conditions.sunlight < species.minSunlight ||
+      conditions.sunlight > species.maxSunlight
+    ) {
       issuesCount++;
     }
 
-    if (issuesCount === 0) return 'good';
-    if (issuesCount <= 2) return 'attention';
-    return 'critical';
+    if (issuesCount === 0) return "good";
+    if (issuesCount <= 2) return "attention";
+    return "critical";
   }
 
   function getStatusColor(status) {
     switch (status) {
       case "good":
-        return "bg-green-500";
+        return "var(--status-good)";
       case "attention":
-        return "bg-orange-500";
+        return "var(--status-attention)";
       case "critical":
-        return "bg-red-500";
-      default:
-        return "bg-gray-500";
+        return "var(--status-critical)";
     }
+  }
+
+  const statusBg = (color) => `color-mix(in oklch, ${color} 12%, transparent)`;
+  const statusBorder = (color) =>
+    `color-mix(in oklch, ${color} 32%, transparent)`;
+
+  function toggleCategory(category) {
+    selectedCategories.update((categories) => {
+      if (categories.includes(category)) {
+        return categories.filter((c) => c !== category);
+      } else {
+        return [...categories, category];
+      }
+    });
+  }
+
+  function toggleStatus(status) {
+    selectedStatus.update((statuses) => {
+      if (statuses.includes(status)) {
+        return statuses.filter((s) => s !== status);
+      } else {
+        return [...statuses, status];
+      }
+    });
   }
 
   function viewPlant(plantId) {
@@ -87,10 +133,11 @@
     [selectedCategories, selectedStatus],
     ([$categories, $statuses]) => {
       if (!plants || plants.length === 0) return [];
-      
-      return plants.filter((plant) =>
-        $categories.includes(plant.species?.type || 'Tree') &&
-        $statuses.includes(getStatus(plant))
+
+      return plants.filter(
+        (plant) =>
+          $categories.includes(plant.species?.type?.toLowerCase() || "tree") &&
+          $statuses.includes(getStatus(plant)),
       );
     },
   );
@@ -110,7 +157,7 @@
       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
     >
       {#each $filteredPlants as plant (plant.id)}
-        {@const category = plant.species?.type || 'Tree'}
+        {@const category = plant.species?.type?.toLowerCase() || "tree"}
         {@const config = categoryConfig[category]}
         {@const status = getStatus(plant)}
         {@const statusColor = getStatusColor(status)}
@@ -123,26 +170,28 @@
           >
             <img
               src={plant.image || "/placeholder.svg"}
-              alt={plant.species?.name || 'Plant'}
+              alt={plant.species?.name || "Plant"}
               class="w-full h-full object-cover"
             />
             <div class="absolute top-2 right-2">
               <div
-                class="h-4 w-4 rounded-full {statusColor} border-2 border-white shadow-md"
+                class="h-4 w-4 rounded-full border-2 border-white shadow-md"
+                style={`background-color: ${statusColor};`}
               ></div>
             </div>
           </div>
           <div class="p-4">
             <div
-              class="mb-2 inline-block px-2 py-1 rounded text-xs font-semibold {config.color} text-white"
+              class="mb-2 inline-block px-2 py-1 rounded text-xs font-semibold text-white"
+              style={`background-color: ${config?.color || "var(--category-tree)"};`}
             >
-              {config.label}
+              {config?.label || "Unknown"}
             </div>
             <h3 class="text-lg font-bold text-card-foreground mb-1">
-              {plant.species?.name || 'Unknown'}
+              {plant.species?.name || "Unknown"}
             </h3>
             <p class="text-sm italic text-muted-foreground mb-3">
-              {plant.species?.scientificName || ''}
+              {plant.species?.scientificName || ""}
             </p>
             <div class="space-y-2 text-sm">
               <div class="flex justify-between">
@@ -152,22 +201,22 @@
                 >
               </div>
               <div class="flex justify-between">
-                <span class="text-muted-foreground">Height:</span>
+                <span class="text-muted-foreground">Water:</span>
                 <span class="font-medium text-card-foreground"
-                  >{plant.height || "N/A"}</span
+                  >{plant.species?.maintenanceLevel || "Low"}</span
                 >
               </div>
-              <div class="flex justify-between">
-                <span class="text-muted-foreground">Sun:</span>
-                <span class="font-medium text-card-foreground"
-                  >{plant.species ? `${plant.species.minSunlight}-${plant.species.maxSunlight}h` : 'N/A'}</span
-                >
-              </div>
-              <div class="flex justify-between">
-                <span class="text-muted-foreground">Maintenance:</span>
-                <span class="font-medium text-card-foreground"
-                  >{plant.species?.maintenanceLevel || 'Low'}</span
-                >
+            </div>
+            <div class="mt-3 text-xs">
+              <div
+                class="inline-block px-2 py-1 rounded-full font-semibold text-white"
+                style={`background-color: ${getStatusColor(status)};`}
+              >
+                {status === "good"
+                  ? t("good", $language)
+                  : status === "attention"
+                    ? t("needsAttention", $language)
+                    : t("critical", $language)}
               </div>
             </div>
           </div>

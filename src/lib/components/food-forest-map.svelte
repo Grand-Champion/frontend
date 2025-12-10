@@ -33,61 +33,86 @@
     const c = plant.conditions[0];
     const s = plant.species;
     let issuesCount = 0;
-    
+
     // Check conditions met species ranges
     if (s.minTemperature !== null && s.maxTemperature !== null) {
-      if (c.temperature < s.minTemperature || c.temperature > s.maxTemperature) {
+      if (
+        c.temperature < s.minTemperature ||
+        c.temperature > s.maxTemperature
+      ) {
         issuesCount++;
       }
     }
-    
+
     if (s.minHumidity !== null && s.maxHumidity !== null) {
       if (c.humidity < s.minHumidity || c.humidity > s.maxHumidity) {
         issuesCount++;
       }
     }
-    
+
     if (s.minSoilMoisture !== null && s.maxSoilMoisture !== null) {
-      if (c.soilMoisture < s.minSoilMoisture || c.soilMoisture > s.maxSoilMoisture) {
+      if (
+        c.soilMoisture < s.minSoilMoisture ||
+        c.soilMoisture > s.maxSoilMoisture
+      ) {
         issuesCount++;
       }
     }
-    
+
     if (s.minSoilPH !== null && s.maxSoilPH !== null) {
       if (c.soilPH < s.minSoilPH || c.soilPH > s.maxSoilPH) {
         issuesCount++;
       }
     }
-    
+
     if (s.minSunlight !== null && s.maxSunlight !== null) {
       if (c.sunlight < s.minSunlight || c.sunlight > s.maxSunlight) {
         issuesCount++;
       }
     }
-    
+
     // Returned de status, kijkt naar hoeveelheid issues
-    if (issuesCount === 0) return 'good';
-    if (issuesCount <= 2) return 'attention';
-    return 'critical';
+    if (issuesCount === 0) return "good";
+    if (issuesCount <= 2) return "attention";
+    return "critical";
   }
 
   // Gebruik backend species types (Tree, Shrub, Plant)
   $: categoryConfig = {
-    Tree: {
+    tree: {
       label: t("trees", $language),
       icon: Trees,
-      color: "bg-emerald-600",
+      color: "var(--category-tree)",
     },
-    Shrub: {
+    shrub: {
       label: t("shrubs", $language),
       icon: Sprout,
-      color: "bg-teal-600",
+      color: "var(--category-shrub)",
     },
-    Plant: { label: t("herbs", $language), icon: Leaf, color: "bg-lime-600" },
+    herb: {
+      label: t("herbs", $language),
+      icon: Leaf,
+      color: "var(--category-herb)",
+    },
+    vegetable: {
+      label: t("vegetables", $language),
+      icon: Flower2,
+      color: "var(--category-vegetable)",
+    },
+  };
+
+  $: statusConfig = {
+    good: { label: t("good", $language) },
+    attention: { label: t("needsAttention", $language) },
+    critical: { label: t("critical", $language) },
   };
 
   // Local UI state
   let selectedPlant = null;
+  let overallStatus = null;
+  let overallColor = null;
+  let speciesOpen = true;
+  let maintenanceOpen = true;
   let hoveredPlantId = null;
   const comments = {};
   let commentText = "";
@@ -95,22 +120,30 @@
   function getStatusColor(status) {
     switch (status) {
       case "good":
-        return "bg-green-500";
+        return "var(--status-good)";
       case "attention":
-        return "bg-orange-500";
+        return "var(--status-attention)";
       case "critical":
-        return "bg-red-500";
+        return "var(--status-critical)";
     }
+  }
+
+  const statusBg = (color) => `color-mix(in oklch, ${color} 12%, transparent)`;
+  const statusBorder = (color) =>
+    `color-mix(in oklch, ${color} 32%, transparent)`;
+
+  function formatStage(stage) {
+    return stage.charAt(0).toUpperCase() + stage.slice(1);
   }
 
   function generateAdvice(plant) {
     const advice = [];
-    
+
     // Check of conditions bestaan
     if (!plant.conditions || !plant.conditions[0]) {
       return ["No condition data available."];
     }
-    
+
     // Check of specie data bestaat
     if (!plant.species) {
       return ["No species data available for optimal range comparison."];
@@ -179,17 +212,33 @@
     [selectedCategories, selectedStatus],
     ([$categories, $statuses]) => {
       if (!plants || plants.length === 0) return [];
-      
+
       return plants.filter(
         (plant) =>
-          $categories.includes(plant.species?.type || 'Tree') &&
-          $statuses.includes(getStatus(plant))
+          $categories.includes(plant.species?.type?.toLowerCase() || "tree") &&
+          $statuses.includes(getStatus(plant)),
       );
     },
   );
 
-  async function viewPlantDetails(plantId) {
-    await goto(`/plant/${plantId}`);
+  function getConditionColor(current, min, max, criticalThreshold) {
+    if (current >= min && current <= max) return getStatusColor("good");
+    const midpoint = (min + max) / 2;
+    return Math.abs(current - midpoint) > criticalThreshold
+      ? getStatusColor("critical")
+      : getStatusColor("attention");
+  }
+
+  function viewPlantDetails(plantId) {
+    goto(`/plant/${plantId}`);
+  }
+
+  $: if (selectedPlant) {
+    overallStatus = getStatus(selectedPlant);
+    overallColor = getStatusColor(overallStatus);
+  } else {
+    overallStatus = null;
+    overallColor = null;
   }
 </script>
 
@@ -214,27 +263,40 @@
 
     <div class="absolute inset-0">
       {#each $filteredPlants as plant (plant.id)}
-        {@const config = categoryConfig[plant.species?.type || 'Tree']}
-        {@const status = getStatus(plant)}
-        {@const statusColor = getStatusColor(status)}
+        {#if typeof plant.posX === "number" && typeof plant.posY === "number"}
+          {@const config =
+            categoryConfig[plant.species?.type?.toLowerCase() || "tree"]}
+          {@const status = getStatus(plant)}
+          {@const statusColor = getStatusColor(status)}
 
-        <button
-          on:click={() => (selectedPlant = plant)}
-          on:mouseenter={() => (hoveredPlantId = plant.id)}
-          on:mouseleave={() => (hoveredPlantId = null)}
-          class="absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full {statusColor} text-white shadow-lg transition-transform hover:scale-110 cursor-pointer"
-          style="left: {plant.posX}%; top: {plant.posY}%"
-          aria-label="View Plant {plant.id}"
-        >
-          <svelte:component this={config.icon} class="h-5 w-5" />
-        </button>
+          <div
+            style="position: absolute; left: {plant.posX}%; top: {plant.posY}%; transform: translate(-50%, -50%); text-align: center; width: 60px;"
+          >
+            <button
+              on:click={() => (selectedPlant = plant)}
+              on:mouseenter={() => (hoveredPlantId = plant.id)}
+              on:mouseleave={() => (hoveredPlantId = null)}
+              class="flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-110 cursor-pointer {selectedPlant?.id ===
+              plant.id
+                ? 'ring-4 ring-white scale-110'
+                : ''}"
+              style="background-color: {statusColor};"
+              aria-label="View {plant.name}"
+            >
+              <svelte:component this={config.icon} class="h-5 w-5" />
+            </button>
+            <div class="text-xs text-white mt-1 truncate" title={plant.name}>
+              {plant.name}
+            </div>
+          </div>
+        {/if}
 
         {#if hoveredPlantId === plant.id}
           <div
             class="absolute rounded-lg bg-gray-900 px-3 py-2 text-sm text-white shadow-lg whitespace-nowrap pointer-events-none z-50"
             style="left: {plant.posX}%; top: calc({plant.posY}% + 30px); transform: translateX(-50%);"
           >
-            Plant {plant.id} - {plant.plantStage}
+            {plant.species?.name || `Plant ${plant.id}`}
           </div>
         {/if}
       {/each}
@@ -242,23 +304,29 @@
 
     {#if selectedPlant}
       <div
-        class="map-overlay absolute right-6 top-6 bottom-6 w-96 max-w-[95%] rounded-lg border border-border bg-card/95 backdrop-blur-md shadow-lg z-50 overflow-y-auto pointer-events-auto"
+        class="map-overlay absolute right-6 top-6 bottom-6 w-96 max-w-[95%] rounded-lg border border-white/40 dark:border-white/10 bg-white/70 dark:bg-green-950/25 backdrop-blur-lg shadow-xl z-50 overflow-y-auto pointer-events-auto"
       >
         <div class="p-6">
           <div class="mb-4 flex items-start justify-between">
             <div class="flex-1">
               <div
-                class="mb-2 inline-block px-2 py-1 rounded text-xs font-semibold {categoryConfig[
-                  selectedPlant.species?.type || 'Tree'
-                ].color} text-primary-foreground"
+                class="mb-2 inline-block px-2 py-1 rounded text-xs font-semibold text-primary-foreground"
+                style={`background-color: ${categoryConfig[selectedPlant.species?.type?.toLowerCase() || "tree"]?.color || "var(--category-tree)"};`}
               >
-                {categoryConfig[selectedPlant.species?.type || 'Tree'].label}
+                {categoryConfig[
+                  selectedPlant.species?.type?.toLowerCase() || "tree"
+                ]?.label || "Unknown"}
               </div>
               <h2 class="text-2xl font-bold text-card-foreground">
-                {selectedPlant.species?.name || `Plant ${selectedPlant.id}`}
+                {selectedPlant.name
+                  ? selectedPlant.name
+                  : selectedPlant.species?.name
+                    ? selectedPlant.species.name
+                    : `Plant ${selectedPlant.id}`}
               </h2>
               <p class="text-sm italic text-muted-foreground">
-                {selectedPlant.species?.scientificName || `Species ${selectedPlant.speciesId}`}
+                {selectedPlant.species?.scientificName ||
+                  `Species ${selectedPlant.speciesId || ""}`}
               </p>
             </div>
             <button
@@ -273,31 +341,31 @@
               class="relative aspect-4/3 w-full overflow-hidden rounded-lg bg-muted"
             >
               <img
-                src={selectedPlant.image || "/placeholder.svg"}
-                alt="Plant {selectedPlant.id}"
+                src={selectedPlant.image ||
+                  selectedPlant.species?.image ||
+                  "/placeholder.svg"}
+                alt={selectedPlant.name
+                  ? selectedPlant.name
+                  : `Plant ${selectedPlant.id}`}
                 class="w-full h-full object-cover"
               />
             </div>
 
             <div
-              class="rounded-lg p-4 border {getStatus(selectedPlant) === 'good'
-                ? 'bg-green-500/10 border-green-500/30'
-                : getStatus(selectedPlant) === 'attention'
-                  ? 'bg-orange-500/10 border-orange-500/30'
-                  : 'bg-red-500/10 border-red-500/30'}"
+              class="rounded-lg p-4 border"
+              style={`background-color: ${statusBg(overallColor)}; border-color: ${statusBorder(overallColor)};`}
             >
               <div class="flex items-center justify-between">
                 <h3 class="text-sm font-semibold text-card-foreground">
                   Overall Status
                 </h3>
                 <div
-                  class="px-2 py-1 rounded text-xs font-semibold {getStatusColor(
-                    getStatus(selectedPlant)
-                  )} text-white"
+                  class="px-2 py-1 rounded text-xs font-semibold text-white"
+                  style={`background-color: ${overallColor};`}
                 >
-                  {getStatus(selectedPlant) === "good"
+                  {overallStatus === "good"
                     ? "Optimal"
-                    : getStatus(selectedPlant) === "attention"
+                    : overallStatus === "attention"
                       ? "Needs Attention"
                       : "Critical"}
                 </div>
@@ -309,7 +377,8 @@
                 Care Advice
               </h3>
               <div
-                class="space-y-2 rounded-lg bg-blue-500/10 border border-blue-500/30 p-4"
+                class="space-y-2 rounded-lg border p-4"
+                style="background-color: color-mix(in oklch, var(--primary) 12%, transparent); border-color: color-mix(in oklch, var(--primary) 32%, transparent);"
               >
                 {#each generateAdvice(selectedPlant) as advice, i (i)}
                   <p class="text-sm text-foreground">{advice}</p>
@@ -327,12 +396,14 @@
               <div class="mb-3 flex items-center gap-2">
                 <MessageCircle class="h-4 w-4" />
                 <h3 class="text-sm font-semibold text-card-foreground">
-                  Comments ({comments[selectedPlant.id]?.length || 0})
+                  Comments ({Array.isArray(comments[selectedPlant.id])
+                    ? comments[selectedPlant.id].length
+                    : 0})
                 </h3>
               </div>
 
               <div class="space-y-2 mb-3 max-h-32 overflow-y-auto">
-                {#each comments[selectedPlant.id] || [] as comment, i (i)}
+                {#each Array.isArray(comments[selectedPlant.id]) ? comments[selectedPlant.id] : [] as comment, i (i)}
                   <div class="rounded-lg bg-muted p-2">
                     <p class="text-sm text-muted-foreground">{comment}</p>
                   </div>
@@ -362,41 +433,5 @@
 </div>
 
 <style>
-  :global(.map-overlay::-webkit-scrollbar) {
-    width: 6px;
-    height: 6px;
-  }
-
-  :global(.map-overlay::-webkit-scrollbar-track) {
-    background: transparent;
-  }
-
-  :global(.map-overlay::-webkit-scrollbar-thumb) {
-    background: rgba(0, 0, 0, 0.06);
-    border-radius: 9999px;
-    border: 1px solid transparent;
-    background-clip: padding-box;
-    transition: background-color 120ms ease;
-  }
-
-  :global(.map-overlay:hover::-webkit-scrollbar-thumb) {
-    background: rgba(0, 0, 0, 0.12);
-  }
-
-  :global(.dark .map-overlay::-webkit-scrollbar-thumb) {
-    background: rgba(255, 255, 255, 0.06);
-  }
-
-  :global(.dark .map-overlay:hover::-webkit-scrollbar-thumb) {
-    background: rgba(255, 255, 255, 0.12);
-  }
-
-  :global(.map-overlay) {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0.06) transparent;
-  }
-
-  :global(.dark .map-overlay) {
-    scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
-  }
+  /* Component-specific styles can go here if needed */
 </style>
