@@ -71,6 +71,12 @@ export const translations = {
         save: 'Save',
         leaveEmptyToKeep: 'leave empty to keep current',
         search: 'Search',
+        changeAdminPassword: 'Change Admin Password',
+        adminKey: 'Admin Key',
+        enterAdminKey: 'Enter admin key',
+        invalidAdminKey: 'Invalid admin key',
+        invalidAdminKeyOrPassword: 'Invalid admin key or current password',
+        pleaseEnterAdminKey: 'Please enter admin key',
 
         // Home page
         foodGarden: 'Food Garden',
@@ -227,6 +233,12 @@ export const translations = {
         save: 'Opslaan',
         leaveEmptyToKeep: 'laat leeg om huidig te behouden',
         search: 'Zoeken',
+        changeAdminPassword: 'Beheerderwachtwoord wijzigen',
+        adminKey: 'Beheerders Sleutel',
+        enterAdminKey: 'Voer beheerders sleutel in',
+        invalidAdminKey: 'Ongeldige beheerders sleutel',
+        invalidAdminKeyOrPassword: 'Ongeldige beheerders sleutel of huidig wachtwoord',
+        pleaseEnterAdminKey: 'Voer beheerders sleutel in',
 
         // Home page
         foodGarden: 'Voedseltuin',

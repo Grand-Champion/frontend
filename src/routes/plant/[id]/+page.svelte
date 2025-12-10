@@ -1,6 +1,5 @@
 <script>
   import { page } from "$app/stores";
-  import { getLocalizedPlant } from "$lib/localized-plants";
   import { goto } from "$app/navigation";
   import { browser } from "$app/environment";
   import { language, t } from "$lib/stores/language";
@@ -19,13 +18,21 @@
     Send,
   } from "lucide-svelte";
 
+  export let data;
+
+  //Pak plant, species en conditions uit de API data
+  $: plant = data.plantData?.data;
+  $: species = plant?.species;
+  $: conditions = plant?.conditions;
+
+  // Gebruik backend species types (Tree, Shrub, Plant)
   $: categoryConfig = {
-    tree: {
+    Tree: {
       label: t("trees", $language),
       icon: Trees,
       color: "var(--category-tree)",
     },
-    shrub: {
+    Shrub: {
       label: t("shrubs", $language),
       icon: Sprout,
       color: "var(--category-shrub)",
@@ -42,21 +49,20 @@
     },
   };
 
-  let plantId = parseInt($page.params.id);
-  $: plant = getLocalizedPlant(plantId, $language);
-
   let comments = [];
   let commentText = "";
   let overallStatus = null;
   let overallColor = null;
 
-  function calculateStatus(current, optimal) {
+  function calculateStatus() {
+    if (!conditions || !species) return 'critical';
+    
     let issueCount = 0;
     let criticalCount = 0;
 
     const tempDiff = Math.max(
-      optimal.temperature.min - current.temperature,
-      current.temperature - optimal.temperature.max,
+      species.minTemperature - conditions.temperature,
+      conditions.temperature - species.maxTemperature,
       0,
     );
     if (tempDiff > 0) {
@@ -65,8 +71,8 @@
     }
 
     const humidityDiff = Math.max(
-      optimal.humidity.min - current.humidity,
-      current.humidity - optimal.humidity.max,
+      species.minHumidity - conditions.humidity,
+      conditions.humidity - species.maxHumidity,
       0,
     );
     if (humidityDiff > 0) {
@@ -75,8 +81,8 @@
     }
 
     const phDiff = Math.max(
-      optimal.soilPH.min - current.soilPH,
-      current.soilPH - optimal.soilPH.max,
+      species.minSoilPH - conditions.soilPH,
+      conditions.soilPH - species.maxSoilPH,
       0,
     );
     if (phDiff > 0) {
@@ -85,8 +91,8 @@
     }
 
     const moistureDiff = Math.max(
-      optimal.soilMoisture.min - current.soilMoisture,
-      current.soilMoisture - optimal.soilMoisture.max,
+      species.minSoilMoisture - conditions.soilMoisture,
+      conditions.soilMoisture - species.maxSoilMoisture,
       0,
     );
     if (moistureDiff > 0) {
@@ -95,8 +101,8 @@
     }
 
     const sunlightDiff = Math.max(
-      optimal.sunlightHours.min - current.sunlightHours,
-      current.sunlightHours - optimal.sunlightHours.max,
+      species.minSunlight - conditions.sunlight,
+      conditions.sunlight - species.maxSunlight,
       0,
     );
     if (sunlightDiff > 0) {
@@ -125,47 +131,49 @@
     `color-mix(in oklch, ${color} 32%, transparent)`;
 
   function formatStage(stage) {
+    if (!stage) return 'Unknown';
     const stageKey = `stage${stage.charAt(0).toUpperCase() + stage.slice(1)}`;
     return t(stageKey, $language);
   }
 
   function getMaintenanceLabel(level) {
+    if (!level) return t('maintenanceMedium', $language);
     const maintenanceKey = `maintenance${level.charAt(0).toUpperCase() + level.slice(1)}`;
     return t(maintenanceKey, $language);
   }
 
-  function generateAdvice(plant) {
+  function generateAdvice() {
+    if (!conditions || !species) return [t("adviceOptimal", $language)];
+    
     const advice = [];
-    const current = plant.currentConditions;
-    const optimal = plant.optimalConditions;
 
-    if (current.temperature < optimal.temperature.min) {
+    if (conditions.temperature < species.minTemperature) {
       advice.push(t("adviceTempTooCold", $language));
-    } else if (current.temperature > optimal.temperature.max) {
+    } else if (conditions.temperature > species.maxTemperature) {
       advice.push(t("adviceTempTooHot", $language));
     }
 
-    if (current.humidity < optimal.humidity.min) {
+    if (conditions.humidity < species.minHumidity) {
       advice.push(t("adviceHumidityTooLow", $language));
-    } else if (current.humidity > optimal.humidity.max) {
+    } else if (conditions.humidity > species.maxHumidity) {
       advice.push(t("adviceHumidityTooHigh", $language));
     }
 
-    if (current.soilPH < optimal.soilPH.min) {
+    if (conditions.soilPH < species.minSoilPH) {
       advice.push(t("adviceSoilTooAcidic", $language));
-    } else if (current.soilPH > optimal.soilPH.max) {
+    } else if (conditions.soilPH > species.maxSoilPH) {
       advice.push(t("adviceSoilTooAlkaline", $language));
     }
 
-    if (current.soilMoisture < optimal.soilMoisture.min) {
+    if (conditions.soilMoisture < species.minSoilMoisture) {
       advice.push(t("adviceSoilTooDry", $language));
-    } else if (current.soilMoisture > optimal.soilMoisture.max) {
+    } else if (conditions.soilMoisture > species.maxSoilMoisture) {
       advice.push(t("adviceSoilTooWet", $language));
     }
 
-    if (current.sunlightHours < optimal.sunlightHours.min) {
+    if (conditions.sunlight < species.minSunlight) {
       advice.push(t("adviceNotEnoughSun", $language));
-    } else if (current.sunlightHours > optimal.sunlightHours.max) {
+    } else if (conditions.sunlight > species.maxSunlight) {
       advice.push(t("adviceTooMuchSun", $language));
     }
 
@@ -229,11 +237,11 @@
           class="mb-3 inline-block px-3 py-1 rounded text-sm font-semibold text-white"
           style="background-color: {categoryConfig[plant.category].color}"
         >
-          {categoryConfig[plant.category].label}
+          {categoryConfig[species?.type || 'Tree'].label}
         </div>
-        <h1 class="text-4xl font-bold text-foreground mb-2">{plant.name}</h1>
+        <h1 class="text-4xl font-bold text-foreground mb-2">{species?.name || 'Unknown Plant'}</h1>
         <p class="text-xl italic text-muted-foreground">
-          {plant.scientificName}
+          {species?.scientificName || ''}
         </p>
       </div>
 
@@ -242,11 +250,11 @@
         <div class="space-y-6">
           <!-- Image -->
           <div
-            class="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-muted"
+            class="relative aspect-4/3 w-full overflow-hidden rounded-xl bg-muted"
           >
             <img
-              src={plant.image || "/placeholder.svg"}
-              alt={plant.name}
+              src={plant?.image || species?.image || "/placeholder.svg"}
+              alt={species?.name || 'Plant'}
               class="w-full h-full object-cover"
             />
           </div>
@@ -257,7 +265,7 @@
               {t("about", $language)}
             </h2>
             <p class="text-muted-foreground leading-relaxed">
-              {plant.description}
+              {species?.description || 'No description available'}
             </p>
           </div>
 
@@ -272,7 +280,7 @@
                   >{t("harvestSeason", $language)}</span
                 >
                 <span class="font-medium text-card-foreground"
-                  >{plant.harvestSeason}</span
+                  >{species?.harvestSeason || 'Unknown'}</span
                 >
               </div>
               <div class="flex justify-between py-2 border-b border-border">
@@ -280,7 +288,7 @@
                   >{t("sunRequirement", $language)}</span
                 >
                 <span class="font-medium text-card-foreground"
-                  >{plant.sunRequirement}</span
+                  >{species?.sunRequirement || 'Unknown'}</span
                 >
               </div>
               <div class="flex justify-between py-2 border-b border-border">
@@ -288,7 +296,7 @@
                   >{t("waterNeeds", $language)}</span
                 >
                 <span class="font-medium text-card-foreground"
-                  >{plant.waterNeeds}</span
+                  >{species?.waterNeeds || 'Unknown'}</span
                 >
               </div>
               <div class="flex justify-between py-2 border-b border-border">
@@ -296,7 +304,7 @@
                   >{t("matureHeight", $language)}</span
                 >
                 <span class="font-medium text-card-foreground"
-                  >{plant.height}</span
+                  >{plant?.height || 'N/A'}</span
                 >
               </div>
               <div class="flex justify-between py-2">
@@ -304,7 +312,7 @@
                   >{t("maintenanceLevel", $language)}</span
                 >
                 <span class="font-medium text-card-foreground capitalize"
-                  >{getMaintenanceLabel(plant.maintenance)}</span
+                  >{getMaintenanceLabel(species?.maintenance)}</span
                 >
               </div>
             </div>
@@ -339,7 +347,7 @@
                   {t("currentStage", $language)}
                 </p>
                 <p class="text-lg font-semibold capitalize text-foreground">
-                  {formatStage(plant.currentConditions.stage)}
+                  {formatStage(plant?.plantStage)}
                 </p>
               </div>
               <div class="bg-background/50 rounded-lg p-3 border border-border">
@@ -347,9 +355,7 @@
                   {t("harvestIn", $language)}
                 </p>
                 <p class="text-lg font-semibold text-foreground">
-                  {plant.currentConditions.harvestDays === 0
-                    ? t("ready", $language)
-                    : `${plant.currentConditions.harvestDays} ${t("days", $language)}`}
+                  {plant?.harvestPrediction || 'Unknown'}
                 </p>
               </div>
             </div>
@@ -377,7 +383,7 @@
                     5,
                   )}`}
                 >
-                  {plant.currentConditions.temperature}°C
+                  {conditions?.temperature || 0}°C
                 </span>
               </div>
 
@@ -397,7 +403,7 @@
                     15,
                   )}`}
                 >
-                  {plant.currentConditions.humidity}%
+                  {conditions?.humidity || 0}%
                 </span>
               </div>
 
@@ -417,7 +423,7 @@
                     0.5,
                   )}`}
                 >
-                  {plant.currentConditions.soilPH.toFixed(1)}
+                  {(conditions?.soilPH || 0).toFixed(1)}
                 </span>
               </div>
 
@@ -438,7 +444,7 @@
                     20,
                   )}`}
                 >
-                  {plant.currentConditions.soilMoisture}%
+                  {conditions?.soilMoisture || 0}%
                 </span>
               </div>
 
@@ -458,7 +464,7 @@
                     2,
                   )}`}
                 >
-                  {plant.currentConditions.sunlightHours}h/day
+                  {conditions?.sunlight || 0}h/day
                 </span>
               </div>
             </div>
@@ -473,7 +479,7 @@
               class="space-y-3 rounded-lg border p-4"
               style="background-color: color-mix(in oklch, var(--primary) 12%, transparent); border-color: color-mix(in oklch, var(--primary) 32%, transparent);"
             >
-              {#each generateAdvice(plant) as advice}
+              {#each generateAdvice() as advice}
                 <p class="text-sm text-foreground leading-relaxed">{advice}</p>
               {/each}
             </div>

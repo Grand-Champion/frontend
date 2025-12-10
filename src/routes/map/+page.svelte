@@ -3,10 +3,14 @@
     import { language, t } from "$lib/stores/language";
 
     $: pageTitle = `${t("mapView", $language)} - Food Forest`;
-</script>
 
 <svelte:head>
     <title>{pageTitle}</title>
 </svelte:head>
+    
+    export let data;
+    
+    console.log('API data:', data);
+</script>
 
-<FoodForestMap />
+<FoodForestMap forestData={data.forestData} />
