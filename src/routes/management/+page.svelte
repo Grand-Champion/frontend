@@ -927,8 +927,7 @@
         {#if showAdminPasswordChange}
             <div class="bg-card border border-border rounded-lg p-6 mt-6">
                 <h2 class="text-sm font-semibold text-foreground mb-4">
-                    {t("changeAdminPassword", $language) ||
-                        "Change Admin Password"}
+                    {t("changeAdminPassword", $language)}
                 </h2>
 
                 <form
@@ -940,7 +939,7 @@
                             for="admin-key"
                             class="block text-sm font-medium text-foreground mb-2"
                         >
-                            {t("adminKey", $language) || "Admin Key"}
+                            {t("adminKey", $language)}
                         </label>
                         <div class="relative">
                             <input
@@ -951,8 +950,7 @@
                                 bind:value={adminKey}
                                 required
                                 class="w-full px-4 py-2 pr-10 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                                placeholder={t("enterAdminKey", $language) ||
-                                    "Enter admin key"}
+                                placeholder={t("enterAdminKey", $language)}
                             />
                             <button
                                 type="button"
@@ -978,8 +976,7 @@
                             for="admin-current-password"
                             class="block text-sm font-medium text-foreground mb-2"
                         >
-                            {t("currentPassword", $language) ||
-                                "Current Password"}
+                            {t("currentPassword", $language)}
                         </label>
                         <div class="relative">
                             <input
@@ -993,7 +990,7 @@
                                 placeholder={t(
                                     "enterCurrentPassword",
                                     $language,
-                                ) || "Enter current password"}
+                                )}
                             />
                             <button
                                 type="button"
@@ -1019,7 +1016,7 @@
                             for="admin-new-password"
                             class="block text-sm font-medium text-foreground mb-2"
                         >
-                            {t("newPassword", $language) || "New Password"}
+                            {t("newPassword", $language)}
                         </label>
                         <div class="relative">
                             <input
@@ -1030,8 +1027,7 @@
                                 bind:value={adminNewPassword}
                                 required
                                 class="w-full px-4 py-2 pr-10 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                                placeholder={t("enterNewPassword", $language) ||
-                                    "Enter new password"}
+                                placeholder={t("enterNewPassword", $language)}
                             />
                             <button
                                 type="button"
@@ -1065,8 +1061,7 @@
                             type="submit"
                             class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
                         >
-                            {t("changePassword", $language) ||
-                                "Change Password"}
+                            {t("changePassword", $language)}
                         </button>
                         <button
                             type="button"
@@ -1104,7 +1099,7 @@
                     on:click|stopPropagation
                 >
                     <h2 class="text-lg font-semibold text-foreground mb-4">
-                        {t("adminKey", $language) || "Admin Key Required"}
+                        {t("changeAdminPassword", $language)}
                     </h2>
 
                     <form
@@ -1116,7 +1111,7 @@
                                 for="admin-save-key"
                                 class="block text-sm font-medium text-foreground mb-2"
                             >
-                                {t("adminKey", $language) || "Admin Key"}
+                                {t("adminKey", $language)}
                             </label>
                             <div class="relative">
                                 <input
@@ -1129,7 +1124,7 @@
                                     placeholder={t(
                                         "enterAdminKey",
                                         $language,
-                                    ) || "Enter admin key"}
+                                    )}
                                 />
                                 <button
                                     type="button"
