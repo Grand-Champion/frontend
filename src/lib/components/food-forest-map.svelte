@@ -270,7 +270,7 @@
 
     {#if selectedPlant}
       <div
-        class="map-overlay absolute right-6 top-6 bottom-6 w-96 max-w-[95%] rounded-lg border border-border bg-card backdrop-blur-md shadow-lg z-50 overflow-y-auto pointer-events-auto"
+        class="map-overlay absolute right-6 top-6 bottom-6 w-96 max-w-[95%] rounded-lg border border-white/40 dark:border-white/10 bg-white/70 dark:bg-gray-900/60 backdrop-blur-lg shadow-xl z-50 overflow-y-auto pointer-events-auto"
       >
         <div class="p-6">
           <div class="mb-4 flex items-start justify-between">
