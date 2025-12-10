@@ -79,8 +79,8 @@
     }
   }
 
-  async function viewSpecies(speciesId) {
-    await goto(`/plant/${speciesId}`);
+  function viewPlant(plantId) {
+    goto(`/plant/${plantId}`);
   }
 
   const filteredPlants = derived(
@@ -115,7 +115,7 @@
         {@const status = getStatus(plant)}
         {@const statusColor = getStatusColor(status)}
         <button
-          on:click={() => viewSpecies(plant.id)}
+          on:click={() => viewPlant(plant.id)}
           class="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-all hover:scale-[1.02] text-left w-full"
         >
           <div
