@@ -77,6 +77,7 @@ export const translations = {
         invalidAdminKey: 'Invalid admin key',
         invalidAdminKeyOrPassword: 'Invalid admin key or current password',
         pleaseEnterAdminKey: 'Please enter admin key',
+        emailFormatError: 'Email must be in format: example@domain.com',
 
         // Home page
         foodGarden: 'Food Garden',
@@ -239,6 +240,7 @@ export const translations = {
         invalidAdminKey: 'Ongeldige beheerders sleutel',
         invalidAdminKeyOrPassword: 'Ongeldige beheerders sleutel of huidig wachtwoord',
         pleaseEnterAdminKey: 'Voer beheerders sleutel in',
+        emailFormatError: 'E-mail moet in het formaat zijn: example@domain.com',
 
         // Home page
         foodGarden: 'Voedseltuin',

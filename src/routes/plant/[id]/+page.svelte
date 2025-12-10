@@ -55,8 +55,8 @@
   let overallColor = null;
 
   function calculateStatus() {
-    if (!conditions || !species) return 'critical';
-    
+    if (!conditions || !species) return "critical";
+
     let issueCount = 0;
     let criticalCount = 0;
 
@@ -131,20 +131,18 @@
     `color-mix(in oklch, ${color} 32%, transparent)`;
 
   function formatStage(stage) {
-    if (!stage) return 'Unknown';
-    const stageKey = `stage${stage.charAt(0).toUpperCase() + stage.slice(1)}`;
-    return t(stageKey, $language);
+    if (!stage) return "Unknown";
+    return stage;
   }
 
   function getMaintenanceLabel(level) {
-    if (!level) return t('maintenanceMedium', $language);
-    const maintenanceKey = `maintenance${level.charAt(0).toUpperCase() + level.slice(1)}`;
-    return t(maintenanceKey, $language);
+    if (!level) return "Medium";
+    return level;
   }
 
   function generateAdvice() {
     if (!conditions || !species) return [t("adviceOptimal", $language)];
-    
+
     const advice = [];
 
     if (conditions.temperature < species.minTemperature) {
@@ -213,6 +211,8 @@
     overallStatus = null;
     overallColor = null;
   }
+
+  $: pageTitle = `${plant?.name || "Plant"} - Food Forest`;
 </script>
 
 <svelte:head>
@@ -235,13 +235,17 @@
       <div class="mb-8">
         <div
           class="mb-3 inline-block px-3 py-1 rounded text-sm font-semibold text-white"
-          style="background-color: {categoryConfig[plant.category].color}"
+          style="background-color: {categoryConfig[
+            species?.type?.toLowerCase() || 'tree'
+          ]?.color || 'var(--category-tree)'}"
         >
-          {categoryConfig[species?.type || 'Tree'].label}
+          {categoryConfig[species?.type || "Tree"].label}
         </div>
-        <h1 class="text-4xl font-bold text-foreground mb-2">{species?.name || 'Unknown Plant'}</h1>
+        <h1 class="text-4xl font-bold text-foreground mb-2">
+          {species?.name || "Unknown Plant"}
+        </h1>
         <p class="text-xl italic text-muted-foreground">
-          {species?.scientificName || ''}
+          {species?.scientificName || ""}
         </p>
       </div>
 
@@ -254,7 +258,7 @@
           >
             <img
               src={plant?.image || species?.image || "/placeholder.svg"}
-              alt={species?.name || 'Plant'}
+              alt={species?.name || "Plant"}
               class="w-full h-full object-cover"
             />
           </div>
@@ -265,7 +269,7 @@
               {t("about", $language)}
             </h2>
             <p class="text-muted-foreground leading-relaxed">
-              {species?.description || 'No description available'}
+              {species?.description || "No description available"}
             </p>
           </div>
 
@@ -280,7 +284,7 @@
                   >{t("harvestSeason", $language)}</span
                 >
                 <span class="font-medium text-card-foreground"
-                  >{species?.harvestSeason || 'Unknown'}</span
+                  >{species?.harvestSeason || "Unknown"}</span
                 >
               </div>
               <div class="flex justify-between py-2 border-b border-border">
@@ -288,7 +292,7 @@
                   >{t("sunRequirement", $language)}</span
                 >
                 <span class="font-medium text-card-foreground"
-                  >{species?.sunRequirement || 'Unknown'}</span
+                  >{species?.sunRequirement || "Unknown"}</span
                 >
               </div>
               <div class="flex justify-between py-2 border-b border-border">
@@ -296,7 +300,7 @@
                   >{t("waterNeeds", $language)}</span
                 >
                 <span class="font-medium text-card-foreground"
-                  >{species?.waterNeeds || 'Unknown'}</span
+                  >{species?.waterNeeds || "Unknown"}</span
                 >
               </div>
               <div class="flex justify-between py-2 border-b border-border">
@@ -304,7 +308,7 @@
                   >{t("matureHeight", $language)}</span
                 >
                 <span class="font-medium text-card-foreground"
-                  >{plant?.height || 'N/A'}</span
+                  >{plant?.height || "N/A"}</span
                 >
               </div>
               <div class="flex justify-between py-2">
@@ -355,7 +359,7 @@
                   {t("harvestIn", $language)}
                 </p>
                 <p class="text-lg font-semibold text-foreground">
-                  {plant?.harvestPrediction || 'Unknown'}
+                  {plant?.harvestPrediction || "Unknown"}
                 </p>
               </div>
             </div>
@@ -377,13 +381,13 @@
                 <span
                   class="text-lg font-semibold"
                   style={`color: ${getConditionColor(
-                    plant.currentConditions.temperature,
-                    plant.optimalConditions.temperature.min,
-                    plant.optimalConditions.temperature.max,
+                    plant.conditions?.temperature ?? 0,
+                    plant.species?.minTemperature ?? 0,
+                    plant.species?.maxTemperature ?? 0,
                     5,
                   )}`}
                 >
-                  {conditions?.temperature || 0}°C
+                  {plant.conditions?.temperature ?? "—"}°C
                 </span>
               </div>
 
@@ -397,13 +401,13 @@
                 <span
                   class="text-lg font-semibold"
                   style={`color: ${getConditionColor(
-                    plant.currentConditions.humidity,
-                    plant.optimalConditions.humidity.min,
-                    plant.optimalConditions.humidity.max,
+                    plant.conditions?.humidity ?? 0,
+                    plant.species?.minHumidity ?? 0,
+                    plant.species?.maxHumidity ?? 0,
                     15,
                   )}`}
                 >
-                  {conditions?.humidity || 0}%
+                  {plant.conditions?.humidity ?? "—"}%
                 </span>
               </div>
 
@@ -417,13 +421,13 @@
                 <span
                   class="text-lg font-semibold"
                   style={`color: ${getConditionColor(
-                    plant.currentConditions.soilPH,
-                    plant.optimalConditions.soilPH.min,
-                    plant.optimalConditions.soilPH.max,
+                    plant.conditions?.soilPH ?? 0,
+                    plant.species?.minSoilPH ?? 0,
+                    plant.species?.maxSoilPH ?? 0,
                     0.5,
                   )}`}
                 >
-                  {(conditions?.soilPH || 0).toFixed(1)}
+                  {plant.conditions?.soilPH ?? "—"}
                 </span>
               </div>
 
@@ -438,13 +442,13 @@
                 <span
                   class="text-lg font-semibold"
                   style={`color: ${getConditionColor(
-                    plant.currentConditions.soilMoisture,
-                    plant.optimalConditions.soilMoisture.min,
-                    plant.optimalConditions.soilMoisture.max,
+                    plant.conditions?.soilMoisture ?? 0,
+                    plant.species?.minSoilMoisture ?? 0,
+                    plant.species?.maxSoilMoisture ?? 0,
                     20,
                   )}`}
                 >
-                  {conditions?.soilMoisture || 0}%
+                  {plant.conditions?.soilMoisture ?? "—"}%
                 </span>
               </div>
 
@@ -458,13 +462,13 @@
                 <span
                   class="text-lg font-semibold"
                   style={`color: ${getConditionColor(
-                    plant.currentConditions.sunlightHours,
-                    plant.optimalConditions.sunlightHours.min,
-                    plant.optimalConditions.sunlightHours.max,
+                    plant.conditions?.sunlight ?? 0,
+                    plant.species?.minSunlight ?? 0,
+                    plant.species?.maxSunlight ?? 0,
                     2,
                   )}`}
                 >
-                  {conditions?.sunlight || 0}h/day
+                  {plant.conditions?.sunlight ?? "—"}h/day
                 </span>
               </div>
             </div>

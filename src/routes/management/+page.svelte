@@ -71,7 +71,7 @@
 
     function openDeleteConfirm(userId: string) {
         const user = $auth.users.find((u) => u.id === userId);
-        if (user) {
+        if (user && user.role !== "admin") {
             userToDelete = userId;
             userToDeleteName = user.fullName;
             showDeleteConfirm = true;
@@ -130,6 +130,14 @@
         // Validate required fields
         if (!newUsername.trim() || !newFullName.trim() || !newEmail.trim()) {
             editError[userId] = t("pleaseEnterCredentials", $language);
+            return;
+        }
+
+        // Validate email format (must have TLD)
+        if (
+            !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(newEmail)
+        ) {
+            editError[userId] = t("emailFormatError", $language);
             return;
         }
 
@@ -216,6 +224,14 @@
 
         if (!newUsername || !newFullName || !newEmail || !newPassword) {
             createError = t("pleaseEnterCredentials", $language);
+            return;
+        }
+
+        // Validate email format (must have TLD)
+        if (
+            !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(newEmail)
+        ) {
+            createError = t("emailFormatError", $language);
             return;
         }
 
@@ -448,6 +464,7 @@
                                 type="email"
                                 bind:value={newEmail}
                                 required
+                                title="Email should be in format: example@domain.com"
                                 class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                 placeholder="example@domain.com"
                             />
@@ -724,8 +741,8 @@
                                                     >-</span
                                                 >
                                             {/if}
-                                            {#if ($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id) || ($auth.currentUser?.role === "manager" && user.role !== "gardener" && user.id !== $auth.currentUser?.id)}
-                                                <!-- Only show one '-' if both actions are unavailable -->
+                                            {#if ($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id) || ($auth.currentUser?.role === "manager" && user.role !== "gardener" && user.id !== $auth.currentUser?.id) || user.role === "admin"}
+                                                <!-- Only show one '-' if both actions are unavailable or if user is admin -->
                                             {:else}
                                                 <button
                                                     on:click={() =>
@@ -874,6 +891,7 @@
                                                             editEmail[user.id]
                                                         }
                                                         required
+                                                        title="Email should be in format: example@domain.com"
                                                         disabled={user.role ===
                                                             "admin" ||
                                                             ($auth.currentUser

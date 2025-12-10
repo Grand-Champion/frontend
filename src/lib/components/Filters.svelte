@@ -3,19 +3,19 @@
     import { Leaf, Trees, Flower2, Sprout, ChevronDown } from "lucide-svelte";
     import { language, t } from "$lib/stores/language";
 
-    // Gebruik backend types direct (Tree, Shrub, Plant)
+    // Gebruik backend types direct (lowercase: tree, shrub, herb, vegetable)
     $: categoryConfig = {
-        Tree: {
+        tree: {
             label: t("trees", $language),
             icon: Trees,
             color: "var(--category-tree)",
         },
-        Shrub: {
+        shrub: {
             label: t("shrubs", $language),
             icon: Sprout,
             color: "var(--category-shrub)",
         },
-        Plant: {
+        herb: {
             label: t("herbs", $language),
             icon: Leaf,
             color: "var(--category-herb)",
