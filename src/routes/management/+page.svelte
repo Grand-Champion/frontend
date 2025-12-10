@@ -53,6 +53,22 @@
     let deleteError = "";
     let showDeletePassword = false;
 
+    // Admin save modal
+    let showAdminSaveModal = false;
+    let pendingAdminSaveUserId = "";
+    let pendingAdminSavePassword = "";
+    let adminSaveKey = "";
+    let adminSaveError = "";
+    let adminSaveShowKey = false;
+
+    // Admin password change
+    let showAdminPasswordChange = false;
+    let adminKey = "";
+    let adminCurrentPassword = "";
+    let adminNewPassword = "";
+    let adminPasswordError = "";
+    let adminPasswordVisibility: Record<string, boolean> = {};
+
     function openDeleteConfirm(userId: string) {
         const user = $auth.users.find((u) => u.id === userId);
         if (user) {
@@ -648,55 +664,10 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm">
                                     <div class="flex items-center gap-2">
-                                        {#if !($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id)}
-                                            <button
-                                                on:click={() => {
-                                                    // Close all other edit forms
-                                                    Object.keys(
-                                                        editingUser,
-                                                    ).forEach((id) => {
-                                                        if (id !== user.id) {
-                                                            editingUser[id] =
-                                                                false;
-                                                            editError[id] = "";
-                                                            editPassword[id] =
-                                                                "";
-                                                            passwordVisibility[
-                                                                id
-                                                            ] = false;
-                                                        }
-                                                    });
-                                                    editingUser[user.id] =
-                                                        !editingUser[user.id];
-                                                    if (editingUser[user.id]) {
-                                                        editUsername[user.id] =
-                                                            user.username;
-                                                        editFullName[user.id] =
-                                                            user.fullName;
-                                                        editEmail[user.id] =
-                                                            user.email;
-                                                        editPassword[user.id] =
-                                                            user.password;
-                                                        editRole[user.id] =
-                                                            user.role;
-                                                        editError[user.id] = "";
-                                                    }
-                                                }}
-                                                class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
-                                                aria-label="Edit user"
-                                            >
-                                                <Pencil class="w-4 h-4" />
-                                            </button>
-                                        {:else}
-                                            <span
-                                                class="text-muted-foreground text-xs"
-                                                >-</span
-                                            >
-                                        {/if}
-                                        {#if user.role === "admin" || ($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id) || ($auth.currentUser?.role === "manager" && user.role !== "gardener" && user.id !== $auth.currentUser?.id)}
+                                        {#if ($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id) || ($auth.currentUser?.role === "manager" && user.role !== "gardener" && user.id !== $auth.currentUser?.id)}
                                             <!-- Only show one '-' if both actions are unavailable -->
                                         {:else}
-                                            {#if user.role !== "admin" && !($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id)}
+                                            {#if !($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id)}
                                                 <button
                                                     on:click={() => {
                                                         // Close all other edit forms
@@ -753,7 +724,7 @@
                                                     >-</span
                                                 >
                                             {/if}
-                                            {#if user.role === "admin" || ($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id) || ($auth.currentUser?.role === "manager" && user.role !== "gardener" && user.id !== $auth.currentUser?.id)}
+                                            {#if ($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id) || ($auth.currentUser?.role === "manager" && user.role !== "gardener" && user.id !== $auth.currentUser?.id)}
                                                 <!-- Only show one '-' if both actions are unavailable -->
                                             {:else}
                                                 <button

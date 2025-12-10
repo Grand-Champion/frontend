@@ -4,13 +4,13 @@
 
     $: pageTitle = `${t("mapView", $language)} - Food Forest`;
 
+    export let data;
+
+    console.log("API data:", data);
+</script>
+
 <svelte:head>
     <title>{pageTitle}</title>
 </svelte:head>
-    
-    export let data;
-    
-    console.log('API data:', data);
-</script>
 
 <FoodForestMap forestData={data.forestData} />

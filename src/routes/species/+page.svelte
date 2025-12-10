@@ -4,11 +4,11 @@
 
   $: pageTitle = `${t("speciesList", $language)} - Food Forest`;
 
+  export let data;
+</script>
+
 <svelte:head>
   <title>{pageTitle}</title>
 </svelte:head>
-  
-  export let data;
-</script>
 
 <SpeciesList forestData={data.forestData} />

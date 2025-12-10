@@ -6,7 +6,7 @@
 
     $: pageTitle = `${t("login", $language)} - Food Forest`;
 
-    let username = "";
+    let identifier = "";
     let password = "";
     let errorMessage = "";
     let showPassword = false;
