@@ -53,10 +53,10 @@ function createAuthStore() {
 
     return {
         subscribe,
-        login: (username: string, password: string) => {
+        login: (identifier: string, password: string) => {
             update((state: AuthState) => {
                 const user = state.users.find(
-                    (u: User) => u.username === username && u.password === password
+                    (u: User) => (u.username === identifier || (u.email !== '-' && u.email === identifier)) && u.password === password
                 );
                 if (user) {
                     const newState = { ...state, currentUser: user };
