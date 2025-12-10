@@ -140,10 +140,10 @@
       <div class="flex gap-1">
         <a
           href="/"
-          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all {$page
+          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
             .url.pathname === '/'
-            ? 'bg-primary text-primary-foreground hover:bg-primary/80 hover:scale-[1.02]'
-            : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted hover:scale-[1.02]'}"
+            ? 'bg-primary text-primary-foreground hover:bg-primary/80'
+            : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
           <Home class="w-4 h-4" />
           <span class="font-medium">{t("home", $language)}</span>
@@ -151,10 +151,10 @@
 
         <a
           href="/map"
-          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all {$page
+          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
             .url.pathname === '/map'
-            ? 'bg-primary text-primary-foreground hover:bg-primary/80 hover:scale-[1.02]'
-            : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted hover:scale-[1.02]'}"
+            ? 'bg-primary text-primary-foreground hover:bg-primary/80'
+            : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
           <Map class="w-4 h-4" />
           <span class="font-medium">{t("mapView", $language)}</span>
@@ -162,10 +162,10 @@
 
         <a
           href="/species"
-          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all {$page
+          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
             .url.pathname === '/species'
-            ? 'bg-primary text-primary-foreground hover:bg-primary/80 hover:scale-[1.02]'
-            : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted hover:scale-[1.02]'}"
+            ? 'bg-primary text-primary-foreground hover:bg-primary/80'
+            : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
           <Grid3X3 class="w-4 h-4" />
           <span class="font-medium">{t("speciesList", $language)}</span>
@@ -177,7 +177,7 @@
       <!-- Language Toggle -->
       <button
         on:click={toggleLanguage}
-        class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-muted hover:scale-[1.02] cursor-pointer"
+        class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
         aria-label="Toggle language"
       >
         <Languages class="w-4 h-4" />
@@ -189,7 +189,7 @@
       <!-- Theme Toggle -->
       <button
         on:click={toggleTheme}
-        class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-muted hover:scale-[1.02] cursor-pointer"
+        class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
         aria-label="Toggle theme"
       >
         {#if $theme === "light"}
@@ -207,7 +207,7 @@
         >
           <button
             on:click={toggleUserMenu}
-            class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-muted hover:scale-[1.02] cursor-pointer"
+            class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
             aria-label="User menu"
           >
             <span class="text-sm font-bold text-foreground"
@@ -275,7 +275,7 @@
         <!-- Login Button -->
         <button
           on:click={handleLogin}
-          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-[1.02] cursor-pointer"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
           aria-label="Login"
         >
           <LogIn class="w-4 h-4" />

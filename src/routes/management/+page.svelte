@@ -43,6 +43,62 @@
     let editError: Record<string, string> = {};
     let passwordVisibility: Record<string, boolean> = {};
 
+    // Delete confirmation modal
+    let showDeleteConfirm = false;
+    let userToDelete: string | null = null;
+    let userToDeleteName = "";
+    let deleteConfirmPassword = "";
+    let deleteError = "";
+    let showDeletePassword = false;
+
+    function openDeleteConfirm(userId: string) {
+        const user = $auth.users.find((u) => u.id === userId);
+        if (user) {
+            userToDelete = userId;
+            userToDeleteName = user.fullName;
+            showDeleteConfirm = true;
+            deleteConfirmPassword = "";
+            deleteError = "";
+            showDeletePassword = false;
+        }
+    }
+
+    function closeDeleteConfirm() {
+        showDeleteConfirm = false;
+        userToDelete = null;
+        userToDeleteName = "";
+        deleteConfirmPassword = "";
+        deleteError = "";
+        showDeletePassword = false;
+    }
+
+    function confirmDelete() {
+        deleteError = "";
+
+        if (!deleteConfirmPassword) {
+            deleteError =
+                $language === "en"
+                    ? "Please enter your password"
+                    : "Voer je wachtwoord in";
+            return;
+        }
+
+        // Verify current user's password
+        if ($auth.currentUser) {
+            const user = $auth.users.find(
+                (u) => u.username === $auth.currentUser?.username,
+            );
+            if (user && user.password === deleteConfirmPassword) {
+                if (userToDelete) {
+                    auth.deleteUser(userToDelete);
+                    closeDeleteConfirm();
+                }
+            } else {
+                deleteError = t("invalidCredentials", $language);
+            }
+        }
+    }
+
     function handleEditUser(userId: string) {
         const user = $auth.users.find((u) => u.id === userId);
         if (!user) return;
@@ -115,9 +171,7 @@
     }
 
     function handleDeleteUser(userId: string) {
-        if (confirm(t("confirmDelete", $language))) {
-            auth.deleteUser(userId);
-        }
+        openDeleteConfirm(userId);
     }
 
     function toggleSort(
@@ -216,10 +270,7 @@
             <input
                 type="text"
                 bind:value={searchFilter}
-                placeholder="{t('search', $language)} {t(
-                    'username',
-                    $language,
-                )}/{t('fullName', $language)}..."
+                placeholder="{t('search', $language)}..."
                 class="px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary w-80"
             />
         </div>
@@ -756,3 +807,87 @@
         </div>
     </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+{#if showDeleteConfirm}
+    <div
+        class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm"
+        on:click={closeDeleteConfirm}
+        on:keydown={(e) => e.key === "Escape" && closeDeleteConfirm()}
+        role="button"
+        tabindex="0"
+    >
+        <div
+            class="bg-card border border-border rounded-lg shadow-xl p-6 max-w-md w-full mx-4"
+            role="dialog"
+            aria-modal="true"
+            tabindex="-1"
+            on:click|stopPropagation
+            on:keydown|stopPropagation
+        >
+            <h2 class="text-xl font-bold text-foreground mb-4">
+                {t("confirmDelete", $language)}
+            </h2>
+            <p class="text-muted-foreground mb-4">
+                {$language === "en"
+                    ? `Are you sure you want to delete ${userToDeleteName}? This action cannot be undone.`
+                    : `Weet je zeker dat je ${userToDeleteName} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.`}
+            </p>
+
+            <div class="mb-4">
+                <label
+                    for="delete-password"
+                    class="block text-sm font-medium text-foreground mb-2"
+                >
+                    {t("enterPassword", $language)}
+                </label>
+                <div class="relative">
+                    <input
+                        id="delete-password"
+                        type={showDeletePassword ? "text" : "password"}
+                        bind:value={deleteConfirmPassword}
+                        class="w-full px-4 py-2 pr-10 bg-background border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                        placeholder={t("password", $language)}
+                    />
+                    <button
+                        type="button"
+                        on:click={() =>
+                            (showDeletePassword = !showDeletePassword)}
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                        aria-label="Toggle password visibility"
+                    >
+                        {#if showDeletePassword}
+                            <EyeOff class="w-4 h-4" />
+                        {:else}
+                            <Eye class="w-4 h-4" />
+                        {/if}
+                    </button>
+                </div>
+                {#if deleteError}
+                    <p
+                        class="text-sm mt-2"
+                        style="color: var(--status-critical);"
+                    >
+                        {deleteError}
+                    </p>
+                {/if}
+            </div>
+
+            <div class="flex gap-3">
+                <button
+                    on:click={closeDeleteConfirm}
+                    class="flex-1 bg-muted text-foreground px-4 py-2 rounded-lg font-medium hover:bg-muted/80 transition-colors cursor-pointer"
+                >
+                    {t("cancel", $language)}
+                </button>
+                <button
+                    on:click={confirmDelete}
+                    class="flex-1 px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer"
+                    style="background-color: var(--status-critical); color: white;"
+                >
+                    {$language === "en" ? "Delete" : "Verwijderen"}
+                </button>
+            </div>
+        </div>
+    </div>
+{/if}
