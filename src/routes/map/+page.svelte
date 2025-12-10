@@ -6,4 +6,4 @@
     console.log('API data:', data);
 </script>
 
-<FoodForestMap />
+<FoodForestMap forestData={data.forestData} />
