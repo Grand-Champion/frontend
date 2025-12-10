@@ -1,10 +1,12 @@
+import { PUBLIC_API_URL } from '$env/static/public';
+
 export async function load({ fetch, params }) {
   try {
     const plantId = params.id;
     
     // Fetch plant data vanaf backend
     const plantResponse = await fetch(
-      `http://localhost:3011/forests/api/v1/plants/${plantId}`
+      `${PUBLIC_API_URL}/forests/api/v1/plants/${plantId}`
     );
     
     if (!plantResponse.ok) {

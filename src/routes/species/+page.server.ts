@@ -1,8 +1,10 @@
+import { PUBLIC_API_URL } from '$env/static/public';
+
 export async function load({ fetch }) {
   try {
     // Fetch forest data met plants
     const forestResponse = await fetch(
-      "http://localhost:3011/forests/api/v1/forests/1"
+      `${PUBLIC_API_URL}/forests/api/v1/forests/1`
     );
     
     if (!forestResponse.ok) {
@@ -16,7 +18,7 @@ export async function load({ fetch }) {
 
     // Fetch species data to join with plants
     const speciesResponse = await fetch(
-      "http://localhost:3011/forests/api/v1/species"
+      `${PUBLIC_API_URL}/forests/api/v1/species`
     );
     
     if (!speciesResponse.ok) {
