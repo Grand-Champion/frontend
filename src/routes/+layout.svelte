@@ -21,6 +21,21 @@
   });
 </script>
 
+<svelte:head>
+  <script>
+    // Prevent flash of wrong theme by applying theme class immediately
+    (function () {
+      const theme = localStorage.getItem("theme");
+      if (
+        theme === "dark" ||
+        (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)
+      ) {
+        document.documentElement.classList.add("dark");
+      }
+    })();
+  </script>
+</svelte:head>
+
 <div class="h-screen w-full flex flex-col">
   <Navigation />
   <main

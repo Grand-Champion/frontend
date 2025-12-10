@@ -4,6 +4,8 @@
     import { t, language } from "$lib/stores/language";
     import { Eye, EyeOff } from "lucide-svelte";
 
+    $: pageTitle = `${t("login", $language)} - Food Forest`;
+
     let identifier = "";
     let password = "";
     let errorMessage = "";
@@ -29,6 +31,10 @@
         }, 100);
     }
 </script>
+
+<svelte:head>
+    <title>{pageTitle}</title>
+</svelte:head>
 
 <div class="min-h-screen flex items-center justify-center bg-background px-4">
     <div class="w-full max-w-md">
@@ -99,7 +105,8 @@
 
                 {#if errorMessage}
                     <div
-                        class="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg"
+                        class="px-4 py-3 rounded-lg"
+                        style={`background-color: color-mix(in oklch, var(--status-critical) 12%, transparent); border: 1px solid color-mix(in oklch, var(--status-critical) 32%, transparent); color: var(--status-critical);`}
                     >
                         {errorMessage}
                     </div>
