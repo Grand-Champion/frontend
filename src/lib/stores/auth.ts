@@ -3,13 +3,13 @@ import { browser } from '$app/environment';
 
 export type UserRole = 'admin' | 'manager' | 'gardener';
 
-// Admin key for changing admin password
 export const ADMIN_KEY = 'A9f!3Lq2$W7n#K8sR1p&Z4m?Tb6Jx9Gv5Hc0YdQeMu';
 
 export interface User {
     id: string;
     username: string;
     fullName: string;
+    email: string;
     password: string;
     role: UserRole;
     createdAt: string;
@@ -25,6 +25,7 @@ const defaultAdmin: User = {
     id: 'admin-1',
     username: 'admin',
     fullName: 'Administrator',
+    email: '-',
     password: 'admin',
     role: 'admin',
     createdAt: new Date().toISOString()
@@ -76,12 +77,13 @@ function createAuthStore() {
                 return newState;
             });
         },
-        createUser: (username: string, fullName: string, password: string, role: UserRole, createdBy: string) => {
+        createUser: (username: string, fullName: string, email: string, password: string, role: UserRole, createdBy: string) => {
             update((state: AuthState) => {
                 const newUser: User = {
                     id: `user-${Date.now()}`,
                     username,
                     fullName,
+                    email,
                     password,
                     role,
                     createdAt: new Date().toISOString(),

@@ -24,6 +24,7 @@
     let showCreateForm = false;
     let newUsername = "";
     let newFullName = "";
+    let newEmail = "";
     let newPassword = "";
     let newRole: UserRole = "gardener";
     let createError = "";
@@ -36,6 +37,7 @@
     let editingUser: Record<string, boolean> = {};
     let editUsername: Record<string, string> = {};
     let editFullName: Record<string, string> = {};
+    let editEmail: Record<string, string> = {};
     let editPassword: Record<string, string> = {};
     let editRole: Record<string, UserRole> = {};
     let editError: Record<string, string> = {};
@@ -63,11 +65,12 @@
 
         const newUsername = editUsername[userId] || user.username;
         const newFullName = editFullName[userId] || user.fullName;
+        const newEmail = editEmail[userId] || user.email;
         const newPassword = editPassword[userId];
         const newRole = editRole[userId] || user.role;
 
         // Validate required fields
-        if (!newUsername.trim() || !newFullName.trim()) {
+        if (!newUsername.trim() || !newFullName.trim() || !newEmail.trim()) {
             editError[userId] = t("pleaseEnterCredentials", $language);
             return;
         }
@@ -75,6 +78,7 @@
         const updates: any = {
             username: newUsername,
             fullName: newFullName,
+            email: newEmail,
             role: newRole,
         };
 
@@ -152,7 +156,7 @@
     function handleCreateUser() {
         createError = "";
 
-        if (!newUsername || !newFullName || !newPassword) {
+        if (!newUsername || !newFullName || !newEmail || !newPassword) {
             createError = t("pleaseEnterCredentials", $language);
             return;
         }
@@ -176,12 +180,14 @@
             auth.createUser(
                 newUsername,
                 newFullName,
+                newEmail,
                 newPassword,
                 newRole,
                 $auth.currentUser.username,
             );
             newUsername = "";
             newFullName = "";
+            newEmail = "";
             newPassword = "";
             newRole = "gardener";
             showCreateForm = false;
@@ -379,6 +385,23 @@
 
                         <div>
                             <label
+                                for="new-email"
+                                class="block text-sm font-medium text-foreground mb-2"
+                            >
+                                Email
+                            </label>
+                            <input
+                                id="new-email"
+                                type="email"
+                                bind:value={newEmail}
+                                required
+                                class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                placeholder="example@domain.com"
+                            />
+                        </div>
+
+                        <div>
+                            <label
                                 for="new-password"
                                 class="block text-sm font-medium text-foreground mb-2"
                             >
@@ -467,6 +490,7 @@
                                 createError = "";
                                 newUsername = "";
                                 newFullName = "";
+                                newEmail = "";
                                 newPassword = "";
                                 passwordVisibility["new"] = false;
                             }}
@@ -516,6 +540,11 @@
                                 </div>
                             </th>
                             <th
+                                class="px-6 py-3 text-left text-sm font-semibold text-foreground"
+                            >
+                                Email
+                            </th>
+                            <th
                                 class="px-6 py-3 text-left text-sm font-semibold text-foreground cursor-pointer hover:bg-muted/80 transition-colors"
                                 on:click={() => toggleSort("role")}
                             >
@@ -561,6 +590,11 @@
                                 <td class="px-6 py-4 text-sm text-foreground">
                                     {user.fullName}
                                 </td>
+                                <td
+                                    class="px-6 py-4 text-sm text-muted-foreground"
+                                >
+                                    {user.email}
+                                </td>
                                 <td class="px-6 py-4 text-sm">
                                     <span
                                         class="px-2 py-1 rounded-full text-xs font-medium {getRoleBadgeClass(
@@ -577,82 +611,62 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm">
                                     <div class="flex items-center gap-2">
-                                        {#if user.id === $auth.currentUser?.id && $auth.currentUser?.role === "manager"}
+                                        {#if !($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id)}
+                                            <button
+                                                on:click={() => {
+                                                    // Close all other edit forms
+                                                    Object.keys(
+                                                        editingUser,
+                                                    ).forEach((id) => {
+                                                        if (id !== user.id) {
+                                                            editingUser[id] =
+                                                                false;
+                                                            editError[id] = "";
+                                                            editPassword[id] =
+                                                                "";
+                                                            passwordVisibility[
+                                                                id
+                                                            ] = false;
+                                                        }
+                                                    });
+                                                    editingUser[user.id] =
+                                                        !editingUser[user.id];
+                                                    if (editingUser[user.id]) {
+                                                        editUsername[user.id] =
+                                                            user.username;
+                                                        editFullName[user.id] =
+                                                            user.fullName;
+                                                        editEmail[user.id] =
+                                                            user.email;
+                                                        editPassword[user.id] =
+                                                            user.password;
+                                                        editRole[user.id] =
+                                                            user.role;
+                                                        editError[user.id] = "";
+                                                    }
+                                                }}
+                                                class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                                                aria-label="Edit user"
+                                            >
+                                                <Pencil class="w-4 h-4" />
+                                            </button>
+                                        {:else}
                                             <span
                                                 class="text-muted-foreground text-xs"
                                                 >-</span
                                             >
+                                        {/if}
+                                        {#if user.role === "admin" || ($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id) || ($auth.currentUser?.role === "manager" && user.role !== "gardener" && user.id !== $auth.currentUser?.id)}
+                                            <!-- Only show one '-' if both actions are unavailable -->
                                         {:else}
-                                            {#if !($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id)}
-                                                <button
-                                                    on:click={() => {
-                                                        // Close all other edit forms
-                                                        Object.keys(
-                                                            editingUser,
-                                                        ).forEach((id) => {
-                                                            if (
-                                                                id !== user.id
-                                                            ) {
-                                                                editingUser[
-                                                                    id
-                                                                ] = false;
-                                                                editError[id] =
-                                                                    "";
-                                                                editPassword[
-                                                                    id
-                                                                ] = "";
-                                                                passwordVisibility[
-                                                                    id
-                                                                ] = false;
-                                                            }
-                                                        });
-                                                        editingUser[user.id] =
-                                                            !editingUser[
-                                                                user.id
-                                                            ];
-                                                        if (
-                                                            editingUser[user.id]
-                                                        ) {
-                                                            editUsername[
-                                                                user.id
-                                                            ] = user.username;
-                                                            editFullName[
-                                                                user.id
-                                                            ] = user.fullName;
-                                                            editPassword[
-                                                                user.id
-                                                            ] = user.password;
-                                                            editRole[user.id] =
-                                                                user.role;
-                                                            editError[user.id] =
-                                                                "";
-                                                        }
-                                                    }}
-                                                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
-                                                    aria-label="Edit user"
-                                                >
-                                                    <Pencil class="w-4 h-4" />
-                                                </button>
-                                            {:else}
-                                                <span
-                                                    class="text-muted-foreground text-xs"
-                                                    >-</span
-                                                >
-                                            {/if}
-                                            {#if user.role === "admin" || ($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id) || ($auth.currentUser?.role === "manager" && user.role !== "gardener" && user.id !== $auth.currentUser?.id)}
-                                                <!-- Only show one '-' if both actions are unavailable -->
-                                            {:else}
-                                                <button
-                                                    on:click={() =>
-                                                        handleDeleteUser(
-                                                            user.id,
-                                                        )}
-                                                    class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
-                                                    aria-label="Delete user"
-                                                >
-                                                    <Trash2 class="w-4 h-4" />
-                                                </button>
-                                            {/if}
+                                            <button
+                                                on:click={() =>
+                                                    handleDeleteUser(user.id)}
+                                                class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
+                                                aria-label="Delete user"
+                                            >
+                                                <Trash2 class="w-4 h-4" />
+                                            </button>
                                         {/if}
                                     </div>
                                 </td>
@@ -660,7 +674,7 @@
                             {#if editingUser[user.id]}
                                 <tr>
                                     <td
-                                        colspan="5"
+                                        colspan="6"
                                         class="px-6 py-4 bg-muted/30"
                                     >
                                         <form
@@ -704,9 +718,27 @@
                                                         }
                                                         required
                                                         disabled={user.role ===
-                                                            "admin"}
+                                                            "admin" ||
+                                                            ($auth.currentUser
+                                                                ?.role ===
+                                                                "manager" &&
+                                                                user.role ===
+                                                                    "manager" &&
+                                                                user.id !==
+                                                                    $auth
+                                                                        .currentUser
+                                                                        ?.id)}
                                                         class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary {user.role ===
-                                                        'admin'
+                                                            'admin' ||
+                                                        ($auth.currentUser
+                                                            ?.role ===
+                                                            'manager' &&
+                                                            user.role ===
+                                                                'manager' &&
+                                                            user.id !==
+                                                                $auth
+                                                                    .currentUser
+                                                                    ?.id)
                                                             ? 'opacity-60 cursor-not-allowed'
                                                             : ''}"
                                                     />
@@ -731,9 +763,67 @@
                                                         }
                                                         required
                                                         disabled={user.role ===
-                                                            "admin"}
+                                                            "admin" ||
+                                                            ($auth.currentUser
+                                                                ?.role ===
+                                                                "manager" &&
+                                                                user.role ===
+                                                                    "manager" &&
+                                                                user.id !==
+                                                                    $auth
+                                                                        .currentUser
+                                                                        ?.id)}
                                                         class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary {user.role ===
-                                                        'admin'
+                                                            'admin' ||
+                                                        ($auth.currentUser
+                                                            ?.role ===
+                                                            'manager' &&
+                                                            user.role ===
+                                                                'manager' &&
+                                                            user.id !==
+                                                                $auth
+                                                                    .currentUser
+                                                                    ?.id)
+                                                            ? 'opacity-60 cursor-not-allowed'
+                                                            : ''}"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label
+                                                        for="edit-email-{user.id}"
+                                                        class="block text-sm font-medium text-foreground mb-2"
+                                                    >
+                                                        Email
+                                                    </label>
+                                                    <input
+                                                        id="edit-email-{user.id}"
+                                                        type="email"
+                                                        bind:value={
+                                                            editEmail[user.id]
+                                                        }
+                                                        required
+                                                        disabled={user.role ===
+                                                            "admin" ||
+                                                            ($auth.currentUser
+                                                                ?.role ===
+                                                                "manager" &&
+                                                                user.role ===
+                                                                    "manager" &&
+                                                                user.id !==
+                                                                    $auth
+                                                                        .currentUser
+                                                                        ?.id)}
+                                                        class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary {user.role ===
+                                                            'admin' ||
+                                                        ($auth.currentUser
+                                                            ?.role ===
+                                                            'manager' &&
+                                                            user.role ===
+                                                                'manager' &&
+                                                            user.id !==
+                                                                $auth
+                                                                    .currentUser
+                                                                    ?.id)
                                                             ? 'opacity-60 cursor-not-allowed'
                                                             : ''}"
                                                     />
@@ -1121,10 +1211,7 @@
                                         : "password"}
                                     bind:value={adminSaveKey}
                                     class="w-full px-3 py-2 pr-10 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                                    placeholder={t(
-                                        "enterAdminKey",
-                                        $language,
-                                    )}
+                                    placeholder={t("enterAdminKey", $language)}
                                 />
                                 <button
                                     type="button"
