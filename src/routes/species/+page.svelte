@@ -7,8 +7,6 @@
 <svelte:head>
   <title>{pageTitle}</title>
 </svelte:head>
-
-  import SpeciesList from '$lib/components/species-list.svelte'
   
   export let data;
 </script>
