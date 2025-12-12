@@ -25,58 +25,6 @@
   // Get plants array directly from API
   $: plants = forestData?.data?.plants || [];
 
-  // calculate status based on species optimal ranges
-  function getStatus(plant) {
-    if (!plant.conditions || !plant.conditions[0]) return 'critical';
-    if (!plant.species) return 'critical';
-    
-    const c = plant.conditions[0];
-    const s = plant.species;
-    let issuesCount = 0;
-
-    // Check conditions met species ranges
-    if (s.minTemperature !== null && s.maxTemperature !== null) {
-      if (
-        c.temperature < s.minTemperature ||
-        c.temperature > s.maxTemperature
-      ) {
-        issuesCount++;
-      }
-    }
-
-    if (s.minHumidity !== null && s.maxHumidity !== null) {
-      if (c.humidity < s.minHumidity || c.humidity > s.maxHumidity) {
-        issuesCount++;
-      }
-    }
-
-    if (s.minSoilMoisture !== null && s.maxSoilMoisture !== null) {
-      if (
-        c.soilMoisture < s.minSoilMoisture ||
-        c.soilMoisture > s.maxSoilMoisture
-      ) {
-        issuesCount++;
-      }
-    }
-
-    if (s.minSoilPH !== null && s.maxSoilPH !== null) {
-      if (c.soilPH < s.minSoilPH || c.soilPH > s.maxSoilPH) {
-        issuesCount++;
-      }
-    }
-
-    if (s.minSunlight !== null && s.maxSunlight !== null) {
-      if (c.sunlight < s.minSunlight || c.sunlight > s.maxSunlight) {
-        issuesCount++;
-      }
-    }
-
-    // Returned de status, kijkt naar hoeveelheid issues
-    if (issuesCount === 0) return "good";
-    if (issuesCount <= 2) return "attention";
-    return "critical";
-  }
-
   // Gebruik backend species types (Tree, Shrub, Plant)
   $: categoryConfig = {
     tree: {
@@ -140,7 +88,7 @@
     const advice = [];
 
     // Check of conditions bestaan
-    if (!plant.conditions || !plant.conditions[0]) {
+    if (!plant.conditions) {
       return ["No condition data available."];
     }
 
@@ -149,7 +97,7 @@
       return ["No species data available for optimal range comparison."];
     }
     
-    const c = plant.conditions[0];
+    const c = plant.conditions;
     const s = plant.species;
 
     // Check of temperature binnen range zit
@@ -216,7 +164,7 @@
       return plants.filter(
         (plant) =>
           $categories.includes(plant.species?.type?.toLowerCase() || "tree") &&
-          $statuses.includes(getStatus(plant)),
+          $statuses.includes(plant.conditions?.status || 'critical'),
       );
     },
   );
@@ -234,7 +182,7 @@
   }
 
   $: if (selectedPlant) {
-    overallStatus = getStatus(selectedPlant);
+    overallStatus = selectedPlant.conditions?.status || 'critical';
     overallColor = getStatusColor(overallStatus);
   } else {
     overallStatus = null;
@@ -266,7 +214,7 @@
         {#if typeof plant.posX === "number" && typeof plant.posY === "number"}
           {@const config =
             categoryConfig[plant.species?.type?.toLowerCase() || "tree"]}
-          {@const status = getStatus(plant)}
+          {@const status = plant.conditions?.status || 'critical'}
           {@const statusColor = getStatusColor(status)}
 
           <div

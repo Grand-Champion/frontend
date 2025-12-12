@@ -23,7 +23,7 @@
   //Pak plant, species en conditions uit de API data
   $: plant = data.plantData?.data;
   $: species = plant?.species;
-  $: conditions = plant?.conditions[0];
+  $: conditions = plant?.conditions;
 
   // Gebruik backend species types (Tree, Shrub, Plant)
   $: categoryConfig = {
@@ -53,67 +53,6 @@
   let commentText = "";
   let overallStatus = null;
   let overallColor = null;
-
-  function calculateStatus() {
-    if (!conditions || !species) return "critical";
-
-    let issueCount = 0;
-    let criticalCount = 0;
-
-    const tempDiff = Math.max(
-      species.minTemperature - conditions.temperature,
-      conditions.temperature - species.maxTemperature,
-      0,
-    );
-    if (tempDiff > 0) {
-      if (tempDiff > 5) criticalCount++;
-      else issueCount++;
-    }
-
-    const humidityDiff = Math.max(
-      species.minHumidity - conditions.humidity,
-      conditions.humidity - species.maxHumidity,
-      0,
-    );
-    if (humidityDiff > 0) {
-      if (humidityDiff > 15) criticalCount++;
-      else issueCount++;
-    }
-
-    const phDiff = Math.max(
-      species.minSoilPH - conditions.soilPH,
-      conditions.soilPH - species.maxSoilPH,
-      0,
-    );
-    if (phDiff > 0) {
-      if (phDiff > 0.5) criticalCount++;
-      else issueCount++;
-    }
-
-    const moistureDiff = Math.max(
-      species.minSoilMoisture - conditions.soilMoisture,
-      conditions.soilMoisture - species.maxSoilMoisture,
-      0,
-    );
-    if (moistureDiff > 0) {
-      if (moistureDiff > 20) criticalCount++;
-      else issueCount++;
-    }
-
-    const sunlightDiff = Math.max(
-      species.minSunlight - conditions.sunlight,
-      conditions.sunlight - species.maxSunlight,
-      0,
-    );
-    if (sunlightDiff > 0) {
-      if (sunlightDiff > 2) criticalCount++;
-      else issueCount++;
-    }
-
-    if (criticalCount >= 2) return "critical";
-    if (criticalCount >= 1 || issueCount >= 2) return "attention";
-    return "good";
-  }
 
   function getStatusColor(status) {
     switch (status) {
@@ -202,10 +141,7 @@
   }
 
   $: if (plant) {
-    overallStatus = calculateStatus(
-      plant.currentConditions,
-      plant.optimalConditions,
-    );
+    overallStatus = plant.conditions?.status || 'critical';
     overallColor = getStatusColor(overallStatus);
   } else {
     overallStatus = null;

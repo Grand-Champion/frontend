@@ -45,51 +45,6 @@
   let speciesOpen = true;
   let statusOpen = true;
 
-  // Calculate plant status based on conditions vs species optimal ranges
-  function getStatus(plant) {
-    if (!plant.conditions || !plant.conditions[0] || !plant.species) return 'critical';
-    
-    let issuesCount = 0;
-    const conditions = plant.conditions[0];
-    const species = plant.species;
-
-    // Check elke condition tegen min/max ranges van species
-    if (
-      conditions.temperature < species.minTemperature ||
-      conditions.temperature > species.maxTemperature
-    ) {
-      issuesCount++;
-    }
-    if (
-      conditions.humidity < species.minHumidity ||
-      conditions.humidity > species.maxHumidity
-    ) {
-      issuesCount++;
-    }
-    if (
-      conditions.soilMoisture < species.minSoilMoisture ||
-      conditions.soilMoisture > species.maxSoilMoisture
-    ) {
-      issuesCount++;
-    }
-    if (
-      conditions.soilPH < species.minSoilPH ||
-      conditions.soilPH > species.maxSoilPH
-    ) {
-      issuesCount++;
-    }
-    if (
-      conditions.sunlight < species.minSunlight ||
-      conditions.sunlight > species.maxSunlight
-    ) {
-      issuesCount++;
-    }
-
-    if (issuesCount === 0) return "good";
-    if (issuesCount <= 2) return "attention";
-    return "critical";
-  }
-
   function getStatusColor(status) {
     switch (status) {
       case "good":
@@ -137,7 +92,7 @@
       return plants.filter(
         (plant) =>
           $categories.includes(plant.species?.type?.toLowerCase() || "tree") &&
-          $statuses.includes(getStatus(plant)),
+          $statuses.includes(plant.conditions?.status || 'critical'),
       );
     },
   );
@@ -159,7 +114,7 @@
       {#each $filteredPlants as plant (plant.id)}
         {@const category = plant.species?.type?.toLowerCase() || "tree"}
         {@const config = categoryConfig[category]}
-        {@const status = getStatus(plant)}
+        {@const status = plant.conditions?.status || 'critical'}
         {@const statusColor = getStatusColor(status)}
         <button
           on:click={() => viewPlant(plant.id)}
