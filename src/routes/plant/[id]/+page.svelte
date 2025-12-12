@@ -381,13 +381,13 @@
                 <span
                   class="text-lg font-semibold"
                   style={`color: ${getConditionColor(
-                    plant.conditions?.temperature ?? 0,
+                    plant.conditions[0]?.temperature ?? 0,
                     plant.species?.minTemperature ?? 0,
                     plant.species?.maxTemperature ?? 0,
                     5,
                   )}`}
                 >
-                  {plant.conditions?.temperature ?? "—"}°C
+                  {plant.conditions[0]?.temperature ?? "—"}°C
                 </span>
               </div>
 
@@ -401,13 +401,13 @@
                 <span
                   class="text-lg font-semibold"
                   style={`color: ${getConditionColor(
-                    plant.conditions?.humidity ?? 0,
+                    plant.conditions[0]?.humidity ?? 0,
                     plant.species?.minHumidity ?? 0,
                     plant.species?.maxHumidity ?? 0,
                     15,
                   )}`}
                 >
-                  {plant.conditions?.humidity ?? "—"}%
+                  {plant.conditions[0]?.humidity ?? "—"}%
                 </span>
               </div>
 
@@ -421,13 +421,13 @@
                 <span
                   class="text-lg font-semibold"
                   style={`color: ${getConditionColor(
-                    plant.conditions?.soilPH ?? 0,
+                    plant.conditions[0]?.soilPH ?? 0,
                     plant.species?.minSoilPH ?? 0,
                     plant.species?.maxSoilPH ?? 0,
                     0.5,
                   )}`}
                 >
-                  {plant.conditions?.soilPH ?? "—"}
+                  {plant.conditions[0]?.soilPH ?? "—"}
                 </span>
               </div>
 
@@ -442,13 +442,13 @@
                 <span
                   class="text-lg font-semibold"
                   style={`color: ${getConditionColor(
-                    plant.conditions?.soilMoisture ?? 0,
+                    plant.conditions[0]?.soilMoisture ?? 0,
                     plant.species?.minSoilMoisture ?? 0,
                     plant.species?.maxSoilMoisture ?? 0,
                     20,
                   )}`}
                 >
-                  {plant.conditions?.soilMoisture ?? "—"}%
+                  {plant.conditions[0]?.soilMoisture ?? "—"}%
                 </span>
               </div>
 
@@ -462,13 +462,13 @@
                 <span
                   class="text-lg font-semibold"
                   style={`color: ${getConditionColor(
-                    plant.conditions?.sunlight ?? 0,
+                    plant.conditions[0]?.sunlight ?? 0,
                     plant.species?.minSunlight ?? 0,
                     plant.species?.maxSunlight ?? 0,
                     2,
                   )}`}
                 >
-                  {plant.conditions?.sunlight ?? "—"}h/day
+                  {plant.conditions[0]?.sunlight ?? "—"}h/day
                 </span>
               </div>
             </div>
