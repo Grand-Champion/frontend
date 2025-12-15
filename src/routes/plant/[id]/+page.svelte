@@ -17,6 +17,7 @@
     MessageCircle,
     Send,
   } from "lucide-svelte";
+  import { PUBLIC_API_URL } from '$env/static/public';
 
   export let data;
 
@@ -213,6 +214,22 @@
   }
 
   $: pageTitle = `${plant?.name || "Plant"} - Food Forest`;
+
+  async function deletePlant(){
+    if(confirm("Weet je het zeker?")){
+      const request = await fetch(PUBLIC_API_URL + "/forests/api/v1/plants/" + plant.id, {
+        body: data,
+        method: "DELETE"
+      });
+      if(!request.ok){
+        alert(request.statusText);
+      } else {
+        goBack();
+      }
+    }
+
+  }
+
 </script>
 
 <svelte:head>
@@ -230,13 +247,22 @@
         <ArrowLeft class="h-4 w-4" />
         {t("back", $language)}
       </button>
-      
-      <button
-        onclick={goto("/plant/"+ plant.id+ "/edit")}
-        class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer float-right"
-      >
-        {t("edit", $language)}
-      </button>
+      <div class="float-right flex gap-6">
+        <button
+          onclick={goto("/plant/"+ plant.id+ "/edit")}
+          class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
+        >
+          {t("edit", $language)}
+        </button>
+
+        
+        <button
+          onclick={deletePlant}
+          class="bg-[red] text-primary-foreground px-4 py-2 rounded-lg hover:bg-[#f00a] transition-colors cursor-pointer"
+        >
+          {t("delete", $language)}
+        </button>
+      </div>
 
       <!-- Header -->
       <div class="mb-8">

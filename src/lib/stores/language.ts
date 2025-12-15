@@ -186,6 +186,7 @@ export const translations = {
         harvestPrediction: "Harvest prediction",
         location: "Location",
         createPlant: "Create plant",
+        delete: "Delete",
     },
     nl: {
         // Navigation
@@ -358,6 +359,7 @@ export const translations = {
         harvestPrediction: "Oogstvoorspelling",
         location: "Locatie",
         createPlant: "Voeg plant toe",
+        delete: "Verwijder",
     }
 };
 

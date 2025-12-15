@@ -2,6 +2,7 @@
   import { language, t } from "$lib/stores/language";
   import PlantLocationSelector from "$lib/components/PlantLocationSelector.svelte";
   import SelectOption from "$lib/components/SelectOption.svelte";
+    import ImageInput from "./ImageInput.svelte";
   const { plant, forest, species } = $props();
 </script>
 
@@ -48,6 +49,7 @@
 <div class="space-y-3">
     <PlantLocationSelector {forest} {plant} />
 </div>
+<ImageInput image={plant?.image} />
 <div class="space-y-3">
     <input type="submit" value="{t("save", $language)}" class="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors cursor-pointer">
 </div>

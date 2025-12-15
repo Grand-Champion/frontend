@@ -469,6 +469,13 @@
           </div>
         </div>
       {/if}
+      
+      <button
+        onclick={goto("/plant/create")}
+        class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer map-overlay absolute left-6 top-6 "
+      >
+        {t("createPlant", $language)}
+      </button>
   </div>
 </div>
 
