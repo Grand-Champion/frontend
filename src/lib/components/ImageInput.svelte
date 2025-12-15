@@ -7,7 +7,6 @@
     const file = e.target.files[0];
     if(!file) return;
     fileReader.onload = ()=>{
-      console.log(fileReader.result);
       imgElt.src = fileReader.result;
       imgUrl.value = fileReader.result;
     }
@@ -15,5 +14,5 @@
   }
 </script>
 <input type="file" accept="image/*" onchange={change} />
-<img src={image} bind:this={imgElt} />
+<img src={image} bind:this={imgElt} class="max-w-[60vh] max-h-[60vh]" />
 <input type="hidden" bind:this={imgUrl} name="image"/>

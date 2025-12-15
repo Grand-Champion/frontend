@@ -17,17 +17,6 @@
     const offsetX = (screenX - mapZoomState.originX) / (mapZoomState.zoom*mapZoomState.zoomMultiplier) + mapZoomState.originX;
     const offsetY = (screenY - mapZoomState.originY) / (mapZoomState.zoom*mapZoomState.zoomMultiplier) + mapZoomState.originY;
     mapZoomState.zoom = limit( mapZoomState.zoom*(1-e.deltaY/1000), 0.3, 5);
-    /** 
-     * als (pointerX - originX) * newScale + originX = screenX
-     * dan originX vrijmaken
-     * (pointerX - originX) * newScale = screenX - originX
-     * pointerX - originX = screenX/newScale -  originX/newScale
-     * -originX + originX/newScale = screenX/newScale - pointerX
-     * originX(-1 + 1/newScale) = screenX/newScale - pointerX
-     * originX = (screenX/newScale - pointerX)/(-1 + 1/newScale)
-     * originX = (screenX - pointerX*newScale)/(-1*newScale + 1)
-     * originX = (pointerX*newScale - screenX)/(newScale - 1)
-     */
 
     if(mapZoomState.zoom*mapZoomState.zoomMultiplier !== 1 ){
       mapZoomState.originX = (offsetX * mapZoomState.zoom*mapZoomState.zoomMultiplier - screenX)/(mapZoomState.zoom*mapZoomState.zoomMultiplier - 1);
