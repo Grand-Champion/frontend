@@ -177,6 +177,16 @@ export const translations = {
         unauthorized: 'Unauthorized',
         serverError: 'Server Error',
         clientError: 'Client Error',
+
+        //Plant-edit page
+        edit: "Edit",
+        generalInformation: "General information",
+        health: "Health",
+        height: "Height",
+        harvestPrediction: "Harvest prediction",
+        location: "Location",
+        createPlant: "Create plant",
+        delete: "Delete",
     },
     nl: {
         // Navigation
@@ -340,6 +350,16 @@ export const translations = {
         unauthorized: 'Ongeautoriseerd',
         serverError: 'Serverfout',
         clientError: 'Clientfout',
+
+        //Plant-edit page
+        edit: "Bewerk",
+        generalInformation: "Algemene informatie",
+        health: "Gezondheid",
+        height: "Hoogte",
+        harvestPrediction: "Oogstvoorspelling",
+        location: "Locatie",
+        createPlant: "Voeg plant toe",
+        delete: "Verwijder",
     }
 };
 
