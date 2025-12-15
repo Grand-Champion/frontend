@@ -53,6 +53,12 @@
   let commentText = "";
   let overallStatus = null;
   let overallColor = null;
+  let lastSensorUpdate = new Date("2025-12-15T11:23:35Z");
+
+  function formatLastUpdate(date) {
+  if (!date) return "Unknown";
+  return date.toLocaleString();
+}
 
   function calculateStatus() {
     if (!conditions || !species) return "critical";
@@ -370,6 +376,13 @@
             <h2 class="text-xl font-semibold text-card-foreground mb-4">
               {t("currentConditions", $language)}
             </h2>
+            <!-- Last sensor update -->
+            <p class="mb-4 text-sm text-muted-foreground">
+              {t("lastUpdated", $language) || "Last updated"}:
+                <span class="font-medium text-foreground">
+                  {formatLastUpdate(lastSensorUpdate)}
+                </span>
+            </p>
             <div class="space-y-3">
               <div
                 class="flex items-center justify-between rounded-lg bg-muted p-4"
