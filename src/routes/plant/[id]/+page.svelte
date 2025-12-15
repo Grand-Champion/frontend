@@ -230,6 +230,13 @@
         <ArrowLeft class="h-4 w-4" />
         {t("back", $language)}
       </button>
+      
+      <button
+        onclick={goto("/plant/"+ plant.id+ "/edit")}
+        class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer float-right"
+      >
+        {t("edit", $language)}
+      </button>
 
       <!-- Header -->
       <div class="mb-8">

@@ -1,6 +1,6 @@
 <script>
-  export let forest;
-  export let plant; 
+  export let forest, plant;
+  plant = plant ?? {posX:0, posY: 0};
 
   let mapHeight;
   let mapWidth;
@@ -50,8 +50,9 @@
 <div class="overflow-hidden max-w-[60vh] max-h-[60vh] aspect-square relative" bind:clientHeight={mapViewHeight} bind:clientWidth={mapViewWidth} onwheel={mapZoom} bind:this={mapView} >
   <div class="relative flex-1 bg-muted" style:width="{mapWidth}px" style:height="{mapHeight}px" style:transform="scale({mapZoomState.zoom*mapZoomState.zoomMultiplier})" style:transform-origin="{mapZoomState.originX}px {mapZoomState.originY}px">
     <div class="absolute inset-0" >
+      <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
       <img
-        src="{forest.image}"
+        src="{forest?.image}"
         alt="Food forest aerial view"
         bind:naturalHeight={mapHeight}
         bind:naturalWidth={mapWidth}
@@ -65,5 +66,5 @@
     </div>
   </div>
 </div>
-<input type="number" name="posX" id="posX" value={plant.posX} disabled>
-<input type="number" name="posY" id="posY" value={plant.posY} disabled>
+<input type="number" name="posX" id="posX" value={plant.posX} readonly>
+<input type="number" name="posY" id="posY" value={plant.posY} readonly>
