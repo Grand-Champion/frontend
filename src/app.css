@@ -3,75 +3,119 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Light Mode: Primary colors and semantic tokens */
 :root {
+  /* Neutral/Layout */
   --background: oklch(0.98 0.03 140);
   --foreground: oklch(0.20 0.04 145);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.20 0.04 145);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.20 0.04 145);
-  --primary: oklch(0.50 0.20 150);
-  --primary-foreground: oklch(0.98 0.01 120);
-  --secondary: oklch(0.62 0.18 90);
-  --secondary-foreground: oklch(0.98 0.01 120);
   --muted: oklch(0.96 0.02 140);
   --muted-foreground: oklch(0.45 0.05 145);
-  --accent: oklch(0.68 0.22 80);
-  --accent-foreground: oklch(0.98 0.01 120);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.90 0.02 140);
   --input: oklch(0.90 0.02 140);
+
+  /* Interactive */
+  --primary: oklch(0.50 0.20 150);
+  --primary-foreground: oklch(0.98 0.01 120);
   --ring: oklch(0.50 0.20 150);
-  --chart-1: oklch(0.50 0.20 150);
-  --chart-2: oklch(0.62 0.18 90);
-  --chart-3: oklch(0.68 0.22 80);
-  --chart-4: oklch(0.42 0.18 170);
-  --chart-5: oklch(0.72 0.20 95);
+
+  /* Action Icons (black in light mode, white in dark mode) */
+  --action-icon: oklch(0 0 0);
+
+  /* Semantic Colors for Plant Categories */
+  --red: oklch(0.577 0.245 27.325);
+  --green: oklch(0.60 0.20 150);
+  --orange: oklch(0.68 0.20 50);
+  --yellow: oklch(0.72 0.22 80);
+  --yellow-green: oklch(0.76 0.20 95);
+
+  /* Semantic Colors for Status Indicators */
+  --status-good: var(--green);
+  --status-attention: var(--orange);
+  --status-critical: var(--red);
+
+  /* Semantic Colors for User Roles */
+  --role-admin: oklch(0.577 0.245 27.325);
+  --role-manager: oklch(0.50 0.20 260);
+  --role-gardener: var(--green);
+
+  /* Plant Category Mappings */
+  --category-tree: var(--green);
+  --category-shrub: var(--orange);
+  --category-herb: var(--yellow);
+  --category-vegetable: var(--yellow-green);
+
+  /* Legacy: Accent color used on home page */
+  --secondary: var(--yellow);
+  --secondary-foreground: oklch(0.98 0.01 120);
+  --accent: var(--yellow);
+  --accent-foreground: oklch(0.98 0.01 120);
+  --destructive: var(--status-critical);
+  --destructive-foreground: oklch(0.985 0 0);
+
+  /* Border radius */
   --radius: 0.5rem;
-  --sidebar: oklch(0.98 0.03 140);
-  --sidebar-foreground: oklch(0.20 0.04 145);
-  --sidebar-primary: oklch(0.50 0.20 150);
-  --sidebar-primary-foreground: oklch(0.98 0.01 120);
-  --sidebar-accent: oklch(0.96 0.02 140);
-  --sidebar-accent-foreground: oklch(0.20 0.04 145);
-  --sidebar-border: oklch(0.90 0.02 140);
-  --sidebar-ring: oklch(0.50 0.20 150);
+
+  /* Shadows */
+  --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
+/* Dark Mode: Adjusted values for contrast and visibility */
 .dark {
+  /* Neutral/Layout */
   --background: oklch(0.16 0.04 145);
+
+  /* Shadows */
+  --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 6px 12px rgba(0, 0, 0, 0.4);
   --foreground: oklch(0.95 0.02 140);
   --card: oklch(0.22 0.04 145);
   --card-foreground: oklch(0.95 0.02 140);
-  --popover: oklch(0.22 0.04 145);
-  --popover-foreground: oklch(0.95 0.02 140);
-  --primary: oklch(0.60 0.20 150);
-  --primary-foreground: oklch(0.10 0.02 145);
-  --secondary: oklch(0.68 0.18 90);
-  --secondary-foreground: oklch(0.10 0.02 145);
   --muted: oklch(0.28 0.04 145);
   --muted-foreground: oklch(0.70 0.04 140);
-  --accent: oklch(0.72 0.22 80);
-  --accent-foreground: oklch(0.10 0.02 145);
-  --destructive: oklch(0.50 0.20 27);
-  --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.32 0.04 145);
   --input: oklch(0.32 0.04 145);
+
+  /* Interactive */
+  --primary: oklch(0.60 0.20 150);
+  --primary-foreground: oklch(0.10 0.02 145);
   --ring: oklch(0.60 0.20 150);
-  --chart-1: oklch(0.60 0.20 150);
-  --chart-2: oklch(0.68 0.18 90);
-  --chart-3: oklch(0.72 0.22 80);
-  --chart-4: oklch(0.52 0.18 170);
-  --chart-5: oklch(0.76 0.20 95);
-  --sidebar: oklch(0.22 0.04 145);
-  --sidebar-foreground: oklch(0.95 0.02 140);
-  --sidebar-primary: oklch(0.60 0.20 150);
-  --sidebar-primary-foreground: oklch(0.10 0.02 145);
-  --sidebar-accent: oklch(0.28 0.04 145);
-  --sidebar-accent-foreground: oklch(0.95 0.02 140);
-  --sidebar-border: oklch(0.32 0.04 145);
-  --sidebar-ring: oklch(0.60 0.20 150);
+
+  /* Action Icons (white for visibility on colored backgrounds) */
+  --action-icon: oklch(1 0 0);
+
+  /* Semantic Colors for Plant Categories */
+  --red: oklch(0.577 0.245 27.325);
+  --green: oklch(0.60 0.20 150);
+  --orange: oklch(0.68 0.20 50);
+  --yellow: oklch(0.72 0.22 80);
+  --yellow-green: oklch(0.76 0.20 95);
+
+  /* Semantic Colors for Status Indicators */
+  --status-good: var(--green);
+  --status-attention: var(--orange);
+  --status-critical: var(--red);
+
+  /* Semantic Colors for User Roles */
+  --role-admin: oklch(0.50 0.20 27);
+  --role-manager: oklch(0.55 0.20 260);
+  --role-gardener: var(--green);
+
+  /* Plant Category Mappings */
+  --category-tree: var(--green);
+  --category-shrub: var(--orange);
+  --category-herb: var(--yellow);
+  --category-vegetable: var(--yellow-green);
+
+  /* Legacy: Accent color used on home page */
+  --secondary: var(--yellow);
+  --secondary-foreground: oklch(0.10 0.02 145);
+  --accent: var(--yellow);
+  --accent-foreground: oklch(0.10 0.02 145);
+  --destructive: var(--status-critical);
+  --destructive-foreground: oklch(0.985 0 0);
 }
 
 @theme inline {
@@ -79,8 +123,6 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
@@ -94,23 +136,10 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
 }
 
 @layer base {
@@ -120,5 +149,55 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Text selection */
+  ::selection {
+    background: rgba(34, 197, 94, 0.363);
+    color: inherit;
+  }
+
+  .dark ::selection {
+    background: rgba(255, 255, 255, 0.3);
+    color: inherit;
+  }
+
+  /* Global scrollbar styles */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+    transition: background-color 120ms ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  * {
+    scrollbar-width: auto;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+
+  .dark * {
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
   }
 }

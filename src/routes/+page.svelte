@@ -1,7 +1,13 @@
 <script>
   import { Trees, ListTree, Sprout, Leaf } from "lucide-svelte";
   import { language, t } from "$lib/stores/language";
+
+  $: pageTitle = `${t("home", $language)} - Food Forest`;
 </script>
+
+<svelte:head>
+  <title>{pageTitle}</title>
+</svelte:head>
 
 <div class="min-h-screen bg-background overflow-y-auto">
   <div class="container mx-auto px-4 py-16">
@@ -97,7 +103,7 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div class="text-center">
             <div class="flex justify-center mb-2">
-              <Trees class="w-8 h-8 text-primary" />
+              <Trees class="w-8 h-8" style="color: var(--category-tree)" />
             </div>
             <div class="text-3xl font-bold text-foreground">3</div>
             <div class="text-sm text-muted-foreground">
@@ -106,7 +112,7 @@
           </div>
           <div class="text-center">
             <div class="flex justify-center mb-2">
-              <Sprout class="w-8 h-8 text-primary" />
+              <Sprout class="w-8 h-8" style="color: var(--category-shrub)" />
             </div>
             <div class="text-3xl font-bold text-foreground">3</div>
             <div class="text-sm text-muted-foreground">
@@ -115,7 +121,7 @@
           </div>
           <div class="text-center">
             <div class="flex justify-center mb-2">
-              <Leaf class="w-8 h-8 text-secondary" />
+              <Leaf class="w-8 h-8" style="color: var(--category-herb)" />
             </div>
             <div class="text-3xl font-bold text-foreground">3</div>
             <div class="text-sm text-muted-foreground">
@@ -125,7 +131,8 @@
           <div class="text-center">
             <div class="flex justify-center mb-2">
               <svg
-                class="w-8 h-8 text-accent"
+                class="w-8 h-8"
+                style="color: var(--category-vegetable)"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

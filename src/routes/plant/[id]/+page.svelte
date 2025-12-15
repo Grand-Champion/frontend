@@ -1,6 +1,5 @@
 <script>
   import { page } from "$app/stores";
-  import { getLocalizedPlant } from "$lib/localized-plants";
   import { goto } from "$app/navigation";
   import { browser } from "$app/environment";
   import { language, t } from "$lib/stores/language";
@@ -18,39 +17,58 @@
     MessageCircle,
     Send,
   } from "lucide-svelte";
+  import { PUBLIC_API_URL } from '$env/static/public';
 
+  export let data;
+
+  //Pak plant, species en conditions uit de API data
+  $: plant = data.plantData?.data;
+  $: species = plant?.species;
+  $: conditions = plant?.conditions[0];
+
+  // Gebruik backend species types (Tree, Shrub, Plant)
   $: categoryConfig = {
-    tree: {
+    Tree: {
       label: t("trees", $language),
       icon: Trees,
-      color: "bg-emerald-600",
+      color: "var(--category-tree)",
     },
-    shrub: {
+    Shrub: {
       label: t("shrubs", $language),
       icon: Sprout,
-      color: "bg-teal-600",
+      color: "var(--category-shrub)",
     },
-    herb: { label: t("herbs", $language), icon: Leaf, color: "bg-lime-600" },
+    herb: {
+      label: t("herbs", $language),
+      icon: Leaf,
+      color: "var(--category-herb)",
+    },
     vegetable: {
       label: t("vegetables", $language),
       icon: Flower2,
-      color: "bg-amber-600",
+      color: "var(--category-vegetable)",
     },
   };
 
-  let plantId = parseInt($page.params.id);
-  $: plant = getLocalizedPlant(plantId, $language);
-
   let comments = [];
   let commentText = "";
+  let overallStatus = null;
+  let overallColor = null;
 
-  function calculateStatus(current, optimal) {
+  function formatLastUpdate(date) {
+  if (!date) return "Unknown";
+  return date.toLocaleString();
+}
+
+  function calculateStatus() {
+    if (!conditions || !species) return "critical";
+
     let issueCount = 0;
     let criticalCount = 0;
 
     const tempDiff = Math.max(
-      optimal.temperature.min - current.temperature,
-      current.temperature - optimal.temperature.max,
+      species.minTemperature - conditions.temperature,
+      conditions.temperature - species.maxTemperature,
       0,
     );
     if (tempDiff > 0) {
@@ -59,8 +77,8 @@
     }
 
     const humidityDiff = Math.max(
-      optimal.humidity.min - current.humidity,
-      current.humidity - optimal.humidity.max,
+      species.minHumidity - conditions.humidity,
+      conditions.humidity - species.maxHumidity,
       0,
     );
     if (humidityDiff > 0) {
@@ -69,8 +87,8 @@
     }
 
     const phDiff = Math.max(
-      optimal.soilPH.min - current.soilPH,
-      current.soilPH - optimal.soilPH.max,
+      species.minSoilPH - conditions.soilPH,
+      conditions.soilPH - species.maxSoilPH,
       0,
     );
     if (phDiff > 0) {
@@ -79,8 +97,8 @@
     }
 
     const moistureDiff = Math.max(
-      optimal.soilMoisture.min - current.soilMoisture,
-      current.soilMoisture - optimal.soilMoisture.max,
+      species.minSoilMoisture - conditions.soilMoisture,
+      conditions.soilMoisture - species.maxSoilMoisture,
       0,
     );
     if (moistureDiff > 0) {
@@ -89,8 +107,8 @@
     }
 
     const sunlightDiff = Math.max(
-      optimal.sunlightHours.min - current.sunlightHours,
-      current.sunlightHours - optimal.sunlightHours.max,
+      species.minSunlight - conditions.sunlight,
+      conditions.sunlight - species.maxSunlight,
       0,
     );
     if (sunlightDiff > 0) {
@@ -106,56 +124,60 @@
   function getStatusColor(status) {
     switch (status) {
       case "good":
-        return "bg-green-500";
+        return "var(--status-good)";
       case "attention":
-        return "bg-orange-500";
+        return "var(--status-attention)";
       case "critical":
-        return "bg-red-500";
+        return "var(--status-critical)";
     }
   }
 
+  const statusBg = (color) => `color-mix(in oklch, ${color} 12%, transparent)`;
+  const statusBorder = (color) =>
+    `color-mix(in oklch, ${color} 32%, transparent)`;
+
   function formatStage(stage) {
-    const stageKey = `stage${stage.charAt(0).toUpperCase() + stage.slice(1)}`;
-    return t(stageKey, $language);
+    if (!stage) return "Unknown";
+    return stage;
   }
 
   function getMaintenanceLabel(level) {
-    const maintenanceKey = `maintenance${level.charAt(0).toUpperCase() + level.slice(1)}`;
-    return t(maintenanceKey, $language);
+    if (!level) return "Medium";
+    return level;
   }
 
-  function generateAdvice(plant) {
-    const advice = [];
-    const current = plant.currentConditions;
-    const optimal = plant.optimalConditions;
+  function generateAdvice() {
+    if (!conditions || !species) return [t("adviceOptimal", $language)];
 
-    if (current.temperature < optimal.temperature.min) {
+    const advice = [];
+
+    if (conditions.temperature < species.minTemperature) {
       advice.push(t("adviceTempTooCold", $language));
-    } else if (current.temperature > optimal.temperature.max) {
+    } else if (conditions.temperature > species.maxTemperature) {
       advice.push(t("adviceTempTooHot", $language));
     }
 
-    if (current.humidity < optimal.humidity.min) {
+    if (conditions.humidity < species.minHumidity) {
       advice.push(t("adviceHumidityTooLow", $language));
-    } else if (current.humidity > optimal.humidity.max) {
+    } else if (conditions.humidity > species.maxHumidity) {
       advice.push(t("adviceHumidityTooHigh", $language));
     }
 
-    if (current.soilPH < optimal.soilPH.min) {
+    if (conditions.soilPH < species.minSoilPH) {
       advice.push(t("adviceSoilTooAcidic", $language));
-    } else if (current.soilPH > optimal.soilPH.max) {
+    } else if (conditions.soilPH > species.maxSoilPH) {
       advice.push(t("adviceSoilTooAlkaline", $language));
     }
 
-    if (current.soilMoisture < optimal.soilMoisture.min) {
+    if (conditions.soilMoisture < species.minSoilMoisture) {
       advice.push(t("adviceSoilTooDry", $language));
-    } else if (current.soilMoisture > optimal.soilMoisture.max) {
+    } else if (conditions.soilMoisture > species.maxSoilMoisture) {
       advice.push(t("adviceSoilTooWet", $language));
     }
 
-    if (current.sunlightHours < optimal.sunlightHours.min) {
+    if (conditions.sunlight < species.minSunlight) {
       advice.push(t("adviceNotEnoughSun", $language));
-    } else if (current.sunlightHours > optimal.sunlightHours.max) {
+    } else if (conditions.sunlight > species.maxSunlight) {
       advice.push(t("adviceTooMuchSun", $language));
     }
 
@@ -163,11 +185,11 @@
   }
 
   function getConditionColor(current, min, max, criticalThreshold) {
-    if (current >= min && current <= max) return "text-green-600";
+    if (current >= min && current <= max) return getStatusColor("good");
     const midpoint = (min + max) / 2;
     return Math.abs(current - midpoint) > criticalThreshold
-      ? "text-red-600"
-      : "text-orange-600";
+      ? getStatusColor("critical")
+      : getStatusColor("attention");
   }
 
   function addComment() {
@@ -184,7 +206,40 @@
       goto("/");
     }
   }
+
+  $: if (plant) {
+    overallStatus = calculateStatus(
+      plant.currentConditions,
+      plant.optimalConditions,
+    );
+    overallColor = getStatusColor(overallStatus);
+  } else {
+    overallStatus = null;
+    overallColor = null;
+  }
+
+  $: pageTitle = `${plant?.name || "Plant"} - Food Forest`;
+
+  async function deletePlant(){
+    if(confirm("Weet je het zeker?")){
+      const request = await fetch(PUBLIC_API_URL + "/forests/api/v1/plants/" + plant.id, {
+        body: data,
+        method: "DELETE"
+      });
+      if(!request.ok){
+        alert(request.statusText);
+      } else {
+        goBack();
+      }
+    }
+
+  }
+
 </script>
+
+<svelte:head>
+  <title>{pageTitle}</title>
+</svelte:head>
 
 {#if plant}
   <div class="bg-background">
@@ -192,24 +247,43 @@
       <!-- Back button -->
       <button
         onclick={goBack}
-        class="mb-6 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+        class="mb-6 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
       >
         <ArrowLeft class="h-4 w-4" />
         {t("back", $language)}
       </button>
+      <div class="float-right flex gap-6">
+        <button
+          onclick={goto("/plant/"+ plant.id+ "/edit")}
+          class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
+        >
+          {t("edit", $language)}
+        </button>
+
+        
+        <button
+          onclick={deletePlant}
+          class="bg-[red] text-primary-foreground px-4 py-2 rounded-lg hover:bg-[#f00a] transition-colors cursor-pointer"
+        >
+          {t("delete", $language)}
+        </button>
+      </div>
 
       <!-- Header -->
       <div class="mb-8">
         <div
-          class="mb-3 inline-block px-3 py-1 rounded text-sm font-semibold {categoryConfig[
-            plant.category
-          ].color} text-white"
+          class="mb-3 inline-block px-3 py-1 rounded text-sm font-semibold text-white"
+          style="background-color: {categoryConfig[
+            species?.type?.toLowerCase() || 'tree'
+          ]?.color || 'var(--category-tree)'}"
         >
-          {categoryConfig[plant.category].label}
+          {categoryConfig[species?.type || "Tree"].label}
         </div>
-        <h1 class="text-4xl font-bold text-foreground mb-2">{plant.name}</h1>
+        <h1 class="text-4xl font-bold text-foreground mb-2">
+          {species?.name || "Unknown Plant"}
+        </h1>
         <p class="text-xl italic text-muted-foreground">
-          {plant.scientificName}
+          {species?.scientificName || ""}
         </p>
       </div>
 
@@ -218,11 +292,11 @@
         <div class="space-y-6">
           <!-- Image -->
           <div
-            class="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-muted"
+            class="relative aspect-4/3 w-full overflow-hidden rounded-xl bg-muted"
           >
             <img
-              src={plant.image || "/placeholder.svg"}
-              alt={plant.name}
+              src={plant?.image || species?.image || "/placeholder.svg"}
+              alt={species?.name || "Plant"}
               class="w-full h-full object-cover"
             />
           </div>
@@ -233,7 +307,7 @@
               {t("about", $language)}
             </h2>
             <p class="text-muted-foreground leading-relaxed">
-              {plant.description}
+              {species?.description || "No description available"}
             </p>
           </div>
 
@@ -248,7 +322,7 @@
                   >{t("harvestSeason", $language)}</span
                 >
                 <span class="font-medium text-card-foreground"
-                  >{plant.harvestSeason}</span
+                  >{species?.harvestSeason || "Unknown"}</span
                 >
               </div>
               <div class="flex justify-between py-2 border-b border-border">
@@ -256,7 +330,7 @@
                   >{t("sunRequirement", $language)}</span
                 >
                 <span class="font-medium text-card-foreground"
-                  >{plant.sunRequirement}</span
+                  >{species?.sunRequirement || "Unknown"}</span
                 >
               </div>
               <div class="flex justify-between py-2 border-b border-border">
@@ -264,7 +338,7 @@
                   >{t("waterNeeds", $language)}</span
                 >
                 <span class="font-medium text-card-foreground"
-                  >{plant.waterNeeds}</span
+                  >{species?.waterNeeds || "Unknown"}</span
                 >
               </div>
               <div class="flex justify-between py-2 border-b border-border">
@@ -272,7 +346,7 @@
                   >{t("matureHeight", $language)}</span
                 >
                 <span class="font-medium text-card-foreground"
-                  >{plant.height}</span
+                  >{plant?.height || "N/A"}</span
                 >
               </div>
               <div class="flex justify-between py-2">
@@ -280,7 +354,7 @@
                   >{t("maintenanceLevel", $language)}</span
                 >
                 <span class="font-medium text-card-foreground capitalize"
-                  >{getMaintenanceLabel(plant.maintenance)}</span
+                  >{getMaintenanceLabel(species?.maintenance)}</span
                 >
               </div>
             </div>
@@ -291,39 +365,20 @@
         <div class="space-y-6">
           <!-- Overall Status -->
           <div
-            class="rounded-xl p-6 border {calculateStatus(
-              plant.currentConditions,
-              plant.optimalConditions,
-            ) === 'good'
-              ? 'bg-green-500/10 border-green-500/30 dark:bg-green-500/20'
-              : calculateStatus(
-                    plant.currentConditions,
-                    plant.optimalConditions,
-                  ) === 'attention'
-                ? 'bg-orange-500/10 border-orange-500/30 dark:bg-orange-500/20'
-                : 'bg-red-500/10 border-red-500/30 dark:bg-red-500/20'}"
+            class="rounded-xl p-6 border"
+            style={`--status-color: ${overallColor || "var(--status-good)"}; background-color: color-mix(in oklch, var(--status-color) 12%, transparent); border-color: color-mix(in oklch, var(--status-color) 32%, transparent);`}
           >
             <div class="flex items-center justify-between mb-4">
               <h2 class="text-xl font-semibold text-foreground">
                 {t("overallStatus", $language)}
               </h2>
               <div
-                class="px-3 py-1 rounded-lg text-sm font-semibold {getStatusColor(
-                  calculateStatus(
-                    plant.currentConditions,
-                    plant.optimalConditions,
-                  ),
-                )} text-white"
+                class="px-3 py-1 rounded-lg text-sm font-semibold text-white"
+                style={`background-color: ${overallColor || "var(--status-good)"};`}
               >
-                {calculateStatus(
-                  plant.currentConditions,
-                  plant.optimalConditions,
-                ) === "good"
+                {overallStatus === "good"
                   ? t("optimal", $language)
-                  : calculateStatus(
-                        plant.currentConditions,
-                        plant.optimalConditions,
-                      ) === "attention"
+                  : overallStatus === "attention"
                     ? t("needsAttention", $language)
                     : t("critical", $language)}
               </div>
@@ -334,7 +389,7 @@
                   {t("currentStage", $language)}
                 </p>
                 <p class="text-lg font-semibold capitalize text-foreground">
-                  {formatStage(plant.currentConditions.stage)}
+                  {formatStage(plant?.plantStage)}
                 </p>
               </div>
               <div class="bg-background/50 rounded-lg p-3 border border-border">
@@ -342,9 +397,7 @@
                   {t("harvestIn", $language)}
                 </p>
                 <p class="text-lg font-semibold text-foreground">
-                  {plant.currentConditions.harvestDays === 0
-                    ? t("ready", $language)
-                    : `${plant.currentConditions.harvestDays} ${t("days", $language)}`}
+                  {plant?.harvestPrediction || "Unknown"}
                 </p>
               </div>
             </div>
@@ -355,6 +408,13 @@
             <h2 class="text-xl font-semibold text-card-foreground mb-4">
               {t("currentConditions", $language)}
             </h2>
+            <!-- Last sensor update -->
+            <p class="mb-4 text-sm text-muted-foreground">
+              {t("lastUpdated", $language) || "Last updated"}:
+                <span class="font-medium text-foreground">
+                  {formatLastUpdate(new Date(conditions.createdAt))}
+                </span>
+            </p>
             <div class="space-y-3">
               <div
                 class="flex items-center justify-between rounded-lg bg-muted p-4"
@@ -364,14 +424,15 @@
                   <span class="font-medium">{t("temperature", $language)}</span>
                 </div>
                 <span
-                  class="text-lg font-semibold {getConditionColor(
-                    plant.currentConditions.temperature,
-                    plant.optimalConditions.temperature.min,
-                    plant.optimalConditions.temperature.max,
+                  class="text-lg font-semibold"
+                  style={`color: ${getConditionColor(
+                    plant.conditions[0]?.temperature ?? 0,
+                    plant.species?.minTemperature ?? 0,
+                    plant.species?.maxTemperature ?? 0,
                     5,
-                  )}"
+                  )}`}
                 >
-                  {plant.currentConditions.temperature}°C
+                  {plant.conditions[0]?.temperature ?? "—"}°C
                 </span>
               </div>
 
@@ -383,14 +444,15 @@
                   <span class="font-medium">{t("humidity", $language)}</span>
                 </div>
                 <span
-                  class="text-lg font-semibold {getConditionColor(
-                    plant.currentConditions.humidity,
-                    plant.optimalConditions.humidity.min,
-                    plant.optimalConditions.humidity.max,
+                  class="text-lg font-semibold"
+                  style={`color: ${getConditionColor(
+                    plant.conditions[0]?.humidity ?? 0,
+                    plant.species?.minHumidity ?? 0,
+                    plant.species?.maxHumidity ?? 0,
                     15,
-                  )}"
+                  )}`}
                 >
-                  {plant.currentConditions.humidity}%
+                  {plant.conditions[0]?.humidity ?? "—"}%
                 </span>
               </div>
 
@@ -402,14 +464,15 @@
                   <span class="font-medium">{t("soilPH", $language)}</span>
                 </div>
                 <span
-                  class="text-lg font-semibold {getConditionColor(
-                    plant.currentConditions.soilPH,
-                    plant.optimalConditions.soilPH.min,
-                    plant.optimalConditions.soilPH.max,
+                  class="text-lg font-semibold"
+                  style={`color: ${getConditionColor(
+                    plant.conditions[0]?.soilPH ?? 0,
+                    plant.species?.minSoilPH ?? 0,
+                    plant.species?.maxSoilPH ?? 0,
                     0.5,
-                  )}"
+                  )}`}
                 >
-                  {plant.currentConditions.soilPH.toFixed(1)}
+                  {plant.conditions[0]?.soilPH ?? "—"}
                 </span>
               </div>
 
@@ -422,14 +485,15 @@
                   >
                 </div>
                 <span
-                  class="text-lg font-semibold {getConditionColor(
-                    plant.currentConditions.soilMoisture,
-                    plant.optimalConditions.soilMoisture.min,
-                    plant.optimalConditions.soilMoisture.max,
+                  class="text-lg font-semibold"
+                  style={`color: ${getConditionColor(
+                    plant.conditions[0]?.soilMoisture ?? 0,
+                    plant.species?.minSoilMoisture ?? 0,
+                    plant.species?.maxSoilMoisture ?? 0,
                     20,
-                  )}"
+                  )}`}
                 >
-                  {plant.currentConditions.soilMoisture}%
+                  {plant.conditions[0]?.soilMoisture ?? "—"}%
                 </span>
               </div>
 
@@ -441,14 +505,15 @@
                   <span class="font-medium">{t("sunlight", $language)}</span>
                 </div>
                 <span
-                  class="text-lg font-semibold {getConditionColor(
-                    plant.currentConditions.sunlightHours,
-                    plant.optimalConditions.sunlightHours.min,
-                    plant.optimalConditions.sunlightHours.max,
+                  class="text-lg font-semibold"
+                  style={`color: ${getConditionColor(
+                    plant.conditions[0]?.sunlight ?? 0,
+                    plant.species?.minSunlight ?? 0,
+                    plant.species?.maxSunlight ?? 0,
                     2,
-                  )}"
+                  )}`}
                 >
-                  {plant.currentConditions.sunlightHours}h/day
+                  {plant.conditions[0]?.sunlight ?? "—"}h/day
                 </span>
               </div>
             </div>
@@ -460,9 +525,10 @@
               {t("careAdvice", $language)}
             </h2>
             <div
-              class="space-y-3 rounded-lg bg-blue-500/10 border border-blue-500/30 dark:bg-blue-500/20 p-4"
+              class="space-y-3 rounded-lg border p-4"
+              style="background-color: color-mix(in oklch, var(--primary) 12%, transparent); border-color: color-mix(in oklch, var(--primary) 32%, transparent);"
             >
-              {#each generateAdvice(plant) as advice}
+              {#each generateAdvice() as advice}
                 <p class="text-sm text-foreground leading-relaxed">{advice}</p>
               {/each}
             </div>
@@ -493,7 +559,7 @@
               />
               <button
                 onclick={addComment}
-                class="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                class="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer"
               >
                 <Send class="h-4 w-4" />
               </button>
@@ -507,7 +573,10 @@
   <div class="bg-background py-20">
     <div class="text-center">
       <h1 class="text-2xl font-bold text-foreground mb-2">Plant Not Found</h1>
-      <button onclick={() => goto("/")} class="text-primary hover:underline">
+      <button
+        onclick={() => goto("/")}
+        class="text-primary hover:underline cursor-pointer"
+      >
         Go back to map
       </button>
     </div>

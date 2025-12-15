@@ -8,7 +8,10 @@
   // Make plant detail pages and home page scrollable
   $: isPlantPage = $page.url.pathname.startsWith("/plant/");
   $: isHomePage = $page.url.pathname === "/";
-  $: isScrollable = isPlantPage || isHomePage;
+  $: isManagementPage = $page.url.pathname === "/management";
+  $: isLoginPage = $page.url.pathname === "/login";
+  $: isScrollable =
+    isPlantPage || isHomePage || isManagementPage || isLoginPage;
 
   // Initialize theme on mount
   onMount(() => {
@@ -17,6 +20,21 @@
     }
   });
 </script>
+
+<svelte:head>
+  <script>
+    // Prevent flash of wrong theme by applying theme class immediately
+    (function () {
+      const theme = localStorage.getItem("theme");
+      if (
+        theme === "dark" ||
+        (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)
+      ) {
+        document.documentElement.classList.add("dark");
+      }
+    })();
+  </script>
+</svelte:head>
 
 <div class="h-screen w-full flex flex-col">
   <Navigation />
