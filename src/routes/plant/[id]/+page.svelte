@@ -53,7 +53,6 @@
   let commentText = "";
   let overallStatus = null;
   let overallColor = null;
-  let lastSensorUpdate = new Date("2025-12-15T11:23:35Z");
 
   function formatLastUpdate(date) {
   if (!date) return "Unknown";
@@ -380,7 +379,7 @@
             <p class="mb-4 text-sm text-muted-foreground">
               {t("lastUpdated", $language) || "Last updated"}:
                 <span class="font-medium text-foreground">
-                  {formatLastUpdate(lastSensorUpdate)}
+                  {formatLastUpdate(new Date(conditions.createdAt))}
                 </span>
             </p>
             <div class="space-y-3">
