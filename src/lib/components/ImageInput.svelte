@@ -1,5 +1,5 @@
 <script>
-  let { image } = $props();
+  let { image, name } = $props();
   let imgElt;
   let imgUrl;
   async function change(e){
@@ -15,4 +15,4 @@
 </script>
 <input type="file" accept="image/*" onchange={change} />
 <img src={image} bind:this={imgElt} class="max-w-[60vh] max-h-[60vh]" />
-<input type="hidden" bind:this={imgUrl} name="image"/>
+<input type="hidden" bind:this={imgUrl} name={name || "image"}/>

@@ -18,6 +18,7 @@
   import { selectedCategories, selectedStatus } from "$lib/stores/filters";
   import { goto } from "$app/navigation";
   import Filters from "$lib/components/Filters.svelte";
+    import { preventDefault } from "svelte/legacy";
 
   // Pak API data
   export let forestData;
@@ -247,20 +248,56 @@
   let mapViewHeight;
   let mapView;
   $: mapZoomState = {originX: 0, originY: 0, zoom: 1, zoomMultiplier: Math.min(mapViewHeight/mapHeight, mapViewWidth/mapWidth)};
+  let pointerPos;
 
   function mapZoom(e){
+    const {screenX, screenY} = getPointerScreenPos(e);
+
+    const {offsetX, offsetY} = pointerScreenToOffset(screenX, screenY); 
+    mapZoomState.zoom = limit( mapZoomState.zoom*(1-e.deltaY/1000), 0.3, 5);
+
+    fixOrigin(offsetX, offsetY, screenX, screenY);
+  }
+
+  function getPointerScreenPos(e){
     const boundingClientRect = mapView.getBoundingClientRect();
     const screenX = e.pageX - boundingClientRect.x;
     const screenY = e.pageY - boundingClientRect.y;
-    
+    return {screenX, screenY};
+  }
+
+  function pointerScreenToOffset(screenX, screenY){
     const offsetX = (screenX - mapZoomState.originX) / (mapZoomState.zoom*mapZoomState.zoomMultiplier) + mapZoomState.originX;
     const offsetY = (screenY - mapZoomState.originY) / (mapZoomState.zoom*mapZoomState.zoomMultiplier) + mapZoomState.originY;
-    mapZoomState.zoom = limit( mapZoomState.zoom*(1-e.deltaY/1000), 0.3, 5);
+    return {offsetX, offsetY};
+  }
 
+  function mapPointerDown(e){
+    pointerPos = getPointerScreenPos(e);
+    e.preventDefault();
+  }
+
+  function fixOrigin(offsetX, offsetY, screenX, screenY){
     if(mapZoomState.zoom*mapZoomState.zoomMultiplier !== 1 ){
       mapZoomState.originX = (offsetX * mapZoomState.zoom*mapZoomState.zoomMultiplier - screenX)/(mapZoomState.zoom*mapZoomState.zoomMultiplier - 1);
       mapZoomState.originY = (offsetY * mapZoomState.zoom*mapZoomState.zoomMultiplier - screenY)/(mapZoomState.zoom*mapZoomState.zoomMultiplier - 1);
     }
+  } 
+  
+  function mapPointerMove(e){
+    if(!pointerPos) return;
+    const {screenX, screenY} = getPointerScreenPos(e);
+    
+    const {offsetX, offsetY} = pointerScreenToOffset(pointerPos.screenX, pointerPos.screenY)
+    fixOrigin(offsetX, offsetY, screenX, screenY);
+
+    pointerPos = {screenX, screenY};
+    e.preventDefault();
+  }
+
+  function mapPointerUp(e){
+    pointerPos = undefined;
+    e.preventDefault();
   }
 
   function limit(n, min, max){
@@ -278,7 +315,7 @@
   </div>
 
   <!-- Center map area -->
-  <div class="overflow-hidden w-full h-full relative" bind:clientHeight={mapViewHeight} bind:clientWidth={mapViewWidth} onwheelcapture={mapZoom} bind:this={mapView}>
+  <div class="overflow-hidden w-full h-full relative" bind:clientHeight={mapViewHeight} bind:clientWidth={mapViewWidth} onwheelcapture={mapZoom} bind:this={mapView} onmousedown={mapPointerDown} onmousemove={mapPointerMove} onmouseup={mapPointerUp}>
     <div class="relative flex-1 bg-muted" style:width="{mapWidth}px" style:height="{mapHeight}px" style:transform="scale({mapZoomState.zoom*mapZoomState.zoomMultiplier})" style:transform-origin="{mapZoomState.originX}px {mapZoomState.originY}px">
       <div class="absolute inset-0">
         <img
