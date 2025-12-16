@@ -24,7 +24,7 @@
   //Pak plant, species en conditions uit de API data
   $: plant = data.plantData?.data;
   $: species = plant?.species;
-  $: conditions = plant?.conditions[0];
+  $: conditions = plant?.conditions[0] ?? {};
 
   // Gebruik backend species types (Tree, Shrub, Plant)
   $: categoryConfig = {
