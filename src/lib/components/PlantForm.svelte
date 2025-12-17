@@ -2,7 +2,7 @@
   import { language, t } from "$lib/stores/language";
   import PlantLocationSelector from "$lib/components/PlantLocationSelector.svelte";
   import SelectOption from "$lib/components/SelectOption.svelte";
-    import ImageInput from "./ImageInput.svelte";
+  import ImageInput from "./ImageInput.svelte";
   const { plant, forest, species } = $props();
 </script>
 
