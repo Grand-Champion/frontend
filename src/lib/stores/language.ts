@@ -187,6 +187,7 @@ export const translations = {
         location: "Location",
         createPlant: "Create plant",
         delete: "Delete",
+        selectImage: "Select image",
     },
     nl: {
         // Navigation
@@ -360,6 +361,7 @@ export const translations = {
         location: "Locatie",
         createPlant: "Voeg plant toe",
         delete: "Verwijder",
+        selectImage: "Selecteer afbeelding",
     }
 };
 
