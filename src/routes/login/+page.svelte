@@ -1,8 +1,9 @@
 <script lang="ts">
-    import { auth } from "$lib/stores/auth";
     import { goto } from "$app/navigation";
     import { t, language } from "$lib/stores/language";
     import { Eye, EyeOff } from "lucide-svelte";
+    import { login } from "$lib/Auth";
+    import { jwt } from "$lib/stores/jwt";
 
     $: pageTitle = `${t("login", $language)} - Food Forest`;
 
@@ -11,7 +12,7 @@
     let errorMessage = "";
     let showPassword = false;
 
-    function handleLogin() {
+    async function handleLogin() {
         errorMessage = "";
 
         if (!identifier || !password) {
@@ -19,16 +20,19 @@
             return;
         }
 
-        auth.login(identifier, password);
-
-        // Check if login was successful
-        setTimeout(() => {
-            if ($auth.currentUser) {
+        try {
+            await login(identifier, password);
+            if ($jwt) {
                 goto("/");
-            } else {
-                errorMessage = t("invalidCredentials", $language);
             }
-        }, 100);
+        }
+        catch(e) {
+            if(e?.message === "Invalid credentials") errorMessage = t("invalidCredentials", $language);
+            else errorMessage = t("loginError", $language);
+        }
+    }
+    $: if($jwt){
+        goto("/");
     }
 </script>
 
