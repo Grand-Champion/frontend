@@ -16,7 +16,7 @@
     import { onMount } from "svelte";
     import SelectOption from "$lib/components/SelectOption.svelte";
 
-    $: pageTitle = `${t("accountManagement", $language)} - Food Forest`;
+    $: pageTitle = `${t("accountManagement", $language)}`;
 
     // Redirect if not admin or manager
     $: if (browser && (!$jwt || getPayload($jwt).role !== "admin")) {
@@ -325,7 +325,7 @@
                             </label>
                             <input
                                 id="new-email"
-                                type="text"
+                                type="{newRole === "admin" ? "text" : "email"}"
                                 bind:value={newEmail}
                                 required
                                 title="Email should be in format: example@domain.com"
@@ -622,7 +622,7 @@
                                                     </label>
                                                     <input
                                                         id="edit-email-{user.id}"
-                                                        type="text"
+                                                        type="{user.role === "admin" ? "text" : "email"}"
                                                         bind:value={ editEmail[user.id] }
                                                         required
                                                         title="Email should be in format: example@domain.com"

@@ -4,8 +4,9 @@
     import { Eye, EyeOff } from "lucide-svelte";
     import { login } from "$lib/Auth";
     import { jwt } from "$lib/stores/jwt";
+    import { browser } from "$app/environment";
 
-    $: pageTitle = `${t("login", $language)} - Food Forest`;
+    $: pageTitle = `${t("login", $language)}`;
 
     let identifier = "";
     let password = "";
@@ -31,7 +32,7 @@
             else errorMessage = t("loginError", $language);
         }
     }
-    $: if($jwt){
+    $: if($jwt && browser){
         goto("/");
     }
 </script>
@@ -45,19 +46,15 @@
         <div class="bg-card border border-border rounded-lg shadow-lg p-8">
             <!-- Header -->
             <div class="text-center mb-8">
-                <div
-                    class="w-16 h-16 rounded-full bg-primary flex items-center justify-center mx-auto mb-4"
-                >
-                    <span class="text-primary-foreground font-semibold text-2xl"
-                        >FF</span
-                    >
-                </div>
                 <h1 class="text-2xl font-bold text-foreground mb-2">
                     {t("welcomeBack", $language)}
                 </h1>
                 <p class="text-muted-foreground">
                     {t("loginToAccount", $language)}
                 </p>
+            </div>
+            <div>
+                <p>{t("or", $language)}: <a href="/register" class="underline text-blue-900">{t("registerLong", $language)}</a></p>
             </div>
 
             <!-- Login Form -->

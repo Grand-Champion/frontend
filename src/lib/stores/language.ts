@@ -79,6 +79,12 @@ export const translations = {
         emailFormatError: 'Email must be in format: example@domain.com',
         loginError: "Error logging in",
         email: "Email",
+        userSettings: "User settings",
+        confirmDeleteSelf: "Are you sure you want to delete your account?",
+        registerLong: "Register a new account",
+        registrationError: "Error registering",
+        or: "Or",
+        register: "Register",
 
         // Home page
         foodGarden: 'Food Garden',
@@ -132,6 +138,7 @@ export const translations = {
         comments: 'Comments',
         addComment: 'Add a comment...',
         send: 'Send',
+        confirmDeletePlant: "Are you sure you want to delete this plant?",
 
         // Maintenance levels
         maintenanceHigh: 'High',
@@ -231,10 +238,10 @@ export const translations = {
         changePassword: 'Wachtwoord Wijzigen',
         currentPassword: 'Huidig Wachtwoord',
         newPassword: 'Nieuw Wachtwoord',
-        confirmPassword: 'Bevestig Wachtwoord',
+        confirmPassword: 'Herhaal wachtwoord',
         enterCurrentPassword: 'Voer huidig wachtwoord in',
         enterNewPassword: 'Voer nieuw wachtwoord in',
-        confirmNewPassword: 'Bevestig nieuw wachtwoord',
+        confirmNewPassword: 'Herhaal nieuw wachtwoord',
         pleaseEnterAllFields: 'Vul alle velden in',
         passwordsDoNotMatch: 'Wachtwoorden komen niet overeen',
         passwordTooShort: 'Wachtwoord moet minimaal 6 tekens lang zijn',
@@ -248,12 +255,18 @@ export const translations = {
         changeAdminPassword: 'Beheerderwachtwoord wijzigen',
         adminKey: 'Jouw wachtwoord',
         enterAdminKey: 'Voer jouw wachtwoord in',
-        invalidAdminKey: 'Jouw wachtwoord ongeldige',
+        invalidAdminKey: 'Jouw wachtwoord ongeldig',
         invalidAdminKeyOrPassword: 'Jouw of huidig wachtwoord ongeldig',
         pleaseEnterAdminKey: 'Voer jouw wachtwoord in',
         emailFormatError: 'E-mail moet in het formaat zijn: example@domain.com',
         loginError: "Error tijdens inloggen",
         email: "Email",
+        userSettings: "Gebruikersinstellingen",
+        confirmDeleteSelf: "Weet je zeker dat je je account wil verwijderen?",
+        registerLong: "Registreer een nieuw account",
+        registrationError: "Error tijdens het registreren",
+        or: "Of",
+        register: "Registreer",
 
         // Home page
         foodGarden: 'Voedseltuin',
@@ -307,6 +320,7 @@ export const translations = {
         comments: 'Reacties',
         addComment: 'Voeg een reactie toe...',
         send: 'Verstuur',
+        confirmDeletePlant: "Weet je zeker dat je deze plant wil verwijderen?",
 
         // Maintenance levels
         maintenanceHigh: 'Hoog',

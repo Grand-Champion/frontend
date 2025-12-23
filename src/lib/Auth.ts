@@ -25,12 +25,10 @@ export async function login(email: string, password: string): Promise<void>{
 }
 
 export async function updateUser(jwts: string, id: string | number, data: Record<string, string>): Promise<void>{
-    const headers = new Headers();
-    headers.set("Authorization", jwts);
     const request = await fetch(PUBLIC_API_URL + "/users/" + id, {
         method: "PATCH",
         body: new URLSearchParams(data),
-        headers
+        headers: headers(jwts)
     });
     const response = await request.json();
     if(request.ok){
@@ -44,12 +42,10 @@ export async function updateUser(jwts: string, id: string | number, data: Record
 
 
 export async function createUser(jwts: string, data: Record<string, string>): Promise<void>{
-    const headers = new Headers();
-    headers.set("Authorization", jwts);
     const request = await fetch(PUBLIC_API_URL + "/users/", {
         method: "POST",
         body: new URLSearchParams(data),
-        headers
+        headers: headers(jwts)
     });
     const response = await request.json();
     if(request.ok){
@@ -60,12 +56,10 @@ export async function createUser(jwts: string, data: Record<string, string>): Pr
 }
 
 export async function updatePassword(jwts: string, password: string, newPassword: string): Promise<void>{
-    const headers = new Headers();
-    headers.set("Authorization", jwts);
     const request = await fetch(PUBLIC_API_URL + "/users/me/password", {
         method: "PATCH",
         body: new URLSearchParams({password, newPassword}),
-        headers
+        headers: headers(jwts)
     });
     const response = await request.json();
     if(request.ok){
@@ -76,11 +70,9 @@ export async function updatePassword(jwts: string, password: string, newPassword
 }
 
 export async function refreshToken(jwts: string): Promise<void> {
-    const headers = new Headers();
-    headers.set("Authorization", jwts);
     const request = await fetch(PUBLIC_API_URL + "/token", {
         method: "POST",
-        headers
+        headers: headers(jwts)
     });
     const response = await request.json();
     if(request.ok){
@@ -91,10 +83,8 @@ export async function refreshToken(jwts: string): Promise<void> {
 }
 
 export async function getUser(jwts: string, id: number | string): Promise<object>{
-    const headers = new Headers();
-    headers.set("Authorization", jwts);
     const request = await fetch(PUBLIC_API_URL + "/users/" + id, {
-        headers
+        headers: headers(jwts)
     });
     const response = await request.json();
     if(request.ok){
@@ -105,10 +95,8 @@ export async function getUser(jwts: string, id: number | string): Promise<object
 }
 
 export async function getUsers(jwts: string): Promise<object[]>{
-    const headers = new Headers();
-    headers.set("Authorization", jwts);
     const request = await fetch(PUBLIC_API_URL + "/users/", {
-        headers
+        headers: headers(jwts)
     });
     const response = await request.json();
     if(request.ok){
@@ -120,19 +108,27 @@ export async function getUsers(jwts: string): Promise<object[]>{
 
 
 export async function deleteUser(jwts: string, id: number | string, password: string | undefined): Promise<void>{
-    const headers = new Headers();
     const data: Record<string, string> = {};
     if(password) data.password = password;
-    headers.set("Authorization", jwts);
     const request = await fetch(PUBLIC_API_URL + "/users/" + id, {
         method: "DELETE",
         body: new URLSearchParams(data),
-        headers
+        headers: headers(jwts)
     });
     const response = await request.json();
     if(request.ok){
-        return;
+        if(id === "me"){
+            jwt.set(undefined);
+        }
     } else {
         throw new Error(response.message);
     }
+}
+
+export function headers(jwts: string | undefined){
+    const headers = new Headers();
+    if(jwts){
+        headers.set("Authorization", jwts);
+    }
+    return headers;
 }
