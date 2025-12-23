@@ -8,6 +8,7 @@
   } from "lucide-svelte";
   import { PUBLIC_API_URL } from '$env/static/public';
   import PlantForm from "$lib/components/PlantForm.svelte";
+  import { jwt } from "$lib/stores/jwt.js";
 
   export let data;
 
@@ -25,10 +26,13 @@
   }
   let formulier;
   async function stuurUpdate(){
+    const headers = new Headers();
+    headers.set("Authorization", $jwt);
     const data = new URLSearchParams(new FormData(formulier));
     const request = await fetch(PUBLIC_API_URL + "/forests/api/v1/plants/" + plant.id, {
       body: data,
-      method: "PATCH"
+      method: "PATCH",
+      headers
     });
     if(!request.ok){
       alert(request.statusText);
