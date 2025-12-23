@@ -19,7 +19,7 @@
   } from "lucide-svelte";
   import { PUBLIC_API_URL } from '$env/static/public';
     import { jwt } from "$lib/stores/jwt.js";
-    import { getPayload } from "$lib/Auth.js";
+    import { getPayload, headers } from "$lib/Auth.js";
 
   export let data;
 
@@ -223,13 +223,11 @@
   $: pageTitle = `${plant?.name || "Plant"} - Food Forest`;
 
   async function deletePlant(){
-    if(confirm("Weet je het zeker?")){
-      const headers = new Headers();
-      headers.set("Authorization", $jwt);
+    if(confirm(t("confirmDeletePlant", $language))){
       const request = await fetch(PUBLIC_API_URL + "/forests/api/v1/plants/" + plant.id, {
         body: data,
         method: "DELETE",
-        headers
+        headers: headers($jwt)
       });
       if(!request.ok){
         alert(request.statusText);
@@ -268,7 +266,7 @@
           
           <button
             onclick={deletePlant}
-            class="bg-[red] text-primary-foreground px-4 py-2 rounded-lg hover:bg-[#f00a] transition-colors cursor-pointer"
+            class="bg-(--status-critical) text-primary-foreground px-4 py-2 rounded-lg hover:bg-(--status-critical)/90 transition-colors cursor-pointer"
           >
             {t("delete", $language)}
           </button>

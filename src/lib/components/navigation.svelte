@@ -13,6 +13,7 @@
     Key,
     Eye,
     EyeOff,
+    Settings
   } from "lucide-svelte";
   import { page } from "$app/stores";
   import { theme } from "$lib/stores/theme";
@@ -56,6 +57,11 @@
 
   function goToAdmin() {
     goto("/management");
+    showUserMenu = false;
+  }
+
+  function goToSettings(){
+    goto("/settings");
     showUserMenu = false;
   }
 
@@ -258,6 +264,14 @@
               >
                 <Key class="w-4 h-4" />
                 {t("changePassword", $language)}
+              </button>
+
+              <button
+                on:click={goToSettings}
+                class="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2 border-b border-border cursor-pointer"
+              >
+                <Settings class="w-4 h-4" />
+                {t("userSettings", $language)}
               </button>
 
               <button
