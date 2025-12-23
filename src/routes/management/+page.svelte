@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { auth, type UserRole } from "$lib/stores/auth";
     import { goto } from "$app/navigation";
     import { browser } from '$app/environment';
     import { t, language } from "$lib/stores/language";
@@ -201,9 +200,6 @@
     async function sortUsers(){
         sortedUsers = [... await getUsers($jwt as string)]
         .filter((user) => {
-            // Hide admin accounts for managers
-            if ($auth.currentUser?.role === "manager" && user.role === "admin")
-                return false;
             if (!searchFilter.trim()) return true;
             const search = searchFilter.toLowerCase();
             return (
@@ -529,7 +525,7 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm">
                                     <div class="flex items-center gap-2">
-                                        {#if !($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id)}
+                                        {#if true}
                                             <button
                                                 on:click={() => {
                                                     // Close all other edit forms

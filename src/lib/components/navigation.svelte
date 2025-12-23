@@ -17,7 +17,6 @@
   import { page } from "$app/stores";
   import { theme } from "$lib/stores/theme";
   import { language, t } from "$lib/stores/language";
-  import { auth, ADMIN_KEY } from "$lib/stores/auth";
   import { goto } from "$app/navigation";
   import { getPayload, updatePassword } from "$lib/Auth";
   import { jwt } from "$lib/stores/jwt";
