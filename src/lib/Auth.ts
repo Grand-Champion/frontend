@@ -1,7 +1,6 @@
 import { jwt } from '$lib/stores/jwt';
 import { PUBLIC_API_URL } from '$env/static/public';
 
-
 export function getPayload(jwts: string|undefined): object {
     if(jwts){
         const parts = jwts.split(".");
