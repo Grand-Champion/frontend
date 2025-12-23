@@ -36,7 +36,7 @@
     }
   }
 
-  $: pageTitle = `${t("edit", $language)} ${ t("createPlant", $language) } - Food Forest`;
+  $: pageTitle = `${ t("createPlant", $language) } - Food Forest`;
 </script>
 
 <svelte:head>
