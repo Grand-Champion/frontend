@@ -128,7 +128,7 @@ export async function deleteUser(jwts: string, id: number | string, password: st
 export function headers(jwts: string | undefined){
     const headers = new Headers();
     if(jwts){
-        headers.set("Authorization", jwts);
+        headers.set("Authorization", "Bearer " + jwts);
     }
     return headers;
 }
