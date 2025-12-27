@@ -13,24 +13,24 @@
     Key,
     Eye,
     EyeOff,
+    Settings
   } from "lucide-svelte";
   import { page } from "$app/stores";
   import { theme } from "$lib/stores/theme";
   import { language, t } from "$lib/stores/language";
-  import { auth, ADMIN_KEY } from "$lib/stores/auth";
   import { goto } from "$app/navigation";
+  import { getPayload, updatePassword } from "$lib/Auth";
+  import { jwt } from "$lib/stores/jwt";
 
   let showUserMenu = false;
   let showChangePasswordModal = false;
   let currentPassword = "";
   let newPassword = "";
   let confirmPassword = "";
-  let adminKey = "";
   let passwordError = "";
   let showCurrentPassword = false;
   let showNewPassword = false;
   let showConfirmPassword = false;
-  let showAdminKey = false;
   let userMenuElement;
 
   function toggleTheme() {
@@ -46,7 +46,7 @@
   }
 
   function handleLogout() {
-    auth.logout();
+    $jwt = undefined;
     showUserMenu = false;
     goto("/");
   }
@@ -57,6 +57,11 @@
 
   function goToAdmin() {
     goto("/management");
+    showUserMenu = false;
+  }
+
+  function goToSettings(){
+    goto("/settings");
     showUserMenu = false;
   }
 
@@ -74,31 +79,18 @@
     currentPassword = "";
     newPassword = "";
     confirmPassword = "";
-    adminKey = "";
     passwordError = "";
     showCurrentPassword = false;
     showNewPassword = false;
     showConfirmPassword = false;
-    showAdminKey = false;
   }
 
-  function handleChangePassword() {
+  async function handleChangePassword() {
     passwordError = "";
 
-    const isAdmin = $auth.currentUser?.role === "admin";
-
-    if (isAdmin) {
-      // Admin password change requires admin key and current password
-      if (!adminKey || !currentPassword || !newPassword || !confirmPassword) {
-        passwordError = t("pleaseEnterAllFields", $language);
-        return;
-      }
-    } else {
-      // Regular user password change
-      if (!currentPassword || !newPassword || !confirmPassword) {
-        passwordError = t("pleaseEnterAllFields", $language);
-        return;
-      }
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      passwordError = t("pleaseEnterAllFields", $language);
+      return;
     }
 
     if (newPassword !== confirmPassword) {
@@ -106,42 +98,22 @@
       return;
     }
 
-    if (newPassword.length < 3) {
+    if (newPassword.length < 6) {
       passwordError = t("passwordTooShort", $language);
       return;
     }
 
-    if ($auth.currentUser) {
+    if ($jwt) {
       let success = false;
 
-      if (isAdmin) {
-        // Use admin password change method
-        success = auth.changeAdminPassword(
-          adminKey,
-          currentPassword,
-          newPassword,
-        );
-        if (!success) {
-          passwordError =
-            t("invalidAdminKeyOrPassword", $language) ||
-            "Invalid admin key or current password";
-        }
-      } else {
-        // Use regular password change method
-        success = auth.changePassword(
-          $auth.currentUser.id,
-          currentPassword,
-          newPassword,
-        );
-        if (!success) {
-          passwordError = t("incorrectCurrentPassword", $language);
-        }
-      }
-
-      if (success) {
+      try{
+        await updatePassword($jwt, currentPassword, newPassword);
         closeChangePasswordModal();
         alert(t("passwordChanged", $language));
-      }
+      } catch(e){
+        if(e?.message === "Invalid credentials") passwordError = t("incorrectCurrentPassword", $language);
+        else passwordError = t("loginError", $language);
+      } 
     }
   }
 
@@ -154,6 +126,7 @@
       showUserMenu = false;
     }
   }
+
 </script>
 
 <svelte:window on:click={handleClickOutside} />
@@ -232,7 +205,7 @@
         {/if}
       </button>
 
-      {#if $auth.currentUser}
+      {#if $jwt}
         <!-- User Menu -->
         <div
           class="relative ml-4 pl-[1.625rem] border-l border-border"
@@ -244,7 +217,7 @@
             aria-label="User menu"
           >
             <span class="text-sm font-bold text-foreground"
-              >{$auth.currentUser.fullName}</span
+              >{getPayload($jwt).displayName}</span
             >
             <ChevronDown class="w-4 h-4" />
           </button>
@@ -261,7 +234,7 @@
                       {t("username", $language)}
                     </p>
                     <p class="text-sm font-medium text-foreground">
-                      {$auth.currentUser.username}
+                      {getPayload($jwt).email}
                     </p>
                   </div>
                   <div>
@@ -269,13 +242,13 @@
                       {t("role", $language)}
                     </p>
                     <p class="text-sm font-medium text-foreground capitalize">
-                      {t($auth.currentUser.role, $language)}
+                      {t(getPayload($jwt).role, $language)}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {#if $auth.currentUser.role === "admin" || $auth.currentUser.role === "manager"}
+              {#if getPayload($jwt).role === "admin" }
                 <button
                   on:click={goToAdmin}
                   class="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2 border-b border-border cursor-pointer"
@@ -291,6 +264,14 @@
               >
                 <Key class="w-4 h-4" />
                 {t("changePassword", $language)}
+              </button>
+
+              <button
+                on:click={goToSettings}
+                class="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2 border-b border-border cursor-pointer"
+              >
+                <Settings class="w-4 h-4" />
+                {t("userSettings", $language)}
               </button>
 
               <button
@@ -340,38 +321,6 @@
       </h2>
 
       <form on:submit|preventDefault={handleChangePassword} class="space-y-4">
-        {#if $auth.currentUser?.role === "admin"}
-          <div>
-            <label
-              for="modal-admin-key"
-              class="block text-sm font-medium text-foreground mb-2"
-            >
-              {t("adminKey", $language) || "Admin Key"}
-            </label>
-            <div class="relative">
-              <input
-                id="modal-admin-key"
-                type={showAdminKey ? "text" : "password"}
-                bind:value={adminKey}
-                class="w-full px-3 py-2 pr-10 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder={t("enterAdminKey", $language) || "Enter admin key"}
-              />
-              <button
-                type="button"
-                on:click={() => (showAdminKey = !showAdminKey)}
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                aria-label="Toggle admin key visibility"
-              >
-                {#if showAdminKey}
-                  <EyeOff class="w-4 h-4" />
-                {:else}
-                  <Eye class="w-4 h-4" />
-                {/if}
-              </button>
-            </div>
-          </div>
-        {/if}
-
         <div>
           <label
             for="modal-current-password"

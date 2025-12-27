@@ -8,6 +8,8 @@
   } from "lucide-svelte";
   import { PUBLIC_API_URL } from '$env/static/public';
   import PlantForm from "$lib/components/PlantForm.svelte";
+  import { jwt } from "$lib/stores/jwt.js";
+    import { headers } from "$lib/Auth.js";
 
   export let data;
 
@@ -27,7 +29,8 @@
     const data = new URLSearchParams(new FormData(formulier));
     const request = await fetch(PUBLIC_API_URL + `/forests/api/v1/forests/${forest.id}/plants`, {
       body: data,
-      method: "POST"
+      method: "POST",
+      headers: headers($jwt)
     });
     if(!request.ok){
       alert(request.statusText);
@@ -36,7 +39,7 @@
     }
   }
 
-  $: pageTitle = `${t("edit", $language)} ${ t("createPlant", $language) } - Food Forest`;
+  $: pageTitle = `${ t("createPlant", $language) } - Food Forest`;
 </script>
 
 <svelte:head>

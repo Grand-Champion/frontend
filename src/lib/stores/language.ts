@@ -29,12 +29,12 @@ export const translations = {
         login: 'Login',
         logout: 'Logout',
         username: 'Username',
-        fullName: 'Full Name',
+        displayName: 'Full Name',
         password: 'Password',
         welcomeBack: 'Welcome',
         loginToAccount: 'Sign in to your account',
         enterUsername: 'Enter your username',
-        enterFullName: 'Enter your full name',
+        enterDisplayName: 'Enter your full name',
         enterPassword: 'Enter your password',
         pleaseEnterCredentials: 'Please enter all required fields',
         invalidCredentials: 'Invalid username or password',
@@ -44,8 +44,7 @@ export const translations = {
         createNewAccount: 'Create New Account',
         role: 'Role',
         admin: 'Admin',
-        manager: 'Manager',
-        gardener: 'Gardener',
+        user: "User",
         createdAt: 'Created At',
         createdBy: 'Created By',
         actions: 'Actions',
@@ -63,7 +62,7 @@ export const translations = {
         confirmNewPassword: 'Confirm new password',
         pleaseEnterAllFields: 'Please enter all fields',
         passwordsDoNotMatch: 'Passwords do not match',
-        passwordTooShort: 'Password must be at least 3 characters',
+        passwordTooShort: 'Password must be at least 6 characters long',
         incorrectCurrentPassword: 'Current password is incorrect',
         passwordChanged: 'Password changed successfully',
         change: 'Change',
@@ -72,12 +71,20 @@ export const translations = {
         leaveEmptyToKeep: 'leave empty to keep current',
         search: 'Search',
         changeAdminPassword: 'Change Admin Password',
-        adminKey: 'Admin Key',
-        enterAdminKey: 'Enter admin key',
-        invalidAdminKey: 'Invalid admin key',
-        invalidAdminKeyOrPassword: 'Invalid admin key or current password',
-        pleaseEnterAdminKey: 'Please enter admin key',
+        adminKey: 'Your password',
+        enterAdminKey: 'Enter your password',
+        invalidAdminKey: 'Invalid your password',
+        invalidAdminKeyOrPassword: 'Invalid your password',
+        pleaseEnterAdminKey: 'Please enter your password',
         emailFormatError: 'Email must be in format: example@domain.com',
+        loginError: "Error logging in",
+        email: "Email",
+        userSettings: "User settings",
+        confirmDeleteSelf: "Are you sure you want to delete your account?",
+        registerLong: "Register a new account",
+        registrationError: "Error registering",
+        or: "Or",
+        register: "Register",
 
         // Home page
         foodGarden: 'Food Garden',
@@ -131,6 +138,7 @@ export const translations = {
         comments: 'Comments',
         addComment: 'Add a comment...',
         send: 'Send',
+        confirmDeletePlant: "Are you sure you want to delete this plant?",
 
         // Maintenance levels
         maintenanceHigh: 'High',
@@ -187,6 +195,7 @@ export const translations = {
         location: "Location",
         createPlant: "Create plant",
         delete: "Delete",
+        selectImage: "Select image",
     },
     nl: {
         // Navigation
@@ -202,12 +211,12 @@ export const translations = {
         login: 'Inloggen',
         logout: 'Uitloggen',
         username: 'Gebruikersnaam',
-        fullName: 'Volledige Naam',
+        displayName: 'Volledige Naam',
         password: 'Wachtwoord',
         welcomeBack: 'Welkom',
         loginToAccount: 'Log in op je account',
         enterUsername: 'Voer je gebruikersnaam in',
-        enterFullName: 'Voer je volledige naam in',
+        enterDisplayName: 'Voer je volledige naam in',
         enterPassword: 'Voer je wachtwoord in',
         pleaseEnterCredentials: 'Vul alle vereiste velden in',
         invalidCredentials: 'Ongeldige gebruikersnaam of wachtwoord',
@@ -217,8 +226,7 @@ export const translations = {
         createNewAccount: 'Nieuw Account Aanmaken',
         role: 'Rol',
         admin: 'Beheerder',
-        manager: 'Manager',
-        gardener: 'Tuinier',
+        user: "Gebruiker",
         createdAt: 'Aangemaakt Op',
         createdBy: 'Aangemaakt Door',
         actions: 'Acties',
@@ -230,13 +238,13 @@ export const translations = {
         changePassword: 'Wachtwoord Wijzigen',
         currentPassword: 'Huidig Wachtwoord',
         newPassword: 'Nieuw Wachtwoord',
-        confirmPassword: 'Bevestig Wachtwoord',
+        confirmPassword: 'Herhaal wachtwoord',
         enterCurrentPassword: 'Voer huidig wachtwoord in',
         enterNewPassword: 'Voer nieuw wachtwoord in',
-        confirmNewPassword: 'Bevestig nieuw wachtwoord',
+        confirmNewPassword: 'Herhaal nieuw wachtwoord',
         pleaseEnterAllFields: 'Vul alle velden in',
         passwordsDoNotMatch: 'Wachtwoorden komen niet overeen',
-        passwordTooShort: 'Wachtwoord moet minimaal 3 tekens zijn',
+        passwordTooShort: 'Wachtwoord moet minimaal 6 tekens lang zijn',
         incorrectCurrentPassword: 'Huidig wachtwoord is onjuist',
         passwordChanged: 'Wachtwoord succesvol gewijzigd',
         change: 'Wijzigen',
@@ -245,12 +253,20 @@ export const translations = {
         leaveEmptyToKeep: 'laat leeg om huidig te behouden',
         search: 'Zoeken',
         changeAdminPassword: 'Beheerderwachtwoord wijzigen',
-        adminKey: 'Beheerders Sleutel',
-        enterAdminKey: 'Voer beheerders sleutel in',
-        invalidAdminKey: 'Ongeldige beheerders sleutel',
-        invalidAdminKeyOrPassword: 'Ongeldige beheerders sleutel of huidig wachtwoord',
-        pleaseEnterAdminKey: 'Voer beheerders sleutel in',
+        adminKey: 'Jouw wachtwoord',
+        enterAdminKey: 'Voer jouw wachtwoord in',
+        invalidAdminKey: 'Jouw wachtwoord ongeldig',
+        invalidAdminKeyOrPassword: 'Jouw of huidig wachtwoord ongeldig',
+        pleaseEnterAdminKey: 'Voer jouw wachtwoord in',
         emailFormatError: 'E-mail moet in het formaat zijn: example@domain.com',
+        loginError: "Error tijdens inloggen",
+        email: "Email",
+        userSettings: "Gebruikersinstellingen",
+        confirmDeleteSelf: "Weet je zeker dat je je account wil verwijderen?",
+        registerLong: "Registreer een nieuw account",
+        registrationError: "Error tijdens het registreren",
+        or: "Of",
+        register: "Registreer",
 
         // Home page
         foodGarden: 'Voedseltuin',
@@ -304,6 +320,7 @@ export const translations = {
         comments: 'Reacties',
         addComment: 'Voeg een reactie toe...',
         send: 'Verstuur',
+        confirmDeletePlant: "Weet je zeker dat je deze plant wil verwijderen?",
 
         // Maintenance levels
         maintenanceHigh: 'Hoog',
@@ -360,9 +377,14 @@ export const translations = {
         location: "Locatie",
         createPlant: "Voeg plant toe",
         delete: "Verwijder",
+        selectImage: "Selecteer afbeelding",
     }
 };
 
 export function t(key: keyof typeof translations.en, lang: Language): string {
-    return translations[lang][key];
+    if(translations[lang][key]) return translations[lang][key];
+    else {
+        console.warn(Error("Tried to translate " + key));
+        return key;
+    }
 }
