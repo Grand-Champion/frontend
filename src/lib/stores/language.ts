@@ -382,5 +382,9 @@ export const translations = {
 };
 
 export function t(key: keyof typeof translations.en, lang: Language): string {
-    return translations[lang][key];
+    if(translations[lang][key]) return translations[lang][key];
+    else {
+        console.warn(Error("Tried to translate " + key));
+        return key;
+    }
 }

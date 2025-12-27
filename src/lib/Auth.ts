@@ -1,7 +1,18 @@
 import { jwt } from '$lib/stores/jwt';
 import { PUBLIC_API_URL } from '$env/static/public';
 
-export function getPayload(jwts: string|undefined): object {
+export type User = {
+    displayName: string | undefined,
+    email: string,
+    role: UserRole,
+    id: Number,
+    createdAt: string | undefined,
+    updatedAt: string | undefined
+};
+
+export type UserRole = "user" | "admin";
+
+export function getPayload(jwts: string | undefined): User | {} {
     if(jwts){
         const parts = jwts.split(".");
         if(parts.length === 3){
@@ -82,7 +93,7 @@ export async function refreshToken(jwts: string): Promise<void> {
     }
 }
 
-export async function getUser(jwts: string, id: number | string): Promise<object>{
+export async function getUser(jwts: string, id: number | string): Promise<User>{
     const request = await fetch(PUBLIC_API_URL + "/users/" + id, {
         headers: headers(jwts)
     });
@@ -94,7 +105,7 @@ export async function getUser(jwts: string, id: number | string): Promise<object
     }
 }
 
-export async function getUsers(jwts: string): Promise<object[]>{
+export async function getUsers(jwts: string): Promise<User[]>{
     const request = await fetch(PUBLIC_API_URL + "/users/", {
         headers: headers(jwts)
     });
@@ -125,7 +136,7 @@ export async function deleteUser(jwts: string, id: number | string, password: st
     }
 }
 
-export function headers(jwts: string | undefined){
+export function headers(jwts: string | undefined): Headers{
     const headers = new Headers();
     if(jwts){
         headers.set("Authorization", "Bearer " + jwts);
