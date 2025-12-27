@@ -111,7 +111,7 @@
                 {#if errorMessage}
                     <div
                         class="px-4 py-3 rounded-lg"
-                        style={`background-color: color-mix(in oklch, var(--status-critical) 12%, transparent); border: 1px solid color-mix(in oklch, var(--status-critical) 32%, transparent); color: var(--status-critical);`}
+                        style="background-color: color-mix(in oklch, var(--status-critical) 12%, transparent); border: 1px solid color-mix(in oklch, var(--status-critical) 32%, transparent); color: var(--status-critical);"
                     >
                         {errorMessage}
                     </div>

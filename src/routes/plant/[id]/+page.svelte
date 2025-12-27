@@ -18,8 +18,8 @@
     Send,
   } from "lucide-svelte";
   import { PUBLIC_API_URL } from '$env/static/public';
-    import { jwt } from "$lib/stores/jwt.js";
-    import { getPayload, headers } from "$lib/Auth.js";
+  import { jwt } from "$lib/stores/jwt.js";
+  import { getPayload, headers } from "$lib/Auth.js";
 
   export let data;
 

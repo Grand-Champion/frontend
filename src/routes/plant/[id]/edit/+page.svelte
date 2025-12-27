@@ -9,7 +9,7 @@
   import { PUBLIC_API_URL } from '$env/static/public';
   import PlantForm from "$lib/components/PlantForm.svelte";
   import { jwt } from "$lib/stores/jwt.js";
-    import { headers } from "$lib/Auth.js";
+  import { headers } from "$lib/Auth.js";
 
   export let data;
 
