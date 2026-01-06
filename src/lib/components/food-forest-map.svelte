@@ -108,6 +108,7 @@
   };
 
   // Local UI state
+  let selectedPlantId = null;
   let selectedPlant = null;
   let overallStatus = null;
   let overallColor = null;
@@ -116,6 +117,16 @@
   let hoveredPlantId = null;
   const comments = {};
   let commentText = "";
+
+  // Plant care advice messages updaten zonder refresh
+  $: if (selectedPlantId !== null) {
+    selectedPlant = plants.find(p => p.id === selectedPlantId) || null;
+    if (!selectedPlant) {
+      selectedPlantId = null;
+    }
+  } else {
+    selectedPlant = null;
+  }
 
   function getStatusColor(status) {
     switch (status) {
@@ -302,7 +313,7 @@
               style="position: absolute; left: {plant.posX}%; top: {plant.posY}%; transform: translate(-50%, -50%); text-align: center; width: 60px;"
             >
               <button
-                onclick={() => (selectedPlant = plant)}
+                onclick={() => (selectedPlantId = plant.id)}
                 onmouseenter={() => (hoveredPlantId = plant.id)}
                 onmouseleave={() => (hoveredPlantId = null)}
                 class="flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-110 cursor-pointer {selectedPlant?.id ===
@@ -360,7 +371,7 @@
                 </p>
               </div>
               <button
-                onclick={() => (selectedPlant = null)}
+                onclick={() => (selectedPlantId = null)}
                 class="p-2 hover:bg-muted rounded-lg cursor-pointer"
                 aria-label="Close details"><X class="h-4 w-4" /></button
               >
