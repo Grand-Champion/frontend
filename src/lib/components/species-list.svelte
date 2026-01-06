@@ -123,6 +123,12 @@
     goto(`/plant/${plantId}`);
   }
 
+  // Update alle plant kleuren wanneer plants verandert
+  $: plantColors = plants.reduce((map, plant) => {
+    map[plant.id] = getStatusColor(getStatus(plant));
+    return map;
+  }, {});
+
   const filteredPlants = derived(
     [selectedCategories, selectedStatus],
     ([$categories, $statuses]) => {
@@ -154,7 +160,6 @@
         {@const category = plant.species?.type?.toLowerCase() || "tree"}
         {@const config = categoryConfig[category]}
         {@const status = getStatus(plant)}
-        {@const statusColor = getStatusColor(status)}
         <button
           on:click={() => viewPlant(plant.id)}
           class="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-all hover:scale-[1.02] text-left w-full"
@@ -170,7 +175,7 @@
             <div class="absolute top-2 right-2">
               <div
                 class="h-4 w-4 rounded-full border-2 border-white shadow-md"
-                style={`background-color: ${statusColor};`}
+                style={`background-color: ${plantColors[plant.id]};`}
               ></div>
             </div>
           </div>
@@ -204,7 +209,7 @@
             <div class="mt-3 text-xs">
               <div
                 class="inline-block px-2 py-1 rounded-full font-semibold text-white"
-                style={`background-color: ${getStatusColor(status)};`}
+                style={`background-color: ${plantColors[plant.id]};`}
               >
                 {status === "good"
                   ? t("good", $language)

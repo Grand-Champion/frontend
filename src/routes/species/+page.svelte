@@ -28,11 +28,12 @@
       if (forestJson.data?.plants) {
         forestJson.data.plants = forestJson.data.plants.map(plant => ({
           ...plant,
+          conditions: plant.conditions ? [...plant.conditions] : [],
           species: speciesMap[plant.speciesId] || null
         }));
       }
       
-      forestData = forestJson;
+      forestData = {...forestJson};
     } catch (err) {
       console.error('Error fetching latest forest data', err);
     }
