@@ -3,6 +3,7 @@
   import { goto } from "$app/navigation";
   import { browser } from "$app/environment";
   import { language, t } from "$lib/stores/language";
+  import { PUBLIC_API_URL } from '$env/static/public';
   import {
     Leaf,
     Trees,
@@ -17,14 +18,31 @@
     MessageCircle,
     Send,
   } from "lucide-svelte";
-  import { PUBLIC_API_URL } from '$env/static/public';
+  import { onMount } from 'svelte';
 
   export let data;
+  let plantData = data?.plantData ?? null;
 
   //Pak plant, species en conditions uit de API data
-  $: plant = data.plantData?.data;
+  $: plant = plantData?.data;
   $: species = plant?.species;
   $: conditions = plant?.conditions[0] ?? {};
+
+  
+  async function fetchLatest() {
+    try {
+      const res = await fetch(`${PUBLIC_API_URL}/forests/api/v1/plants/${plant?.id}`);
+      if (!res.ok) return;
+      plantData = await res.json();
+    } catch (err) {
+      console.error('Error fetching latest plant data', err);
+    }
+  }
+
+  onMount(() => {
+    const interval = setInterval(fetchLatest, 10000);
+    return () => clearInterval(interval);
+  });
 
   // Gebruik backend species types (Tree, Shrub, Plant)
   $: categoryConfig = {
