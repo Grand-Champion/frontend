@@ -41,7 +41,7 @@
     }
 
     onMount(() => {
-        const interval = setInterval(fetchLatest, 8000);
+           const interval = setInterval(fetchLatest, 5000);
         return () => clearInterval(interval);
     });
 </script>
