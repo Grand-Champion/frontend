@@ -241,6 +241,12 @@
     overallColor = null;
   }
 
+  // Update alle plant kleuren wanneer plants verandert
+  $: plantColors = plants.reduce((map, plant) => {
+    map[plant.id] = getStatusColor(getStatus(plant));
+    return map;
+  }, {});
+
   let mapHeight;
   let mapWidth;
   let mapViewWidth;
@@ -295,8 +301,6 @@
           {#if typeof plant.posX === "number" && typeof plant.posY === "number"}
             {@const config =
               categoryConfig[plant.species?.type?.toLowerCase() || "tree"]}
-            {@const status = getStatus(plant)}
-            {@const statusColor = getStatusColor(status)}
 
             <div
               style="position: absolute; left: {plant.posX}%; top: {plant.posY}%; transform: translate(-50%, -50%); text-align: center; width: 60px;"
@@ -309,7 +313,7 @@
                 plant.id
                   ? 'ring-4 ring-white scale-110'
                   : ''}"
-                style="background-color: {statusColor};"
+                style="background-color: {plantColors[plant.id]};"
                 aria-label="View {plant.name}"
               >
                 <svelte:component this={config.icon} class="h-5 w-5" />
