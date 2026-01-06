@@ -316,6 +316,7 @@
               </button>
               <div class="text-xs text-white mt-1 truncate" title={plant.name}>
                 {plant.name}
+                  <span style="display:block; color:yellow; font-size:10px;">ID: {plant.id}</span> <!-- dit is zodat we kunnen zien welk id een plant heeft. Moet later verwijderd worden -->
               </div>
             </div>
           {/if}
