@@ -104,15 +104,6 @@
       else issueCount++;
     }
 
-    const phDiff = Math.max(
-      species.minSoilPH - conditions.soilPH,
-      conditions.soilPH - species.maxSoilPH,
-      0,
-    );
-    if (phDiff > 0) {
-      if (phDiff > 0.5) criticalCount++;
-      else issueCount++;
-    }
 
     const moistureDiff = Math.max(
       species.minSoilMoisture - conditions.soilMoisture,
@@ -181,11 +172,6 @@
       advice.push(t("adviceHumidityTooHigh", $language));
     }
 
-    if (conditions.soilPH < species.minSoilPH) {
-      advice.push(t("adviceSoilTooAcidic", $language));
-    } else if (conditions.soilPH > species.maxSoilPH) {
-      advice.push(t("adviceSoilTooAlkaline", $language));
-    }
 
     if (conditions.soilMoisture < species.minSoilMoisture) {
       advice.push(t("adviceSoilTooDry", $language));
@@ -474,25 +460,6 @@
                 </span>
               </div>
 
-              <div
-                class="flex items-center justify-between rounded-lg bg-muted p-4"
-              >
-                <div class="flex items-center gap-3">
-                  <FlaskConical class="h-5 w-5 text-muted-foreground" />
-                  <span class="font-medium">{t("soilPH", $language)}</span>
-                </div>
-                <span
-                  class="text-lg font-semibold"
-                  style={`color: ${getConditionColor(
-                    plant.conditions[0]?.soilPH ?? 0,
-                    plant.species?.minSoilPH ?? 0,
-                    plant.species?.maxSoilPH ?? 0,
-                    0.5,
-                  )}`}
-                >
-                  {plant.conditions[0]?.soilPH ?? "—"}
-                </span>
-              </div>
 
               <div
                 class="flex items-center justify-between rounded-lg bg-muted p-4"

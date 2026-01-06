@@ -73,12 +73,6 @@
       issuesCount++;
     }
     if (
-      conditions.soilPH < species.minSoilPH ||
-      conditions.soilPH > species.maxSoilPH
-    ) {
-      issuesCount++;
-    }
-    if (
       conditions.sunlight < species.minSunlight ||
       conditions.sunlight > species.maxSunlight
     ) {

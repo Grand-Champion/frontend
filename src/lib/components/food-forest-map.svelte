@@ -59,11 +59,6 @@
       }
     }
 
-    if (s.minSoilPH !== null && s.maxSoilPH !== null) {
-      if (c.soilPH < s.minSoilPH || c.soilPH > s.maxSoilPH) {
-        issuesCount++;
-      }
-    }
 
     if (s.minSunlight !== null && s.maxSunlight !== null) {
       if (c.sunlight < s.minSunlight || c.sunlight > s.maxSunlight) {
@@ -190,12 +185,6 @@
       }
     }
 
-    // Check of soil pH binnen range zit
-    if (s.minSoilPH !== null && s.maxSoilPH !== null) {
-      if (c.soilPH < s.minSoilPH || c.soilPH > s.maxSoilPH) {
-        advice.push("Soil pH out of range.");
-      }
-    }
 
     // Check of sunlight binnen range zit
     if (s.minSunlight !== null && s.maxSunlight !== null) {
