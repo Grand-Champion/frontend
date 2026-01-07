@@ -8,7 +8,7 @@
   } from "lucide-svelte";
   import { PUBLIC_API_URL } from '$env/static/public';
   import MessageForm from "$lib/components/MessageForm.svelte";
-  import { getPayload } from "$lib/Auth";
+  import { getPayload, headers } from "$lib/Auth";
   import { jwt } from "$lib/stores/jwt";
 
   export let data;
@@ -29,7 +29,8 @@
     console.log(forest.id);
     const request = await fetch(PUBLIC_API_URL + `/forests/api/v1/messages`, {
       body: data,
-      method: "POST"
+      method: "POST",
+      headers: headers($jwt)
     });
     if(!request.ok){
       alert(request.statusText);
