@@ -1,5 +1,6 @@
 <script>
-  let { image } = $props();
+  import { language, t } from "$lib/stores/language";
+  let { image, name } = $props();
   let imgElt;
   let imgUrl;
   async function change(e){
@@ -13,6 +14,6 @@
     await fileReader.readAsDataURL(file);
   }
 </script>
-<input type="file" accept="image/*" onchange={change} />
+<label for="filePicker">{t("selectImage", $language)}</label> <input type="file" accept="image/*" onchange={change} id="filePicker" />
 <img src={image} bind:this={imgElt} class="max-w-[60vh] max-h-[60vh]" />
-<input type="hidden" bind:this={imgUrl} name="image"/>
+<input type="hidden" bind:this={imgUrl} name={name || "image"}/>

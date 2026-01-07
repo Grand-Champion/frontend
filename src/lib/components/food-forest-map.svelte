@@ -18,6 +18,9 @@
   import { selectedCategories, selectedStatus } from "$lib/stores/filters";
   import { goto } from "$app/navigation";
   import Filters from "$lib/components/Filters.svelte";
+  import ZoomableMap from "./ZoomableMap.svelte";
+  import { jwt } from "$lib/stores/jwt";
+  import { getPayload } from "$lib/Auth";
 
   // Pak API data
   export let forestData;
@@ -241,32 +244,6 @@
     overallColor = null;
   }
 
-  let mapHeight;
-  let mapWidth;
-  let mapViewWidth;
-  let mapViewHeight;
-  let mapView;
-  $: mapZoomState = {originX: 0, originY: 0, zoom: 1, zoomMultiplier: Math.min(mapViewHeight/mapHeight, mapViewWidth/mapWidth)};
-
-  function mapZoom(e){
-    const boundingClientRect = mapView.getBoundingClientRect();
-    const screenX = e.pageX - boundingClientRect.x;
-    const screenY = e.pageY - boundingClientRect.y;
-    
-    const offsetX = (screenX - mapZoomState.originX) / (mapZoomState.zoom*mapZoomState.zoomMultiplier) + mapZoomState.originX;
-    const offsetY = (screenY - mapZoomState.originY) / (mapZoomState.zoom*mapZoomState.zoomMultiplier) + mapZoomState.originY;
-    mapZoomState.zoom = limit( mapZoomState.zoom*(1-e.deltaY/1000), 0.3, 5);
-
-    if(mapZoomState.zoom*mapZoomState.zoomMultiplier !== 1 ){
-      mapZoomState.originX = (offsetX * mapZoomState.zoom*mapZoomState.zoomMultiplier - screenX)/(mapZoomState.zoom*mapZoomState.zoomMultiplier - 1);
-      mapZoomState.originY = (offsetY * mapZoomState.zoom*mapZoomState.zoomMultiplier - screenY)/(mapZoomState.zoom*mapZoomState.zoomMultiplier - 1);
-    }
-  }
-
-  function limit(n, min, max){
-    return Math.min(Math.max(n, min), max);
-  }
-
 </script>
 
 <div class="flex h-full w-full">
@@ -278,59 +255,46 @@
   </div>
 
   <!-- Center map area -->
-  <div class="overflow-hidden w-full h-full relative" bind:clientHeight={mapViewHeight} bind:clientWidth={mapViewWidth} onwheelcapture={mapZoom} bind:this={mapView}>
-    <div class="relative flex-1 bg-muted" style:width="{mapWidth}px" style:height="{mapHeight}px" style:transform="scale({mapZoomState.zoom*mapZoomState.zoomMultiplier})" style:transform-origin="{mapZoomState.originX}px {mapZoomState.originY}px">
-      <div class="absolute inset-0">
-        <img
-          src="{forestData?.data?.image}"
-          alt="Food forest aerial view"
-          bind:naturalHeight={mapHeight}
-          bind:naturalWidth={mapWidth}
-        />
-        <div class="absolute inset-0 bg-black/10"></div>
-      </div>
+  <ZoomableMap image={forestData?.data?.image} alt="Food forest aerial view">
+    {#each $filteredPlants as plant (plant.id)}
+      {#if typeof plant.posX === "number" && typeof plant.posY === "number"}
+        {@const config =
+          categoryConfig[plant.species?.type?.toLowerCase() || "tree"]}
+        {@const status = getStatus(plant)}
+        {@const statusColor = getStatusColor(status)}
 
-      <div class="absolute inset-0" style:width="{mapWidth}px" style:height="{mapHeight}px">
-        {#each $filteredPlants as plant (plant.id)}
-          {#if typeof plant.posX === "number" && typeof plant.posY === "number"}
-            {@const config =
-              categoryConfig[plant.species?.type?.toLowerCase() || "tree"]}
-            {@const status = getStatus(plant)}
-            {@const statusColor = getStatusColor(status)}
+        <div
+          style="position: absolute; left: {plant.posX}%; top: {plant.posY}%; transform: translate(-50%, -50%); text-align: center; width: 60px;"
+        >
+          <button
+            onclick={() => (selectedPlant = plant)}
+            onmouseenter={() => (hoveredPlantId = plant.id)}
+            onmouseleave={() => (hoveredPlantId = null)}
+            class="flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-110 cursor-pointer {selectedPlant?.id ===
+            plant.id
+              ? 'ring-4 ring-white scale-110'
+              : ''}"
+            style="background-color: {statusColor};"
+            aria-label="View {plant.name}"
+          >
+            <svelte:component this={config.icon} class="h-5 w-5" />
+          </button>
+          <div class="text-xs text-white mt-1 truncate" title={plant.name}>
+            {plant.name}
+          </div>
+        </div>
+      {/if}
 
-            <div
-              style="position: absolute; left: {plant.posX}%; top: {plant.posY}%; transform: translate(-50%, -50%); text-align: center; width: 60px;"
-            >
-              <button
-                onclick={() => (selectedPlant = plant)}
-                onmouseenter={() => (hoveredPlantId = plant.id)}
-                onmouseleave={() => (hoveredPlantId = null)}
-                class="flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-110 cursor-pointer {selectedPlant?.id ===
-                plant.id
-                  ? 'ring-4 ring-white scale-110'
-                  : ''}"
-                style="background-color: {statusColor};"
-                aria-label="View {plant.name}"
-              >
-                <svelte:component this={config.icon} class="h-5 w-5" />
-              </button>
-              <div class="text-xs text-white mt-1 truncate" title={plant.name}>
-                {plant.name}
-              </div>
-            </div>
-          {/if}
-
-          {#if hoveredPlantId === plant.id}
-            <div
-              class="absolute rounded-lg bg-gray-900 px-3 py-2 text-sm text-white shadow-lg whitespace-nowrap pointer-events-none z-50"
-              style="left: {plant.posX}%; top: calc({plant.posY}% + 30px); transform: translateX(-50%);"
-            >
-              {plant.species?.name || `Plant ${plant.id}`}
-            </div>
-          {/if}
-        {/each}
-      </div>
-    </div>
+      {#if hoveredPlantId === plant.id}
+        <div
+          class="absolute rounded-lg bg-gray-900 px-3 py-2 text-sm text-white shadow-lg whitespace-nowrap pointer-events-none z-50"
+          style="left: {plant.posX}%; top: calc({plant.posY}% + 30px); transform: translateX(-50%);"
+        >
+          {plant.species?.name || `Plant ${plant.id}`}
+        </div>
+      {/if}
+    {/each}
+    <svelte:fragment slot="over">
       {#if selectedPlant}
         <div
           class="map-overlay absolute right-6 top-6 bottom-6 w-96 max-w-[95%] rounded-lg border border-white/40 dark:border-white/10 bg-white/70 dark:bg-green-950/25 backdrop-blur-lg shadow-xl z-50 overflow-y-auto pointer-events-auto"
@@ -458,14 +422,16 @@
           </div>
         </div>
       {/if}
-      
+      {#if (getPayload($jwt).role === "admin" || getPayload($jwt).id === forestData.data.ownerId)}
       <button
         onclick={goto("/plant/create")}
         class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer map-overlay absolute left-6 top-6 "
       >
         {t("createPlant", $language)}
       </button>
-  </div>
+      {/if}
+    </svelte:fragment>
+  </ZoomableMap>
 </div>
 
 <style>
