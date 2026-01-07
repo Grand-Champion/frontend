@@ -203,6 +203,17 @@
           <Grid3X3 class="w-4 h-4" />
           <span class="font-medium">{t("speciesList", $language)}</span>
         </a>
+
+        <a
+          href="/messages"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
+            .url.pathname === '/messages'
+            ? 'bg-primary text-primary-foreground hover:bg-primary/80'
+            : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
+        >
+          <Grid3X3 class="w-4 h-4" />
+          <span class="font-medium">{t("messages", $language)}</span>
+        </a>
       </div>
     </div>
 

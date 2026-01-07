@@ -187,6 +187,10 @@ export const translations = {
         location: "Location",
         createPlant: "Create plant",
         delete: "Delete",
+
+        // Message create page
+        message: "Message",
+        createMessage: "Create Message"
     },
     nl: {
         // Navigation
@@ -360,6 +364,10 @@ export const translations = {
         location: "Locatie",
         createPlant: "Voeg plant toe",
         delete: "Verwijder",
+
+        //Message create page
+        message: "Bericht",
+        createMessage: "Schrijf een bericht"
     }
 };
 

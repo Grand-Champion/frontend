@@ -18,6 +18,7 @@
   <p class="message-body">
     {message.message}
   </p>
+
 </article>
 
 <style>
