@@ -240,6 +240,33 @@
     overallStatus = null;
     overallColor = null;
   }
+
+  let mapHeight;
+  let mapWidth;
+  let mapViewWidth;
+  let mapViewHeight;
+  let mapView;
+  $: mapZoomState = {originX: 0, originY: 0, zoom: 1, zoomMultiplier: Math.min(mapViewHeight/mapHeight, mapViewWidth/mapWidth)};
+
+  function mapZoom(e){
+    const boundingClientRect = mapView.getBoundingClientRect();
+    const screenX = e.pageX - boundingClientRect.x;
+    const screenY = e.pageY - boundingClientRect.y;
+    
+    const offsetX = (screenX - mapZoomState.originX) / (mapZoomState.zoom*mapZoomState.zoomMultiplier) + mapZoomState.originX;
+    const offsetY = (screenY - mapZoomState.originY) / (mapZoomState.zoom*mapZoomState.zoomMultiplier) + mapZoomState.originY;
+    mapZoomState.zoom = limit( mapZoomState.zoom*(1-e.deltaY/1000), 0.3, 5);
+
+    if(mapZoomState.zoom*mapZoomState.zoomMultiplier !== 1 ){
+      mapZoomState.originX = (offsetX * mapZoomState.zoom*mapZoomState.zoomMultiplier - screenX)/(mapZoomState.zoom*mapZoomState.zoomMultiplier - 1);
+      mapZoomState.originY = (offsetY * mapZoomState.zoom*mapZoomState.zoomMultiplier - screenY)/(mapZoomState.zoom*mapZoomState.zoomMultiplier - 1);
+    }
+  }
+
+  function limit(n, min, max){
+    return Math.min(Math.max(n, min), max);
+  }
+
 </script>
 
 <div class="flex h-full w-full">
@@ -251,184 +278,193 @@
   </div>
 
   <!-- Center map area -->
-  <div class="relative flex-1 bg-muted">
-    <div class="absolute inset-0">
-      <img
-        src="/images/food-forest-map.jpg"
-        alt="Food forest aerial view"
-        class="w-full h-full object-cover"
-      />
-      <div class="absolute inset-0 bg-black/10"></div>
-    </div>
+  <div class="overflow-hidden w-full h-full relative" bind:clientHeight={mapViewHeight} bind:clientWidth={mapViewWidth} onwheelcapture={mapZoom} bind:this={mapView}>
+    <div class="relative flex-1 bg-muted" style:width="{mapWidth}px" style:height="{mapHeight}px" style:transform="scale({mapZoomState.zoom*mapZoomState.zoomMultiplier})" style:transform-origin="{mapZoomState.originX}px {mapZoomState.originY}px">
+      <div class="absolute inset-0">
+        <img
+          src="{forestData?.data?.image}"
+          alt="Food forest aerial view"
+          bind:naturalHeight={mapHeight}
+          bind:naturalWidth={mapWidth}
+        />
+        <div class="absolute inset-0 bg-black/10"></div>
+      </div>
 
-    <div class="absolute inset-0">
-      {#each $filteredPlants as plant (plant.id)}
-        {#if typeof plant.posX === "number" && typeof plant.posY === "number"}
-          {@const config =
-            categoryConfig[plant.species?.type?.toLowerCase() || "tree"]}
-          {@const status = getStatus(plant)}
-          {@const statusColor = getStatusColor(status)}
+      <div class="absolute inset-0" style:width="{mapWidth}px" style:height="{mapHeight}px">
+        {#each $filteredPlants as plant (plant.id)}
+          {#if typeof plant.posX === "number" && typeof plant.posY === "number"}
+            {@const config =
+              categoryConfig[plant.species?.type?.toLowerCase() || "tree"]}
+            {@const status = getStatus(plant)}
+            {@const statusColor = getStatusColor(status)}
 
-          <div
-            style="position: absolute; left: {plant.posX}%; top: {plant.posY}%; transform: translate(-50%, -50%); text-align: center; width: 60px;"
-          >
-            <button
-              on:click={() => (selectedPlant = plant)}
-              on:mouseenter={() => (hoveredPlantId = plant.id)}
-              on:mouseleave={() => (hoveredPlantId = null)}
-              class="flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-110 cursor-pointer {selectedPlant?.id ===
-              plant.id
-                ? 'ring-4 ring-white scale-110'
-                : ''}"
-              style="background-color: {statusColor};"
-              aria-label="View {plant.name}"
+            <div
+              style="position: absolute; left: {plant.posX}%; top: {plant.posY}%; transform: translate(-50%, -50%); text-align: center; width: 60px;"
             >
-              <svelte:component this={config.icon} class="h-5 w-5" />
-            </button>
-            <div class="text-xs text-white mt-1 truncate" title={plant.name}>
-              {plant.name}
-            </div>
-          </div>
-        {/if}
-
-        {#if hoveredPlantId === plant.id}
-          <div
-            class="absolute rounded-lg bg-gray-900 px-3 py-2 text-sm text-white shadow-lg whitespace-nowrap pointer-events-none z-50"
-            style="left: {plant.posX}%; top: calc({plant.posY}% + 30px); transform: translateX(-50%);"
-          >
-            {plant.species?.name || `Plant ${plant.id}`}
-          </div>
-        {/if}
-      {/each}
-    </div>
-
-    {#if selectedPlant}
-      <div
-        class="map-overlay absolute right-6 top-6 bottom-6 w-96 max-w-[95%] rounded-lg border border-white/40 dark:border-white/10 bg-white/70 dark:bg-green-950/25 backdrop-blur-lg shadow-xl z-50 overflow-y-auto pointer-events-auto"
-      >
-        <div class="p-6">
-          <div class="mb-4 flex items-start justify-between">
-            <div class="flex-1">
-              <div
-                class="mb-2 inline-block px-2 py-1 rounded text-xs font-semibold text-primary-foreground"
-                style={`background-color: ${categoryConfig[selectedPlant.species?.type?.toLowerCase() || "tree"]?.color || "var(--category-tree)"};`}
+              <button
+                onclick={() => (selectedPlant = plant)}
+                onmouseenter={() => (hoveredPlantId = plant.id)}
+                onmouseleave={() => (hoveredPlantId = null)}
+                class="flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-110 cursor-pointer {selectedPlant?.id ===
+                plant.id
+                  ? 'ring-4 ring-white scale-110'
+                  : ''}"
+                style="background-color: {statusColor};"
+                aria-label="View {plant.name}"
               >
-                {categoryConfig[
-                  selectedPlant.species?.type?.toLowerCase() || "tree"
-                ]?.label || "Unknown"}
+                <svelte:component this={config.icon} class="h-5 w-5" />
+              </button>
+              <div class="text-xs text-white mt-1 truncate" title={plant.name}>
+                {plant.name}
               </div>
-              <h2 class="text-2xl font-bold text-card-foreground">
-                {selectedPlant.name
-                  ? selectedPlant.name
-                  : selectedPlant.species?.name
-                    ? selectedPlant.species.name
-                    : `Plant ${selectedPlant.id}`}
-              </h2>
-              <p class="text-sm italic text-muted-foreground">
-                {selectedPlant.species?.scientificName ||
-                  `Species ${selectedPlant.speciesId || ""}`}
-              </p>
             </div>
-            <button
-              on:click={() => (selectedPlant = null)}
-              class="p-2 hover:bg-muted rounded-lg cursor-pointer"
-              aria-label="Close details"><X class="h-4 w-4" /></button
-            >
-          </div>
+          {/if}
 
-          <div class="space-y-6">
+          {#if hoveredPlantId === plant.id}
             <div
-              class="relative aspect-4/3 w-full overflow-hidden rounded-lg bg-muted"
+              class="absolute rounded-lg bg-gray-900 px-3 py-2 text-sm text-white shadow-lg whitespace-nowrap pointer-events-none z-50"
+              style="left: {plant.posX}%; top: calc({plant.posY}% + 30px); transform: translateX(-50%);"
             >
-              <img
-                src={selectedPlant.image ||
-                  selectedPlant.species?.image ||
-                  "/placeholder.svg"}
-                alt={selectedPlant.name
-                  ? selectedPlant.name
-                  : `Plant ${selectedPlant.id}`}
-                class="w-full h-full object-cover"
-              />
+              {plant.species?.name || `Plant ${plant.id}`}
             </div>
-
-            <div
-              class="rounded-lg p-4 border"
-              style={`background-color: ${statusBg(overallColor)}; border-color: ${statusBorder(overallColor)};`}
-            >
-              <div class="flex items-center justify-between">
-                <h3 class="text-sm font-semibold text-card-foreground">
-                  Overall Status
-                </h3>
+          {/if}
+        {/each}
+      </div>
+    </div>
+      {#if selectedPlant}
+        <div
+          class="map-overlay absolute right-6 top-6 bottom-6 w-96 max-w-[95%] rounded-lg border border-white/40 dark:border-white/10 bg-white/70 dark:bg-green-950/25 backdrop-blur-lg shadow-xl z-50 overflow-y-auto pointer-events-auto"
+        >
+          <div class="p-6">
+            <div class="mb-4 flex items-start justify-between">
+              <div class="flex-1">
                 <div
-                  class="px-2 py-1 rounded text-xs font-semibold text-white"
-                  style={`background-color: ${overallColor};`}
+                  class="mb-2 inline-block px-2 py-1 rounded text-xs font-semibold text-primary-foreground"
+                  style={`background-color: ${categoryConfig[selectedPlant.species?.type?.toLowerCase() || "tree"]?.color || "var(--category-tree)"};`}
                 >
-                  {overallStatus === "good"
-                    ? "Optimal"
-                    : overallStatus === "attention"
-                      ? "Needs Attention"
-                      : "Critical"}
+                  {categoryConfig[
+                    selectedPlant.species?.type?.toLowerCase() || "tree"
+                  ]?.label || "Unknown"}
+                </div>
+                <h2 class="text-2xl font-bold text-card-foreground">
+                  {selectedPlant.name
+                    ? selectedPlant.name
+                    : selectedPlant.species?.name
+                      ? selectedPlant.species.name
+                      : `Plant ${selectedPlant.id}`}
+                </h2>
+                <p class="text-sm italic text-muted-foreground">
+                  {selectedPlant.species?.scientificName ||
+                    `Species ${selectedPlant.speciesId || ""}`}
+                </p>
+              </div>
+              <button
+                onclick={() => (selectedPlant = null)}
+                class="p-2 hover:bg-muted rounded-lg cursor-pointer"
+                aria-label="Close details"><X class="h-4 w-4" /></button
+              >
+            </div>
+
+            <div class="space-y-6">
+              <div
+                class="relative aspect-4/3 w-full overflow-hidden rounded-lg bg-muted"
+              >
+                <img
+                  src={selectedPlant.image ||
+                    selectedPlant.species?.image ||
+                    "/placeholder.svg"}
+                  alt={selectedPlant.name
+                    ? selectedPlant.name
+                    : `Plant ${selectedPlant.id}`}
+                  class="w-full h-full object-cover"
+                />
+              </div>
+
+              <div
+                class="rounded-lg p-4 border"
+                style={`background-color: ${statusBg(overallColor)}; border-color: ${statusBorder(overallColor)};`}
+              >
+                <div class="flex items-center justify-between">
+                  <h3 class="text-sm font-semibold text-card-foreground">
+                    Overall Status
+                  </h3>
+                  <div
+                    class="px-2 py-1 rounded text-xs font-semibold text-white"
+                    style={`background-color: ${overallColor};`}
+                  >
+                    {overallStatus === "good"
+                      ? "Optimal"
+                      : overallStatus === "attention"
+                        ? "Needs Attention"
+                        : "Critical"}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div>
-              <h3 class="mb-3 text-sm font-semibold text-card-foreground">
-                Care Advice
-              </h3>
-              <div
-                class="space-y-2 rounded-lg border p-4"
-                style="background-color: color-mix(in oklch, var(--primary) 12%, transparent); border-color: color-mix(in oklch, var(--primary) 32%, transparent);"
-              >
-                {#each generateAdvice(selectedPlant) as advice, i (i)}
-                  <p class="text-sm text-foreground">{advice}</p>
-                {/each}
-              </div>
-            </div>
-
-            <div>
-              <button
-                on:click={() => viewPlantDetails(selectedPlant.id)}
-                class="w-full mb-3 flex items-center justify-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium cursor-pointer"
-                >View Full Details <ExternalLink class="h-4 w-4" /></button
-              >
-
-              <div class="mb-3 flex items-center gap-2">
-                <MessageCircle class="h-4 w-4" />
-                <h3 class="text-sm font-semibold text-card-foreground">
-                  Comments ({Array.isArray(comments[selectedPlant.id])
-                    ? comments[selectedPlant.id].length
-                    : 0})
+              <div>
+                <h3 class="mb-3 text-sm font-semibold text-card-foreground">
+                  Care Advice
                 </h3>
-              </div>
-
-              <div class="space-y-2 mb-3 max-h-32 overflow-y-auto">
-                {#each Array.isArray(comments[selectedPlant.id]) ? comments[selectedPlant.id] : [] as comment, i (i)}
-                  <div class="rounded-lg bg-muted p-2">
-                    <p class="text-sm text-muted-foreground">{comment}</p>
-                  </div>
-                {/each}
-              </div>
-
-              <div class="flex gap-2">
-                <input
-                  type="text"
-                  bind:value={commentText}
-                  on:keypress={(e) => e.key === "Enter" && addComment()}
-                  placeholder="Add a comment..."
-                  class="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                <button
-                  on:click={addComment}
-                  class="px-3 py-2 rounded-lg border border-border hover:bg-muted cursor-pointer"
-                  ><Send class="h-3 w-3" /></button
+                <div
+                  class="space-y-2 rounded-lg border p-4"
+                  style="background-color: color-mix(in oklch, var(--primary) 12%, transparent); border-color: color-mix(in oklch, var(--primary) 32%, transparent);"
                 >
+                  {#each generateAdvice(selectedPlant) as advice, i (i)}
+                    <p class="text-sm text-foreground">{advice}</p>
+                  {/each}
+                </div>
+              </div>
+
+              <div>
+                <button
+                  onclick={() => viewPlantDetails(selectedPlant.id)}
+                  class="w-full mb-3 flex items-center justify-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium cursor-pointer"
+                  >View Full Details <ExternalLink class="h-4 w-4" /></button
+                >
+
+                <div class="mb-3 flex items-center gap-2">
+                  <MessageCircle class="h-4 w-4" />
+                  <h3 class="text-sm font-semibold text-card-foreground">
+                    Comments ({Array.isArray(comments[selectedPlant.id])
+                      ? comments[selectedPlant.id].length
+                      : 0})
+                  </h3>
+                </div>
+
+                <div class="space-y-2 mb-3 max-h-32 overflow-y-auto">
+                  {#each Array.isArray(comments[selectedPlant.id]) ? comments[selectedPlant.id] : [] as comment, i (i)}
+                    <div class="rounded-lg bg-muted p-2">
+                      <p class="text-sm text-muted-foreground">{comment}</p>
+                    </div>
+                  {/each}
+                </div>
+
+                <div class="flex gap-2">
+                  <input
+                    type="text"
+                    bind:value={commentText}
+                    onkeypress={(e) => e.key === "Enter" && addComment()}
+                    placeholder="Add a comment..."
+                    class="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <button
+                    onclick={addComment}
+                    class="px-3 py-2 rounded-lg border border-border hover:bg-muted cursor-pointer"
+                    ><Send class="h-3 w-3" /></button
+                  >
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    {/if}
+      {/if}
+      
+      <button
+        onclick={goto("/plant/create")}
+        class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer map-overlay absolute left-6 top-6 "
+      >
+        {t("createPlant", $language)}
+      </button>
   </div>
 </div>
 
