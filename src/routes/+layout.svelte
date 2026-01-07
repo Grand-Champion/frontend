@@ -10,8 +10,7 @@
   $: isHomePage = $page.url.pathname === "/";
   $: isManagementPage = $page.url.pathname === "/management";
   $: isLoginPage = $page.url.pathname === "/login";
-  $: isScrollable =
-    isPlantPage || isHomePage || isManagementPage || isLoginPage;
+  $: isScrollable = isPlantPage || isHomePage || isManagementPage;
 
   // Initialize theme on mount
   onMount(() => {
@@ -36,7 +35,7 @@
   </script>
 </svelte:head>
 
-<div class="h-screen w-full flex flex-col">
+<div class="h-[100dvh] w-full flex flex-col">
   <Navigation />
   <main
     class="flex-1"

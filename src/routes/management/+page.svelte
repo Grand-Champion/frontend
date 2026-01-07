@@ -10,6 +10,7 @@
         Eye,
         EyeOff,
         Pencil,
+        CheckCircle2,
     } from "lucide-svelte";
 
     $: pageTitle = `${t("accountManagement", $language)} - Food Forest`;
@@ -71,7 +72,11 @@
 
     function openDeleteConfirm(userId: string) {
         const user = $auth.users.find((u) => u.id === userId);
-        if (user && user.role !== "admin") {
+        if (
+            user &&
+            user.role !== "admin" &&
+            !(user.role === "manager" && user.id === $auth.currentUser?.id)
+        ) {
             userToDelete = userId;
             userToDeleteName = user.fullName;
             showDeleteConfirm = true;
@@ -377,7 +382,7 @@
     <title>{pageTitle}</title>
 </svelte:head>
 
-<div class="min-h-screen bg-background p-6">
+<div class="bg-background p-6">
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
         <div class="mb-8">
@@ -390,10 +395,12 @@
         </div>
 
         <!-- Create User Button and Search Filter -->
-        <div class="mb-6 flex items-center justify-between gap-4">
+        <div
+            class="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4"
+        >
             <button
                 on:click={() => (showCreateForm = !showCreateForm)}
-                class="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
+                class="flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
             >
                 <UserPlus class="w-4 h-4" />
                 {t("createNewAccount", $language)}
@@ -402,7 +409,7 @@
                 type="text"
                 bind:value={searchFilter}
                 placeholder="{t('search', $language)}..."
-                class="px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary w-80"
+                class="px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary w-full sm:w-80"
             />
         </div>
 
@@ -457,7 +464,7 @@
                                 for="new-email"
                                 class="block text-sm font-medium text-foreground mb-2"
                             >
-                                Email
+                                {t("email", $language)}
                             </label>
                             <input
                                 id="new-email"
@@ -574,8 +581,10 @@
             </div>
         {/if}
 
-        <!-- Users List -->
-        <div class="bg-card border border-border rounded-lg overflow-hidden">
+        <!-- Users List - Desktop Table -->
+        <div
+            class="hidden lg:block bg-card border border-border rounded-lg overflow-hidden"
+        >
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead class="bg-muted">
@@ -659,7 +668,23 @@
                                     {user.username}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-foreground">
-                                    {user.fullName}
+                                    <div class="flex items-center gap-2">
+                                        {user.fullName}
+                                        {#if user.id === $auth.currentUser?.id}
+                                            <div
+                                                title={$language === "en"
+                                                    ? "Currently Logged In"
+                                                    : "Momenteel Ingelogd"}
+                                                class="cursor-help"
+                                            >
+                                                <CheckCircle2
+                                                    class="w-4 h-4"
+                                                    style="color: var(--action-icon);"
+                                                    aria-label="Currently logged in"
+                                                />
+                                            </div>
+                                        {/if}
+                                    </div>
                                 </td>
                                 <td
                                     class="px-6 py-4 text-sm text-muted-foreground"
@@ -720,6 +745,8 @@
                                                             editFullName[
                                                                 user.id
                                                             ] = user.fullName;
+                                                            editEmail[user.id] =
+                                                                user.email;
                                                             editPassword[
                                                                 user.id
                                                             ] = user.password;
@@ -882,7 +909,7 @@
                                                         for="edit-email-{user.id}"
                                                         class="block text-sm font-medium text-foreground mb-2"
                                                     >
-                                                        Email
+                                                        {t("email", $language)}
                                                     </label>
                                                     <input
                                                         id="edit-email-{user.id}"
@@ -1102,6 +1129,358 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+
+        <!-- Users List - Mobile Cards -->
+        <div class="lg:hidden space-y-4">
+            {#each sortedUsers as user}
+                <div class="bg-card border border-border rounded-lg p-4">
+                    <div class="space-y-3">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    <h3 class="font-semibold text-foreground">
+                                        {user.fullName}
+                                    </h3>
+                                    {#if user.id === $auth.currentUser?.id}
+                                        <div
+                                            title={$language === "en"
+                                                ? "Currently Logged In"
+                                                : "Momenteel Ingelogd"}
+                                            class="cursor-help"
+                                        >
+                                            <CheckCircle2
+                                                class="w-4 h-4"
+                                                style="color: var(--action-icon);"
+                                                aria-label="Currently logged in"
+                                            />
+                                        </div>
+                                    {/if}
+                                </div>
+                                <p class="text-sm text-muted-foreground">
+                                    {user.username}
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span
+                                    class="px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap"
+                                    style={getRoleBadgeStyle(user.role)}
+                                >
+                                    {t(user.role, $language)}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="text-sm space-y-1">
+                            <div class="flex gap-2">
+                                <span class="text-muted-foreground">Email:</span
+                                >
+                                <span class="text-foreground">{user.email}</span
+                                >
+                            </div>
+                            <div class="flex gap-2">
+                                <span class="text-muted-foreground"
+                                    >{t("createdAt", $language)}:</span
+                                >
+                                <span class="text-foreground"
+                                    >{new Date(
+                                        user.createdAt,
+                                    ).toLocaleDateString()}</span
+                                >
+                            </div>
+                        </div>
+                        {#if !(($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id) || ($auth.currentUser?.role === "manager" && user.role !== "gardener" && user.id !== $auth.currentUser?.id))}
+                            <div
+                                class="flex items-center gap-2 pt-2 border-t border-border"
+                            >
+                                {#if !($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id)}
+                                    <button
+                                        on:click={() => {
+                                            Object.keys(editingUser).forEach(
+                                                (id) => {
+                                                    if (id !== user.id) {
+                                                        editingUser[id] = false;
+                                                        editError[id] = "";
+                                                        editPassword[id] = "";
+                                                        passwordVisibility[id] =
+                                                            false;
+                                                    }
+                                                },
+                                            );
+                                            editingUser[user.id] =
+                                                !editingUser[user.id];
+                                            if (editingUser[user.id]) {
+                                                editUsername[user.id] =
+                                                    user.username;
+                                                editFullName[user.id] =
+                                                    user.fullName;
+                                                editEmail[user.id] = user.email;
+                                                editPassword[user.id] =
+                                                    user.password;
+                                                editRole[user.id] = user.role;
+                                                editError[user.id] = "";
+                                            }
+                                        }}
+                                        class="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors cursor-pointer flex-1"
+                                    >
+                                        <Pencil
+                                            class="w-4 h-4"
+                                            style="color: var(--action-icon);"
+                                        />
+                                        <span class="text-sm font-medium"
+                                            >{t("edit", $language)}</span
+                                        >
+                                    </button>
+                                {/if}
+                                {#if !($auth.currentUser?.role === "manager" && user.role === "manager" && user.id !== $auth.currentUser?.id) && !($auth.currentUser?.role === "manager" && user.role !== "gardener" && user.id !== $auth.currentUser?.id) && user.role !== "admin" && !(user.role === "manager" && user.id === $auth.currentUser?.id)}
+                                    <button
+                                        on:click={() =>
+                                            handleDeleteUser(user.id)}
+                                        class="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors cursor-pointer flex-1"
+                                    >
+                                        <Trash2
+                                            class="w-4 h-4"
+                                            style="color: var(--status-critical);"
+                                        />
+                                        <span
+                                            class="text-sm font-medium"
+                                            style="color: var(--status-critical);"
+                                            >{t("delete", $language)}</span
+                                        >
+                                    </button>
+                                {/if}
+                            </div>
+                        {/if}
+                    </div>
+
+                    {#if editingUser[user.id]}
+                        <div class="mt-4 pt-4 border-t border-border">
+                            <form
+                                on:submit|preventDefault={() => {
+                                    if (user.role === "admin") {
+                                        handleAdminEditSave(
+                                            user.id,
+                                            editPassword[user.id],
+                                        );
+                                    } else {
+                                        handleEditUser(user.id);
+                                    }
+                                }}
+                                class="space-y-4"
+                            >
+                                <h3
+                                    class="text-sm font-semibold text-foreground"
+                                >
+                                    {t("editUser", $language)}
+                                </h3>
+
+                                <div class="space-y-3">
+                                    <div>
+                                        <label
+                                            for="edit-username-mobile-{user.id}"
+                                            class="block text-sm font-medium text-foreground mb-2"
+                                        >
+                                            {t("username", $language)}
+                                        </label>
+                                        <input
+                                            id="edit-username-mobile-{user.id}"
+                                            type="text"
+                                            bind:value={editUsername[user.id]}
+                                            required
+                                            disabled={user.role === "admin" ||
+                                                ($auth.currentUser?.role ===
+                                                    "manager" &&
+                                                    user.role === "manager" &&
+                                                    user.id !==
+                                                        $auth.currentUser?.id)}
+                                            class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary {user.role ===
+                                                'admin' ||
+                                            ($auth.currentUser?.role ===
+                                                'manager' &&
+                                                user.role === 'manager' &&
+                                                user.id !==
+                                                    $auth.currentUser?.id)
+                                                ? 'opacity-60 cursor-not-allowed'
+                                                : ''}"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label
+                                            for="edit-fullname-mobile-{user.id}"
+                                            class="block text-sm font-medium text-foreground mb-2"
+                                        >
+                                            {t("fullName", $language)}
+                                        </label>
+                                        <input
+                                            id="edit-fullname-mobile-{user.id}"
+                                            type="text"
+                                            bind:value={editFullName[user.id]}
+                                            required
+                                            disabled={user.role === "admin" ||
+                                                ($auth.currentUser?.role ===
+                                                    "manager" &&
+                                                    user.role === "manager" &&
+                                                    user.id !==
+                                                        $auth.currentUser?.id)}
+                                            class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary {user.role ===
+                                                'admin' ||
+                                            ($auth.currentUser?.role ===
+                                                'manager' &&
+                                                user.role === 'manager' &&
+                                                user.id !==
+                                                    $auth.currentUser?.id)
+                                                ? 'opacity-60 cursor-not-allowed'
+                                                : ''}"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label
+                                            for="edit-email-mobile-{user.id}"
+                                            class="block text-sm font-medium text-foreground mb-2"
+                                        >
+                                            {t("email", $language)}
+                                        </label>
+                                        <input
+                                            id="edit-email-mobile-{user.id}"
+                                            type="email"
+                                            bind:value={editEmail[user.id]}
+                                            required
+                                            disabled={user.role === "admin" ||
+                                                ($auth.currentUser?.role ===
+                                                    "manager" &&
+                                                    user.role === "manager" &&
+                                                    user.id !==
+                                                        $auth.currentUser?.id)}
+                                            class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary {user.role ===
+                                                'admin' ||
+                                            ($auth.currentUser?.role ===
+                                                'manager' &&
+                                                user.role === 'manager' &&
+                                                user.id !==
+                                                    $auth.currentUser?.id)
+                                                ? 'opacity-60 cursor-not-allowed'
+                                                : ''}"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label
+                                            for="edit-password-mobile-{user.id}"
+                                            class="block text-sm font-medium text-foreground mb-2"
+                                        >
+                                            {t("password", $language)}
+                                        </label>
+                                        <div class="relative">
+                                            <input
+                                                id="edit-password-mobile-{user.id}"
+                                                type={passwordVisibility[
+                                                    user.id
+                                                ]
+                                                    ? "text"
+                                                    : "password"}
+                                                bind:value={
+                                                    editPassword[user.id]
+                                                }
+                                                placeholder="••••••••••"
+                                                class="w-full px-4 py-2 pr-10 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                            />
+                                            <button
+                                                type="button"
+                                                on:click={() => {
+                                                    passwordVisibility[
+                                                        user.id
+                                                    ] =
+                                                        !passwordVisibility[
+                                                            user.id
+                                                        ];
+                                                    passwordVisibility =
+                                                        passwordVisibility;
+                                                }}
+                                                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                                            >
+                                                {#if passwordVisibility[user.id]}
+                                                    <EyeOff class="w-4 h-4" />
+                                                {:else}
+                                                    <Eye class="w-4 h-4" />
+                                                {/if}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label
+                                            for="edit-role-mobile-{user.id}"
+                                            class="block text-sm font-medium text-foreground mb-2"
+                                        >
+                                            {t("role", $language)}
+                                        </label>
+                                        {#if $auth.currentUser?.role === "admin" && user.role !== "admin"}
+                                            <select
+                                                id="edit-role-mobile-{user.id}"
+                                                bind:value={editRole[user.id]}
+                                                class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+                                            >
+                                                <option value="manager"
+                                                    >{t(
+                                                        "manager",
+                                                        $language,
+                                                    )}</option
+                                                >
+                                                <option value="gardener"
+                                                    >{t(
+                                                        "gardener",
+                                                        $language,
+                                                    )}</option
+                                                >
+                                            </select>
+                                        {:else}
+                                            <input
+                                                id="edit-role-mobile-{user.id}"
+                                                type="text"
+                                                value={t(user.role, $language)}
+                                                disabled
+                                                class="w-full px-4 py-2 border border-border rounded-lg bg-muted text-muted-foreground cursor-not-allowed"
+                                            />
+                                        {/if}
+                                    </div>
+                                </div>
+
+                                {#if editError[user.id]}
+                                    <div
+                                        class="px-4 py-3 rounded-lg"
+                                        style={`background-color: color-mix(in oklch, var(--status-critical) 12%, transparent); border: 1px solid color-mix(in oklch, var(--status-critical) 32%, transparent); color: var(--status-critical);`}
+                                    >
+                                        {editError[user.id]}
+                                    </div>
+                                {/if}
+
+                                <div class="flex gap-2">
+                                    <button
+                                        type="submit"
+                                        class="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
+                                    >
+                                        {t("save", $language)}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        on:click={() => {
+                                            editingUser[user.id] = false;
+                                            editPassword[user.id] = "";
+                                            editError[user.id] = "";
+                                            passwordVisibility[user.id] = false;
+                                        }}
+                                        class="flex-1 bg-muted text-foreground px-4 py-2 rounded-lg hover:bg-muted/80 transition-colors cursor-pointer"
+                                    >
+                                        {t("cancel", $language)}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    {/if}
+                </div>
+            {/each}
         </div>
 
         <!-- Admin Password Change Form -->

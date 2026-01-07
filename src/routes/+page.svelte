@@ -1,5 +1,5 @@
 <script>
-  import { Trees, ListTree, Sprout, Leaf } from "lucide-svelte";
+  import { Trees, Sprout, Leaf, Map, Grid3X3 } from "lucide-svelte";
   import { language, t } from "$lib/stores/language";
 
   $: pageTitle = `${t("home", $language)} - Food Forest`;
@@ -9,7 +9,7 @@
   <title>{pageTitle}</title>
 </svelte:head>
 
-<div class="min-h-screen bg-background overflow-y-auto">
+<div class="min-h-full bg-background">
   <div class="container mx-auto px-4 py-16">
     <!-- Header -->
     <div class="text-center mb-16">
@@ -22,7 +22,7 @@
         </div>
       </div>
       <h1 class="text-5xl font-bold text-foreground mb-4">
-        {t("foodGarden", $language)}
+        {t("foodForest", $language)}
       </h1>
       <p class="text-xl text-muted-foreground max-w-2xl mx-auto">
         {t("monitorManage", $language)}
@@ -37,10 +37,10 @@
         class="group bg-card rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1 border border-border"
       >
         <div class="bg-primary p-8 text-primary-foreground">
-          <Trees
+          <Map
             class="w-16 h-16 mb-4 group-hover:scale-110 transition-transform"
           />
-          <h2 class="text-3xl font-bold mb-2">{t("gardenMap", $language)}</h2>
+          <h2 class="text-3xl font-bold mb-2">{t("mapView", $language)}</h2>
           <p class="opacity-90">
             {t("interactiveLayout", $language)}
           </p>
@@ -69,7 +69,7 @@
         class="group bg-card rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1 border border-border"
       >
         <div class="bg-secondary p-8 text-secondary-foreground">
-          <ListTree
+          <Grid3X3
             class="w-16 h-16 mb-4 group-hover:scale-110 transition-transform"
           />
           <h2 class="text-3xl font-bold mb-2">{t("speciesList", $language)}</h2>

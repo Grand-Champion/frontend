@@ -80,7 +80,7 @@ export const translations = {
         emailFormatError: 'Email must be in format: example@domain.com',
 
         // Home page
-        foodGarden: 'Food Garden',
+        foodForest: 'Food Forest',
         monitorManage: 'Monitor and manage your sustainable food forest ecosystem',
         gardenMap: 'Garden Map',
         interactiveLayout: 'Interactive visual layout of your food forest',
@@ -105,6 +105,13 @@ export const translations = {
         critical: 'Critical',
         noPlants: 'No plants match your filters',
         adjustFilters: 'Try adjusting your filter settings',
+        stage: 'Stage',
+        water: 'Water',
+        unknown: 'Unknown',
+        low: 'Low',
+        searchSpecies: 'Search species',
+        email: 'Email',
+        filters: 'Filters',
 
         // Plant detail page
         back: 'Back',
@@ -254,7 +261,7 @@ export const translations = {
         emailFormatError: 'E-mail moet in het formaat zijn: example@domain.com',
 
         // Home page
-        foodGarden: 'Voedseltuin',
+        foodForest: 'Voedseltuin',
         monitorManage: 'Monitor en beheer je duurzame voedselbos ecosysteem',
         gardenMap: 'Tuinkaart',
         interactiveLayout: 'Interactieve visuele weergave van je voedselbos',
@@ -279,6 +286,13 @@ export const translations = {
         critical: 'Kritiek',
         noPlants: 'Geen planten komen overeen met je filters',
         adjustFilters: 'Probeer je filterinstellingen aan te passen',
+        stage: 'Fase',
+        water: 'Water',
+        unknown: 'Onbekend',
+        low: 'Laag',
+        searchSpecies: 'Zoek soorten',
+        email: 'E-mail',
+        filters: 'Filters',
 
         // Plant detail page
         back: 'Terug',

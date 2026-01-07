@@ -4,12 +4,12 @@ export async function load({ fetch }) {
   try {
     // Fetch forest data met plants
     const forestResponse = await fetch(
-      `${PUBLIC_API_URL}/forests/api/v1/forests/1`
+      `${PUBLIC_API_URL}/forests/api/v1/forests/4`
     );
     if (!forestResponse.ok) {
-      return { 
-        forestData: null, 
-        error: `Backend returned ${forestResponse.status}` 
+      return {
+        forestData: null,
+        error: `Backend returned ${forestResponse.status}`
       };
     }
     const forestData = await forestResponse.json();
@@ -19,9 +19,9 @@ export async function load({ fetch }) {
       `${PUBLIC_API_URL}/forests/api/v1/species`
     );
     if (!speciesResponse.ok) {
-      return { 
-        forestData: null, 
-        error: `Failed to fetch species data: ${speciesResponse.status}` 
+      return {
+        forestData: null,
+        error: `Failed to fetch species data: ${speciesResponse.status}`
       };
     }
     const speciesData = await speciesResponse.json();
@@ -43,9 +43,9 @@ export async function load({ fetch }) {
     };
   } catch (error) {
     console.error('Error loading forest data:', error);
-    return { 
-      forestData: null, 
-      error: 'Backend is not reachable. Is it running on port 3011?' 
+    return {
+      forestData: null,
+      error: 'Backend is not reachable. Is it running on port 3011?'
     };
   }
 }

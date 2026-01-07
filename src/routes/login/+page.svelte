@@ -34,11 +34,20 @@
 
 <svelte:head>
     <title>{pageTitle}</title>
+    <style>
+        body,
+        html {
+            overflow: hidden;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
 </svelte:head>
 
-<div class="min-h-screen flex items-center justify-center bg-background px-4">
-    <div class="w-full max-w-md">
-        <div class="bg-card border border-border rounded-lg shadow-lg p-8">
+<div class="h-screen flex items-center justify-center bg-background px-4">
+    <div class="w-full max-w-md -mt-20">
+        <div class="bg-card rounded-lg shadow-lg p-8">
             <!-- Header -->
             <div class="text-center mb-8">
                 <div

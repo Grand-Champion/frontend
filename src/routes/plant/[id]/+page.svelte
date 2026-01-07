@@ -17,7 +17,7 @@
     MessageCircle,
     Send,
   } from "lucide-svelte";
-  import { PUBLIC_API_URL } from '$env/static/public';
+  import { PUBLIC_API_URL } from "$env/static/public";
 
   export let data;
 
@@ -56,9 +56,9 @@
   let overallColor = null;
 
   function formatLastUpdate(date) {
-  if (!date) return "Unknown";
-  return date.toLocaleString();
-}
+    if (!date) return "Unknown";
+    return date.toLocaleString();
+  }
 
   function calculateStatus() {
     if (!conditions || !species) return "critical";
@@ -220,21 +220,22 @@
 
   $: pageTitle = `${plant?.name || "Plant"} - Food Forest`;
 
-  async function deletePlant(){
-    if(confirm("Weet je het zeker?")){
-      const request = await fetch(PUBLIC_API_URL + "/forests/api/v1/plants/" + plant.id, {
-        body: data,
-        method: "DELETE"
-      });
-      if(!request.ok){
+  async function deletePlant() {
+    if (confirm("Weet je het zeker?")) {
+      const request = await fetch(
+        PUBLIC_API_URL + "/forests/api/v1/plants/" + plant.id,
+        {
+          body: data,
+          method: "DELETE",
+        },
+      );
+      if (!request.ok) {
         alert(request.statusText);
       } else {
         goBack();
       }
     }
-
   }
-
 </script>
 
 <svelte:head>
@@ -243,34 +244,35 @@
 
 {#if plant}
   <div class="bg-background">
-    <div class="max-w-5xl mx-auto px-6 py-8">
-      <!-- Back button -->
-      <button
-        onclick={goBack}
-        class="mb-6 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+      <div
+        class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
       >
-        <ArrowLeft class="h-4 w-4" />
-        {t("back", $language)}
-      </button>
-      <div class="float-right flex gap-6">
         <button
-          onclick={goto("/plant/"+ plant.id+ "/edit")}
-          class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
+          onclick={goBack}
+          class="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-muted-foreground transition-colors hover:text-foreground sm:w-auto"
         >
-          {t("edit", $language)}
+          <ArrowLeft class="h-4 w-4" />
+          {t("back", $language)}
         </button>
-
-        
-        <button
-          onclick={deletePlant}
-          class="bg-[red] text-primary-foreground px-4 py-2 rounded-lg hover:bg-[#f00a] transition-colors cursor-pointer"
-        >
-          {t("delete", $language)}
-        </button>
+        <div class="flex w-full gap-3 sm:w-auto sm:justify-end">
+          <button
+            onclick={goto("/plant/" + plant.id + "/edit")}
+            class="flex-1 rounded-lg bg-primary px-4 py-2 text-center text-primary-foreground transition-colors hover:bg-primary/90 sm:flex-none"
+          >
+            {t("edit", $language)}
+          </button>
+          <button
+            onclick={deletePlant}
+            class="flex-1 rounded-lg bg-[red] px-4 py-2 text-center text-primary-foreground transition-colors hover:bg-[#f00a] sm:flex-none"
+          >
+            {t("delete", $language)}
+          </button>
+        </div>
       </div>
 
       <!-- Header -->
-      <div class="mb-8">
+      <div class="mb-8 space-y-2 sm:space-y-3">
         <div
           class="mb-3 inline-block px-3 py-1 rounded text-sm font-semibold text-white"
           style="background-color: {categoryConfig[
@@ -279,10 +281,10 @@
         >
           {categoryConfig[species?.type || "Tree"].label}
         </div>
-        <h1 class="text-4xl font-bold text-foreground mb-2">
+        <h1 class="text-3xl sm:text-4xl font-bold text-foreground">
           {species?.name || "Unknown Plant"}
         </h1>
-        <p class="text-xl italic text-muted-foreground">
+        <p class="text-lg sm:text-xl italic text-muted-foreground">
           {species?.scientificName || ""}
         </p>
       </div>
@@ -411,9 +413,9 @@
             <!-- Last sensor update -->
             <p class="mb-4 text-sm text-muted-foreground">
               {t("lastUpdated", $language) || "Last updated"}:
-                <span class="font-medium text-foreground">
-                  {formatLastUpdate(new Date(conditions.createdAt))}
-                </span>
+              <span class="font-medium text-foreground">
+                {formatLastUpdate(new Date(conditions.createdAt))}
+              </span>
             </p>
             <div class="space-y-3">
               <div

@@ -1,30 +1,30 @@
 import { PUBLIC_API_URL } from '$env/static/public';
 
-export async function load({ fetch, params }) {
+export async function load({ fetch }) {
   try {
     const FOREST = 1;
     const speciesResponse = await fetch(
       `${PUBLIC_API_URL}/forests/api/v1/species`
     );
-    
+
     if (!speciesResponse.ok) {
-      return { 
-        plantData: null, 
-        error: `Failed to fetch forest data: ${speciesResponse.status}` 
+      return {
+        plantData: null,
+        error: `Failed to fetch forest data: ${speciesResponse.status}`
       };
     }
-    
+
     const speciesData = await speciesResponse.json();
 
     const forestResponse = await fetch(`${PUBLIC_API_URL}/forests/api/v1/forests/${FOREST}`);
 
     if (!forestResponse.ok) {
-      return { 
-        plantData: null, 
-        error: `Failed to fetch forest data: ${forestResponse.status}` 
+      return {
+        plantData: null,
+        error: `Failed to fetch forest data: ${forestResponse.status}`
       };
     }
-    
+
     const forestData = await forestResponse.json();
 
     return {
@@ -34,9 +34,9 @@ export async function load({ fetch, params }) {
 
   } catch (error) {
     console.error('Error loading data:', error);
-    return { 
-      plantData: null, 
-      error: 'Backend is not reachable. Is it running on port 3011?' 
+    return {
+      plantData: null,
+      error: 'Backend is not reachable. Is it running on port 3011?'
     };
   }
 }
