@@ -426,6 +426,12 @@
       >
         {t("createPlant", $language)}
       </button>
+      <button
+        onclick={goto("/species/create")}
+        class="bg-secondary text-secondary-foreground px-4 py-2 rounded-lg hover:bg-secondary/90 transition-colors cursor-pointer map-overlay absolute left-6 top-16 "
+      >
+        {t("createSpecies", $language)}
+      </button>
     </svelte:fragment>
   </ZoomableMap>
 </div>

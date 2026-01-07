@@ -2,7 +2,7 @@
   import SpeciesList from "$lib/components/species-list.svelte";
   import { language, t } from "$lib/stores/language";
 
-  $: pageTitle = `${t("speciesList", $language)} - Food Forest`;
+  $: pageTitle = `Species List - Food Forest`;
 
   export let data;
 </script>
@@ -11,4 +11,4 @@
   <title>{pageTitle}</title>
 </svelte:head>
 
-<SpeciesList forestData={data.forestData} />
+<SpeciesList speciesData={data.speciesData} />
