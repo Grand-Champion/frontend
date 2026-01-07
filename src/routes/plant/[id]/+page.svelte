@@ -82,52 +82,38 @@
     if (!conditions || !species) return "critical";
 
     let issueCount = 0;
-    let criticalCount = 0;
 
     const tempDiff = Math.max(
       species.minTemperature - conditions.temperature,
       conditions.temperature - species.maxTemperature,
       0,
     );
-    if (tempDiff > 0) {
-      if (tempDiff > 5) criticalCount++;
-      else issueCount++;
-    }
+    if (tempDiff > 0) issueCount++;
 
     const humidityDiff = Math.max(
       species.minHumidity - conditions.humidity,
       conditions.humidity - species.maxHumidity,
       0,
     );
-    if (humidityDiff > 0) {
-      if (humidityDiff > 15) criticalCount++;
-      else issueCount++;
-    }
-
+    if (humidityDiff > 0) issueCount++;
 
     const moistureDiff = Math.max(
       species.minSoilMoisture - conditions.soilMoisture,
       conditions.soilMoisture - species.maxSoilMoisture,
       0,
     );
-    if (moistureDiff > 0) {
-      if (moistureDiff > 20) criticalCount++;
-      else issueCount++;
-    }
+    if (moistureDiff > 0) issueCount++;
 
     const sunlightDiff = Math.max(
       species.minSunlight - conditions.sunlight,
       conditions.sunlight - species.maxSunlight,
       0,
     );
-    if (sunlightDiff > 0) {
-      if (sunlightDiff > 2) criticalCount++;
-      else issueCount++;
-    }
+    if (sunlightDiff > 0) issueCount++;
 
-    if (criticalCount >= 2) return "critical";
-    if (criticalCount >= 1 || issueCount >= 2) return "attention";
-    return "good";
+    if (issueCount === 0) return "good";
+    if (issueCount <= 2) return "attention";
+    return "critical";
   }
 
   function getStatusColor(status) {
@@ -498,7 +484,7 @@
                     2,
                   )}`}
                 >
-                  {plant.conditions[0]?.sunlight ?? "—"}h/day
+                  {plant.conditions[0]?.sunlight ?? "—"}%
                 </span>
               </div>
             </div>
