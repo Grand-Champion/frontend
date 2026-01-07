@@ -8,12 +8,13 @@
   } from "lucide-svelte";
   import { PUBLIC_API_URL } from '$env/static/public';
   import MessageForm from "$lib/components/MessageForm.svelte";
+  import { getPayload } from "$lib/Auth";
+  import { jwt } from "$lib/stores/jwt";
 
   export let data;
 
   //Pak plant uit de API data
   $: forest = data.forestData?.data;
-  $: user = data.userData?.data;
 
   function goBack() {
     if (browser && window.history.length > 1) {
@@ -68,7 +69,7 @@
           <!-- Basic Info -->
           <div class="bg-card border border-border rounded-xl p-6">
             <form action="javascript://" bind:this={formulier} onsubmit={stuurUpdate} >
-              <MessageForm {user} {forest} />
+              <MessageForm user={getPayload($jwt)} {forest} />
             </form>
           </div>
         </div>

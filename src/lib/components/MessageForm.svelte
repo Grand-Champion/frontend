@@ -1,14 +1,14 @@
 <script>
   import { language, t } from "$lib/stores/language";
   import ImageInput from "./ImageInput.svelte";
-  const { message } = $props();
+  const { message, user, forest } = $props();
 </script>
 
 <label for="user">user</label>
-<input type="number" name="userId" id="user" value={1} class="border rounded-1" />
+<input type="number" name="userId" id="user" value={user.id} class="border rounded-1" />
 
 <label for="forest">forest</label>
-<input type="number" name="foodForestId" id="forest" value={1} class="border rounded-1" />
+<input type="number" name="foodForestId" id="forest" value={forest.id} class="border rounded-1" />
 
 <div class="flex justify-between py-2">
     <label for="message">{t("message", $language)}</label>
