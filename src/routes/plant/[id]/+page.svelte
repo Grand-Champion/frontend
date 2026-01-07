@@ -17,7 +17,9 @@
     MessageCircle,
     Send,
   } from "lucide-svelte";
-  import { PUBLIC_API_URL } from "$env/static/public";
+  import { PUBLIC_API_URL } from '$env/static/public';
+  import { jwt } from "$lib/stores/jwt.js";
+  import { getPayload, headers } from "$lib/Auth.js";
 
   export let data;
 
@@ -220,16 +222,14 @@
 
   $: pageTitle = `${plant?.name || "Plant"} - Food Forest`;
 
-  async function deletePlant() {
-    if (confirm("Weet je het zeker?")) {
-      const request = await fetch(
-        PUBLIC_API_URL + "/forests/api/v1/plants/" + plant.id,
-        {
-          body: data,
-          method: "DELETE",
-        },
-      );
-      if (!request.ok) {
+  async function deletePlant(){
+    if(confirm(t("confirmDeletePlant", $language))){
+      const request = await fetch(PUBLIC_API_URL + "/forests/api/v1/plants/" + plant.id, {
+        body: data,
+        method: "DELETE",
+        headers: headers($jwt)
+      });
+      if(!request.ok){
         alert(request.statusText);
       } else {
         goBack();
@@ -248,27 +248,25 @@
       <div
         class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
       >
-        <button
-          onclick={goBack}
-          class="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-muted-foreground transition-colors hover:text-foreground sm:w-auto"
-        >
-          <ArrowLeft class="h-4 w-4" />
-          {t("back", $language)}
-        </button>
-        <div class="flex w-full gap-3 sm:w-auto sm:justify-end">
+        <ArrowLeft class="h-4 w-4" />
+        {t("back", $language)}
+      </button>
+      <div class="float-right flex gap-6">
+        {#if (getPayload($jwt).id === data.forestData.data.ownerId || getPayload($jwt).role === "admin" )}
           <button
-            onclick={goto("/plant/" + plant.id + "/edit")}
-            class="flex-1 rounded-lg bg-primary px-4 py-2 text-center text-primary-foreground transition-colors hover:bg-primary/90 sm:flex-none"
+            onclick={goto("/plant/"+ plant.id+ "/edit")}
+            class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
           >
             {t("edit", $language)}
           </button>
+          
           <button
             onclick={deletePlant}
-            class="flex-1 rounded-lg bg-[red] px-4 py-2 text-center text-primary-foreground transition-colors hover:bg-[#f00a] sm:flex-none"
+            class="bg-(--status-critical) text-primary-foreground px-4 py-2 rounded-lg hover:bg-(--status-critical)/90 transition-colors cursor-pointer"
           >
             {t("delete", $language)}
           </button>
-        </div>
+        {/if}
       </div>
 
       <!-- Header -->
@@ -391,7 +389,7 @@
                   {t("currentStage", $language)}
                 </p>
                 <p class="text-lg font-semibold capitalize text-foreground">
-                  {formatStage(plant?.plantStage)}
+                  {formatStage(plant?.stage)}
                 </p>
               </div>
               <div class="bg-background/50 rounded-lg p-3 border border-border">

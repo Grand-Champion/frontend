@@ -19,19 +19,18 @@
   import { page } from "$app/stores";
   import { theme } from "$lib/stores/theme";
   import { language, t } from "$lib/stores/language";
-  import { auth, ADMIN_KEY } from "$lib/stores/auth";
   import { goto } from "$app/navigation";
+  import { getPayload, updatePassword } from "$lib/Auth";
+  import { jwt } from "$lib/stores/jwt";
 
   let showUserMenu = false;
   let currentPassword = "";
   let newPassword = "";
   let confirmPassword = "";
-  let adminKey = "";
   let passwordError = "";
   let showCurrentPassword = false;
   let showNewPassword = false;
   let showConfirmPassword = false;
-  let showAdminKey = false;
   let userMenuElement;
   let showMobileMenu = false;
   let showChangePasswordModal = false;
@@ -49,7 +48,7 @@
   }
 
   function handleLogout() {
-    auth.logout();
+    $jwt = undefined;
     showUserMenu = false;
     goto("/");
   }
@@ -60,6 +59,11 @@
 
   function goToAdmin() {
     goto("/management");
+    showUserMenu = false;
+  }
+
+  function goToSettings(){
+    goto("/settings");
     showUserMenu = false;
   }
 
@@ -77,31 +81,18 @@
     currentPassword = "";
     newPassword = "";
     confirmPassword = "";
-    adminKey = "";
     passwordError = "";
     showCurrentPassword = false;
     showNewPassword = false;
     showConfirmPassword = false;
-    showAdminKey = false;
   }
 
-  function handleChangePassword() {
+  async function handleChangePassword() {
     passwordError = "";
 
-    const isAdmin = $auth.currentUser?.role === "admin";
-
-    if (isAdmin) {
-      // Admin password change requires admin key and current password
-      if (!adminKey || !currentPassword || !newPassword || !confirmPassword) {
-        passwordError = t("pleaseEnterAllFields", $language);
-        return;
-      }
-    } else {
-      // Regular user password change
-      if (!currentPassword || !newPassword || !confirmPassword) {
-        passwordError = t("pleaseEnterAllFields", $language);
-        return;
-      }
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      passwordError = t("pleaseEnterAllFields", $language);
+      return;
     }
 
     if (newPassword !== confirmPassword) {
@@ -109,12 +100,12 @@
       return;
     }
 
-    if (newPassword.length < 3) {
+    if (newPassword.length < 6) {
       passwordError = t("passwordTooShort", $language);
       return;
     }
 
-    if ($auth.currentUser) {
+    if ($jwt) {
       let success = false;
 
       if (isAdmin) {
@@ -143,7 +134,10 @@
       if (success) {
         closeChangePasswordModal();
         alert(t("passwordChanged", $language));
-      }
+      } catch(e){
+        if(e?.message === "Invalid credentials") passwordError = t("incorrectCurrentPassword", $language);
+        else passwordError = t("loginError", $language);
+      } 
     }
   }
 
@@ -156,6 +150,7 @@
       showUserMenu = false;
     }
   }
+
 </script>
 
 <svelte:body
