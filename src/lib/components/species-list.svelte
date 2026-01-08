@@ -171,7 +171,7 @@
             class="relative aspect-4/3 w-full overflow-hidden bg-linear-to-br from-muted to-muted/50"
           >
             <img
-              src={plant.image || "/placeholder.svg"}
+              src={plant.image || plant.species?.image || "/placeholder.svg"}
               alt={plant.species?.name || "Plant"}
               class="w-full h-full object-cover"
             />

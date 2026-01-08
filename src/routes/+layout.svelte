@@ -2,7 +2,7 @@
   import "../app.css";
   import Navigation from "$lib/components/navigation.svelte";
   import { page } from "$app/stores";
-  import { onMount } from "svelte";
+  import { getContext, onMount, setContext } from "svelte";
   import { theme } from "$lib/stores/theme";
 
   // Make plant detail pages and home page scrollable
