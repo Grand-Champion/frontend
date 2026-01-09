@@ -21,6 +21,10 @@
   import { goto } from "$app/navigation";
   import { getPayload, updatePassword } from "$lib/Auth";
   import { jwt } from "$lib/stores/jwt";
+    import SelectOption from "./SelectOption.svelte";
+
+  export let forests = [], forestId;
+  let selectedForest;
 
   let showUserMenu = false;
   let showChangePasswordModal = false;
@@ -144,6 +148,15 @@
       </div>
 
       <div class="flex gap-1">
+        <select
+          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
+          bind:value={selectedForest}
+        >
+          {#each forests as forest}
+            <SelectOption name={forest.name} value={forest.id} currentValue={forestId} />
+          {/each}
+        </select>
+
         <a
           href="/"
           class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page

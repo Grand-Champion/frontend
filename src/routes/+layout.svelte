@@ -14,6 +14,11 @@
   $: isScrollable =
     isPlantPage || isSpeciesPage || isHomePage || isManagementPage || isLoginPage;
 
+  export let data;
+
+  $: forests = data.forestsData?.data;
+  let forestId = data.forestId;
+  
   // Initialize theme on mount
   onMount(() => {
     if ($theme === "dark") {
@@ -38,7 +43,7 @@
 </svelte:head>
 
 <div class="h-screen w-full flex flex-col">
-  <Navigation />
+  <Navigation {forests} {forestId} />
   <main
     class="flex-1"
     class:overflow-auto={isScrollable}
