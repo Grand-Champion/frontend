@@ -12,14 +12,31 @@ export async function load({ fetch, params }) {
     if (!plantResponse.ok) {
       return { 
         plantData: null, 
+        forestData: null,
         error: `Failed to fetch plant data: ${plantResponse.status}` 
       };
     }
     
     const plantData = await plantResponse.json();
 
+    
+    const forestResponse = await fetch(
+      `${PUBLIC_API_URL}/forests/api/v1/forests/${plantData.data.foodForestId}`
+    );
+    
+    if (!forestResponse.ok) {
+      return { 
+        forestData: null, 
+        plantData,
+        error: `Failed to fetch plant data: ${plantResponse.status}` 
+      };
+    }
+    
+    const forestData = await forestResponse.json();
+
     return {
       plantData,
+      forestData
     };
   } catch (error) {
     console.error('Error loading plant data:', error);
