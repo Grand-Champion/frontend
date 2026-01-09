@@ -21,59 +21,13 @@
   import ZoomableMap from "./ZoomableMap.svelte";
   import { jwt } from "$lib/stores/jwt";
   import { getPayload } from "$lib/Auth";
+  import { getStatus, getStatusColor } from "$lib/utils/plant-helpers";
 
   // Pak API data
   export let forestData;
 
   // Get plants array directly from API
   $: plants = forestData?.data?.plants || [];
-
-  // calculate status based on species optimal ranges
-  function getStatus(plant) {
-    if (!plant.conditions || !plant.conditions[0]) return 'critical';
-    if (!plant.species) return 'critical';
-    
-    const c = plant.conditions[0];
-    const s = plant.species;
-    let issuesCount = 0;
-
-    // Check conditions met species ranges
-    if (s.minTemperature !== null && s.maxTemperature !== null) {
-      if (
-        c.temperature < s.minTemperature ||
-        c.temperature > s.maxTemperature
-      ) {
-        issuesCount++;
-      }
-    }
-
-    if (s.minHumidity !== null && s.maxHumidity !== null) {
-      if (c.humidity < s.minHumidity || c.humidity > s.maxHumidity) {
-        issuesCount++;
-      }
-    }
-
-    if (s.minSoilMoisture !== null && s.maxSoilMoisture !== null) {
-      if (
-        c.soilMoisture < s.minSoilMoisture ||
-        c.soilMoisture > s.maxSoilMoisture
-      ) {
-        issuesCount++;
-      }
-    }
-
-
-    if (s.minSunlight !== null && s.maxSunlight !== null) {
-      if (c.sunlight < s.minSunlight || c.sunlight > s.maxSunlight) {
-        issuesCount++;
-      }
-    }
-
-    // Returned de status, kijkt naar hoeveelheid issues
-    if (issuesCount === 0) return "good";
-    if (issuesCount <= 2) return "attention";
-    return "critical";
-  }
 
   // Gebruik backend species types (Tree, Shrub, Plant)
   $: categoryConfig = {
@@ -124,17 +78,6 @@
     }
   } else {
     selectedPlant = null;
-  }
-
-  function getStatusColor(status) {
-    switch (status) {
-      case "good":
-        return "var(--status-good)";
-      case "attention":
-        return "var(--status-attention)";
-      case "critical":
-        return "var(--status-critical)";
-    }
   }
 
   const statusBg = (color) => `color-mix(in oklch, ${color} 12%, transparent)`;
