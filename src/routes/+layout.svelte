@@ -2,16 +2,17 @@
   import "../app.css";
   import Navigation from "$lib/components/navigation.svelte";
   import { page } from "$app/stores";
-  import { onMount } from "svelte";
+  import { getContext, onMount, setContext } from "svelte";
   import { theme } from "$lib/stores/theme";
 
-  // Make plant detail pages and home page scrollable
-  $: isPlantPage = $page.url.pathname.startsWith("/plant/");
+  // Make plant detail pages, species pages, home page, and management page scrollable
+  $: isPlantPage = $page.url.pathname.startsWith("/plants/");
+  $: isSpeciesPage = $page.url.pathname.startsWith("/species");
   $: isHomePage = $page.url.pathname === "/";
   $: isManagementPage = $page.url.pathname === "/management";
   $: isLoginPage = $page.url.pathname === "/login";
   $: isScrollable =
-    isPlantPage || isHomePage || isManagementPage || isLoginPage;
+    isPlantPage || isSpeciesPage || isHomePage || isManagementPage || isLoginPage;
 
   // Initialize theme on mount
   onMount(() => {

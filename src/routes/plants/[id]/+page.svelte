@@ -3,6 +3,7 @@
   import { goto } from "$app/navigation";
   import { browser } from "$app/environment";
   import { language, t } from "$lib/stores/language";
+  import { PUBLIC_API_URL } from '$env/static/public';
   import {
     Leaf,
     Trees,
@@ -17,13 +18,33 @@
     MessageCircle,
     Send,
   } from "lucide-svelte";
+  import { onMount } from 'svelte';
+  import { jwt } from "$lib/stores/jwt.js";
+  import { getPayload, headers } from "$lib/Auth.js";
 
   export let data;
+  let plantData = data?.plantData ?? null;
 
   //Pak plant, species en conditions uit de API data
-  $: plant = data.plantData?.data;
+  $: plant = plantData?.data;
   $: species = plant?.species;
-  $: conditions = plant?.conditions;
+  $: conditions = plant?.conditions[0] ?? {};
+
+  
+  async function fetchLatest() {
+    try {
+      const res = await fetch(`${PUBLIC_API_URL}/forests/api/v1/plants/${plant?.id}`);
+      if (!res.ok) return;
+      plantData = await res.json();
+    } catch (err) {
+      console.error('Error fetching latest plant data', err);
+    }
+  }
+
+  onMount(() => {
+     const interval = setInterval(fetchLatest, 5000);
+    return () => clearInterval(interval);
+  });
 
   // Gebruik backend species types (Tree, Shrub, Plant)
   $: categoryConfig = {
@@ -37,12 +58,12 @@
       icon: Sprout,
       color: "var(--category-shrub)",
     },
-    herb: {
+    Herb: {
       label: t("herbs", $language),
       icon: Leaf,
       color: "var(--category-herb)",
     },
-    vegetable: {
+    Vegetable: {
       label: t("vegetables", $language),
       icon: Flower2,
       color: "var(--category-vegetable)",
@@ -53,6 +74,49 @@
   let commentText = "";
   let overallStatus = null;
   let overallColor = null;
+
+  function formatLastUpdate(date) {
+  if (!date) return "Unknown";
+  return date.toLocaleString();
+}
+
+  function calculateStatus() {
+    if (!conditions || !species) return "critical";
+
+    let issueCount = 0;
+
+    const tempDiff = Math.max(
+      species.minTemperature - conditions.temperature,
+      conditions.temperature - species.maxTemperature,
+      0,
+    );
+    if (tempDiff > 0) issueCount++;
+
+    const humidityDiff = Math.max(
+      species.minHumidity - conditions.humidity,
+      conditions.humidity - species.maxHumidity,
+      0,
+    );
+    if (humidityDiff > 0) issueCount++;
+
+    const moistureDiff = Math.max(
+      species.minSoilMoisture - conditions.soilMoisture,
+      conditions.soilMoisture - species.maxSoilMoisture,
+      0,
+    );
+    if (moistureDiff > 0) issueCount++;
+
+    const sunlightDiff = Math.max(
+      species.minSunlight - conditions.sunlight,
+      conditions.sunlight - species.maxSunlight,
+      0,
+    );
+    if (sunlightDiff > 0) issueCount++;
+
+    if (issueCount === 0) return "good";
+    if (issueCount <= 2) return "attention";
+    return "critical";
+  }
 
   function getStatusColor(status) {
     switch (status) {
@@ -96,11 +160,6 @@
       advice.push(t("adviceHumidityTooHigh", $language));
     }
 
-    if (conditions.soilPH < species.minSoilPH) {
-      advice.push(t("adviceSoilTooAcidic", $language));
-    } else if (conditions.soilPH > species.maxSoilPH) {
-      advice.push(t("adviceSoilTooAlkaline", $language));
-    }
 
     if (conditions.soilMoisture < species.minSoilMoisture) {
       advice.push(t("adviceSoilTooDry", $language));
@@ -149,6 +208,23 @@
   }
 
   $: pageTitle = `${plant?.name || "Plant"} - Food Forest`;
+
+  async function deletePlant(){
+    if(confirm(t("confirmDeletePlant", $language))){
+      const request = await fetch(PUBLIC_API_URL + "/forests/api/v1/plants/" + plant.id, {
+        body: data,
+        method: "DELETE",
+        headers: headers($jwt)
+      });
+      if(!request.ok){
+        alert(request.statusText);
+      } else {
+        goBack();
+      }
+    }
+
+  }
+
 </script>
 
 <svelte:head>
@@ -166,6 +242,23 @@
         <ArrowLeft class="h-4 w-4" />
         {t("back", $language)}
       </button>
+      <div class="float-right flex gap-6">
+        {#if (getPayload($jwt).id === data.forestData.data.ownerId || getPayload($jwt).role === "admin" )}
+          <button
+            onclick={goto("/plants/"+ plant.id+ "/edit")}
+            class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
+          >
+            {t("edit", $language)}
+          </button>
+          
+          <button
+            onclick={deletePlant}
+            class="bg-(--status-critical) text-primary-foreground px-4 py-2 rounded-lg hover:bg-(--status-critical)/90 transition-colors cursor-pointer"
+          >
+            {t("delete", $language)}
+          </button>
+        {/if}
+      </div>
 
       <!-- Header -->
       <div class="mb-8">
@@ -287,7 +380,7 @@
                   {t("currentStage", $language)}
                 </p>
                 <p class="text-lg font-semibold capitalize text-foreground">
-                  {formatStage(plant?.plantStage)}
+                  {formatStage(plant?.stage)}
                 </p>
               </div>
               <div class="bg-background/50 rounded-lg p-3 border border-border">
@@ -306,6 +399,13 @@
             <h2 class="text-xl font-semibold text-card-foreground mb-4">
               {t("currentConditions", $language)}
             </h2>
+            <!-- Last sensor update -->
+            <p class="mb-4 text-sm text-muted-foreground">
+              {t("lastUpdated", $language) || "Last updated"}:
+                <span class="font-medium text-foreground">
+                  {formatLastUpdate(new Date(conditions.createdAt))}
+                </span>
+            </p>
             <div class="space-y-3">
               <div
                 class="flex items-center justify-between rounded-lg bg-muted p-4"
@@ -317,13 +417,13 @@
                 <span
                   class="text-lg font-semibold"
                   style={`color: ${getConditionColor(
-                    plant.conditions?.temperature ?? 0,
+                    plant.conditions[0]?.temperature ?? 0,
                     plant.species?.minTemperature ?? 0,
                     plant.species?.maxTemperature ?? 0,
                     5,
                   )}`}
                 >
-                  {plant.conditions?.temperature ?? "—"}°C
+                  {plant.conditions[0]?.temperature ?? "—"}°C
                 </span>
               </div>
 
@@ -337,35 +437,16 @@
                 <span
                   class="text-lg font-semibold"
                   style={`color: ${getConditionColor(
-                    plant.conditions?.humidity ?? 0,
+                    plant.conditions[0]?.humidity ?? 0,
                     plant.species?.minHumidity ?? 0,
                     plant.species?.maxHumidity ?? 0,
                     15,
                   )}`}
                 >
-                  {plant.conditions?.humidity ?? "—"}%
+                  {plant.conditions[0]?.humidity ?? "—"}%
                 </span>
               </div>
 
-              <div
-                class="flex items-center justify-between rounded-lg bg-muted p-4"
-              >
-                <div class="flex items-center gap-3">
-                  <FlaskConical class="h-5 w-5 text-muted-foreground" />
-                  <span class="font-medium">{t("soilPH", $language)}</span>
-                </div>
-                <span
-                  class="text-lg font-semibold"
-                  style={`color: ${getConditionColor(
-                    plant.conditions?.soilPH ?? 0,
-                    plant.species?.minSoilPH ?? 0,
-                    plant.species?.maxSoilPH ?? 0,
-                    0.5,
-                  )}`}
-                >
-                  {plant.conditions?.soilPH ?? "—"}
-                </span>
-              </div>
 
               <div
                 class="flex items-center justify-between rounded-lg bg-muted p-4"
@@ -378,13 +459,13 @@
                 <span
                   class="text-lg font-semibold"
                   style={`color: ${getConditionColor(
-                    plant.conditions?.soilMoisture ?? 0,
+                    plant.conditions[0]?.soilMoisture ?? 0,
                     plant.species?.minSoilMoisture ?? 0,
                     plant.species?.maxSoilMoisture ?? 0,
                     20,
                   )}`}
                 >
-                  {plant.conditions?.soilMoisture ?? "—"}%
+                  {plant.conditions[0]?.soilMoisture ?? "—"}%
                 </span>
               </div>
 
@@ -398,13 +479,13 @@
                 <span
                   class="text-lg font-semibold"
                   style={`color: ${getConditionColor(
-                    plant.conditions?.sunlight ?? 0,
+                    plant.conditions[0]?.sunlight ?? 0,
                     plant.species?.minSunlight ?? 0,
                     plant.species?.maxSunlight ?? 0,
                     2,
                   )}`}
                 >
-                  {plant.conditions?.sunlight ?? "—"}h/day
+                  {plant.conditions[0]?.sunlight ?? "—"}%
                 </span>
               </div>
             </div>

@@ -1,0 +1,20 @@
+<script>
+  import ZoomableMap from "./ZoomableMap.svelte";
+  export let forest, plant;
+  plant = plant ?? {posX:0, posY: 0};
+
+  function selectLocation(pos){
+    plant.posX = pos.posX;
+    plant.posY = pos.posY;
+  }
+
+</script>
+<ZoomableMap image={forest?.image} alt="Food forest aerial view" clickable onimageclick={selectLocation} let:mapZoom classes="max-w-[60vh] max-h-[60vh]">
+<div
+    style="position: absolute; left: {plant.posX}%; top: {plant.posY}%; transform: translate(-50%, -50%); text-align: center; aspect-ratio: 1 / 1;  background: red;" 
+    style:width="{30/mapZoom}px" style:border-radius="{15/mapZoom}px"
+></div>
+</ZoomableMap>
+
+<input type="number" name="posX" id="posX" value={plant.posX} readonly>
+<input type="number" name="posY" id="posY" value={plant.posY} readonly>

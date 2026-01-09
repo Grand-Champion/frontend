@@ -65,14 +65,14 @@
 
       <!-- Species List Card -->
       <a
-        href="/species"
+        href="/plants"
         class="group bg-card rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1 border border-border"
       >
         <div class="bg-secondary p-8 text-secondary-foreground">
           <ListTree
             class="w-16 h-16 mb-4 group-hover:scale-110 transition-transform"
           />
-          <h2 class="text-3xl font-bold mb-2">{t("speciesList", $language)}</h2>
+          <h2 class="text-3xl font-bold mb-2">{t("plantsList", $language)}</h2>
           <p class="opacity-90">{t("detailedInfo", $language)}</p>
         </div>
         <div class="p-6">
