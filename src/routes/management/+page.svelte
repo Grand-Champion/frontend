@@ -1,6 +1,6 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import { browser } from '$app/environment';
+    import { browser } from "$app/environment";
     import { t, language } from "$lib/stores/language";
     import {
         Trash2,
@@ -13,7 +13,16 @@
         CheckCircle2,
     } from "lucide-svelte";
     import { jwt } from "$lib/stores/jwt";
-    import { deleteUser, getPayload, getUser, updatePassword, updateUser, getUsers, createUser } from "$lib/Auth";
+    import {
+        deleteUser,
+        getPayload,
+        getUser,
+        updatePassword,
+        updateUser,
+        getUsers,
+        createUser,
+    } from "$lib/Auth";
+    import { derived } from "svelte/store";
     import { onMount } from "svelte";
     import SelectOption from "$lib/components/SelectOption.svelte";
 
@@ -68,12 +77,19 @@
     let adminPasswordError = "";
     let adminPasswordVisibility: Record<string, boolean> = {};
 
+    const auth = derived(jwt, ($jwt) => ({
+        currentUser: $jwt ? getPayload($jwt) : null,
+    }));
+
+    let currentUser: any = $jwt ? getPayload($jwt) : null;
+    $: currentUser = $jwt ? getPayload($jwt) : null;
+
     function openDeleteConfirm(userId: string) {
-        const user = $auth.users.find((u) => u.id === userId);
+        const user = sortedUsers.find((u) => u.id === userId);
         if (
             user &&
             user.role !== "admin" &&
-            !(user.role === "manager" && user.id === $auth.currentUser?.id)
+            !(user.role === "manager" && user.id === currentUser?.id)
         ) {
             userToDelete = userId;
             userToDeleteName = user.fullName;
@@ -101,8 +117,8 @@
                 await deleteUser($jwt as string, userToDelete);
                 closeDeleteConfirm();
                 sortUsers();
-            } catch (e){
-                if(e?.message == "Invalid credentials"){
+            } catch (e) {
+                if (e?.message == "Invalid credentials") {
                     deleteError = t("invalidCredentials", $language);
                 } else {
                     deleteError = e?.message ?? t("error", $language);
@@ -128,7 +144,10 @@
 
         // Validate email format (must have TLD)
         if (
-            !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(newEmail) && user.role !== "admin"
+            !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(
+                newEmail,
+            ) &&
+            user.role !== "admin"
         ) {
             editError[userId] = t("emailFormatError", $language);
             return;
@@ -141,14 +160,14 @@
         };
 
         if (newPassword) {
-            if(newPassword.length >= 6) {
+            if (newPassword.length >= 6) {
                 updates.password = newPassword;
             } else {
                 editError[userId] = t("passwordTooShort", $language);
                 return;
             }
         }
-        if(userId === getPayload($jwt as string).id){
+        if (userId === getPayload($jwt as string).id) {
             delete updates.role;
             delete updates.password;
         }
@@ -159,10 +178,9 @@
             editError[userId] = "";
             passwordVisibility[userId] = false;
             await sortUsers();
-        } catch(e){
-            editError[userId] = e?.message ?? t("error", $language);;
+        } catch (e) {
+            editError[userId] = e?.message ?? t("error", $language);
         }
-        
     }
 
     async function handleCreateUser() {
@@ -175,14 +193,19 @@
 
         // Validate email format (must have TLD)
         if (
-            !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(newEmail) && newRole !== "admin"
+            !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(
+                newEmail,
+            ) &&
+            newRole !== "admin"
         ) {
             createError = t("emailFormatError", $language);
             return;
         }
 
         // Check if email already exists
-        if ((await getUsers($jwt as string)).find((u) => u.email === newEmail)) {
+        if (
+            (await getUsers($jwt as string)).find((u) => u.email === newEmail)
+        ) {
             createError = t("usernameExists", $language);
             return;
         }
@@ -191,7 +214,7 @@
             displayName: newDisplayName,
             email: newEmail,
             password: newPassword,
-            role: newRole
+            role: newRole,
         };
 
         await createUser($jwt as string, data);
@@ -220,56 +243,58 @@
     }
 
     $: sortedUsers = [];
-    async function sortUsers(){
-        sortedUsers = [... await getUsers($jwt as string)]
-        .filter((user) => {
-            if (!searchFilter.trim()) return true;
-            const search = searchFilter.toLowerCase();
-            return (
-                user.email.toLowerCase().includes(search) ||
-                user.displayName.toLowerCase().includes(search)
-            );
-        })
-        .sort((a, b) => {
-            let aVal: string | number = "";
-            let bVal: string | number = "";
+    async function sortUsers() {
+        sortedUsers = [...(await getUsers($jwt as string))]
+            .filter((user) => {
+                if (!searchFilter.trim()) return true;
+                const search = searchFilter.toLowerCase();
+                return (
+                    user.email.toLowerCase().includes(search) ||
+                    user.displayName.toLowerCase().includes(search)
+                );
+            })
+            .sort((a, b) => {
+                let aVal: string | number = "";
+                let bVal: string | number = "";
 
-            switch (sortBy) {
-                case "displayName":
-                    const aDisplayName = a.displayName?.trim() || "";
-                    const bDisplayName = b.displayName?.trim() || "";
-                    // Handle empty displayName - place at top when sorting A-Z
-                    if (!aDisplayName && bDisplayName) return sortAsc ? -1 : 1;
-                    if (aDisplayName && !bDisplayName) return sortAsc ? 1 : -1;
-                    if (!aDisplayName && !bDisplayName) return 0;
-                    aVal = aDisplayName.toLowerCase();
-                    bVal = bDisplayName.toLowerCase();
-                    break;
-                case "role":
-                    aVal = a.role;
-                    bVal = b.role;
-                    break;
-                case "createdAt":
-                    aVal = new Date(a.createdAt).getTime();
-                    bVal = new Date(b.createdAt).getTime();
-                    break;
-                case "email":
-                    aVal = a?.email?.toLowerCase();
-                    bVal = b?.email?.toLowerCase();
-                    break;
-            }
+                switch (sortBy) {
+                    case "displayName":
+                        const aDisplayName = a.displayName?.trim() || "";
+                        const bDisplayName = b.displayName?.trim() || "";
+                        // Handle empty displayName - place at top when sorting A-Z
+                        if (!aDisplayName && bDisplayName)
+                            return sortAsc ? -1 : 1;
+                        if (aDisplayName && !bDisplayName)
+                            return sortAsc ? 1 : -1;
+                        if (!aDisplayName && !bDisplayName) return 0;
+                        aVal = aDisplayName.toLowerCase();
+                        bVal = bDisplayName.toLowerCase();
+                        break;
+                    case "role":
+                        aVal = a.role;
+                        bVal = b.role;
+                        break;
+                    case "createdAt":
+                        aVal = new Date(a.createdAt).getTime();
+                        bVal = new Date(b.createdAt).getTime();
+                        break;
+                    case "email":
+                        aVal = a?.email?.toLowerCase();
+                        bVal = b?.email?.toLowerCase();
+                        break;
+                }
 
-            if (aVal < bVal) return sortAsc ? -1 : 1;
-            if (aVal > bVal) return sortAsc ? 1 : -1;
-            return 0;
-        });
-    };
-    
+                if (aVal < bVal) return sortAsc ? -1 : 1;
+                if (aVal > bVal) return sortAsc ? 1 : -1;
+                return 0;
+            });
+    }
+
     function getRoleBadgeStyle(role: string) {
         const roleColor =
             {
                 admin: "var(--role-admin)",
-                user: "var(--role-gardener)"
+                user: "var(--role-gardener)",
             }[role] || "var(--foreground)";
         return `background-color: color-mix(in oklch, ${roleColor} 12%, transparent); color: ${roleColor};`;
     }
@@ -323,7 +348,6 @@
                     class="space-y-4"
                 >
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
                         <div>
                             <label
                                 for="new-displayname"
@@ -350,7 +374,7 @@
                             </label>
                             <input
                                 id="new-email"
-                                type="{newRole === "admin" ? "text" : "email"}"
+                                type={newRole === "admin" ? "text" : "email"}
                                 bind:value={newEmail}
                                 required
                                 title="Email should be in format: example@domain.com"
@@ -474,7 +498,8 @@
                                         {/if}
                                     {/if}
                                 </div>
-                            </th> <th
+                            </th>
+                            <th
                                 class="px-6 py-3 text-left text-sm font-semibold text-foreground cursor-pointer hover:bg-muted/80 transition-colors"
                                 on:click={() => toggleSort("email")}
                             >
@@ -575,10 +600,10 @@
                                             <button
                                                 on:click={() => {
                                                     // Close all other edit forms
-                                                    Object.keys(editingUser).forEach(id => {
-                                                        if (
-                                                            id !== user.id
-                                                        ) {
+                                                    Object.keys(
+                                                        editingUser,
+                                                    ).forEach((id) => {
+                                                        if (id !== user.id) {
                                                             editUsername[
                                                                 user.id
                                                             ] = user.username;
@@ -597,12 +622,18 @@
                                                         }
                                                     });
 
-                                                    editingUser[user.id] = !editingUser[user.id];
+                                                    editingUser[user.id] =
+                                                        !editingUser[user.id];
                                                     if (editingUser[user.id]) {
-                                                        editDisplayName[ user.id ] = user.displayName;
-                                                        editPassword[ user.id ] = user.password;
-                                                        editRole[user.id] = user.role;
-                                                        editEmail[user.id] = user.email;
+                                                        editDisplayName[
+                                                            user.id
+                                                        ] = user.displayName;
+                                                        editPassword[user.id] =
+                                                            user.password;
+                                                        editRole[user.id] =
+                                                            user.role;
+                                                        editEmail[user.id] =
+                                                            user.email;
                                                         editError[user.id] = "";
                                                     }
                                                 }}
@@ -618,12 +649,10 @@
                                                 >-</span
                                             >
                                         {/if}
-                                        {#if (user.id !== getPayload($jwt).id)}
+                                        {#if user.id !== getPayload($jwt).id}
                                             <button
                                                 on:click={() =>
-                                                    handleDeleteUser(
-                                                        user.id,
-                                                    )}
+                                                    handleDeleteUser(user.id)}
                                                 class="cursor-pointer"
                                                 style="color: var(--status-critical);"
                                                 aria-label="Delete user"
@@ -644,11 +673,16 @@
                                             on:submit|preventDefault={() => {
                                                 handleEditUser(user.id);
                                             }}
-                                            class="space-y-4" >
-                                            <h3 class="text-sm font-semibold text-foreground">
+                                            class="space-y-4"
+                                        >
+                                            <h3
+                                                class="text-sm font-semibold text-foreground"
+                                            >
                                                 {t("editUser", $language)}
                                             </h3>
-                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div
+                                                class="grid grid-cols-1 md:grid-cols-2 gap-4"
+                                            >
                                                 <div>
                                                     <label
                                                         for="edit-displayname-{user.id}"
@@ -662,7 +696,11 @@
                                                     <input
                                                         id="edit-displayname-{user.id}"
                                                         type="text"
-                                                        bind:value={ editDisplayName[user.id] }
+                                                        bind:value={
+                                                            editDisplayName[
+                                                                user.id
+                                                            ]
+                                                        }
                                                         required
                                                         class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                                     />
@@ -672,10 +710,7 @@
                                                         for="edit-email-{user.id}"
                                                         class="block text-sm font-medium text-foreground mb-2"
                                                     >
-                                                        {t(
-                                                            "email",
-                                                            $language,
-                                                        )}
+                                                        {t("email", $language)}
                                                     </label>
                                                     <input
                                                         id="edit-fullname-{user.id}"
@@ -721,8 +756,13 @@
                                                     </label>
                                                     <input
                                                         id="edit-email-{user.id}"
-                                                        type="{user.role === "admin" ? "text" : "email"}"
-                                                        bind:value={ editEmail[user.id] }
+                                                        type={user.role ===
+                                                        "admin"
+                                                            ? "text"
+                                                            : "email"}
+                                                        bind:value={
+                                                            editEmail[user.id]
+                                                        }
                                                         required
                                                         title="Email should be in format: example@domain.com"
                                                         class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -733,29 +773,55 @@
                                                         for="edit-password-{user.id}"
                                                         class="block text-sm font-medium text-foreground mb-2"
                                                     >
-                                                        {t( "password", $language )}
+                                                        {t(
+                                                            "password",
+                                                            $language,
+                                                        )}
                                                     </label>
                                                     <div class="relative">
                                                         <input
                                                             id="edit-password-{user.id}"
-                                                            type={passwordVisibility[user.id] ? "text" : "password"}
-                                                            bind:value={ editPassword[user.id] }
+                                                            type={passwordVisibility[
+                                                                user.id
+                                                            ]
+                                                                ? "text"
+                                                                : "password"}
+                                                            bind:value={
+                                                                editPassword[
+                                                                    user.id
+                                                                ]
+                                                            }
                                                             placeholder="••••••••••"
-                                                            class="w-full px-4 py-2 pr-10 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary {user.id === getPayload($jwt).id ? "opacity-60 cursor-not-allowed" : ""}"
-                                                            disabled={user.id === getPayload($jwt).id}
+                                                            class="w-full px-4 py-2 pr-10 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary {user.id ===
+                                                            getPayload($jwt).id
+                                                                ? 'opacity-60 cursor-not-allowed'
+                                                                : ''}"
+                                                            disabled={user.id ===
+                                                                getPayload($jwt)
+                                                                    .id}
                                                         />
                                                         <button
                                                             type="button"
                                                             on:click={() => {
-                                                                passwordVisibility[user.id] = !passwordVisibility[user.id];
-                                                                passwordVisibility = passwordVisibility;
+                                                                passwordVisibility[
+                                                                    user.id
+                                                                ] =
+                                                                    !passwordVisibility[
+                                                                        user.id
+                                                                    ];
+                                                                passwordVisibility =
+                                                                    passwordVisibility;
                                                             }}
                                                             class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                                                         >
                                                             {#if passwordVisibility[user.id]}
-                                                                <EyeOff class="w-4 h-4" />
+                                                                <EyeOff
+                                                                    class="w-4 h-4"
+                                                                />
                                                             {:else}
-                                                                <Eye class="w-4 h-4" />
+                                                                <Eye
+                                                                    class="w-4 h-4"
+                                                                />
                                                             {/if}
                                                         </button>
                                                     </div>
@@ -769,12 +835,32 @@
                                                     </label>
                                                     <select
                                                         id="edit-role-{user.id}"
-                                                        bind:value={ editRole[user.id] }
-                                                        class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer  {user.id === getPayload($jwt).id ? "opacity-60 cursor-not-allowed" : ""}"
-                                                        disabled={user.id === getPayload($jwt).id}
-                                                        >
-                                                        <SelectOption value="user" name={t("user", $language)} currentValue={user.role} />
-                                                        <SelectOption value="admin" name={t("admin", $language)} currentValue={user.role} />
+                                                        bind:value={
+                                                            editRole[user.id]
+                                                        }
+                                                        class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer {user.id ===
+                                                        getPayload($jwt).id
+                                                            ? 'opacity-60 cursor-not-allowed'
+                                                            : ''}"
+                                                        disabled={user.id ===
+                                                            getPayload($jwt).id}
+                                                    >
+                                                        <SelectOption
+                                                            value="user"
+                                                            name={t(
+                                                                "user",
+                                                                $language,
+                                                            )}
+                                                            currentValue={user.role}
+                                                        />
+                                                        <SelectOption
+                                                            value="admin"
+                                                            name={t(
+                                                                "admin",
+                                                                $language,
+                                                            )}
+                                                            currentValue={user.role}
+                                                        />
                                                     </select>
                                                 </div>
                                             </div>

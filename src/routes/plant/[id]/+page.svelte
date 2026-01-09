@@ -17,7 +17,7 @@
     MessageCircle,
     Send,
   } from "lucide-svelte";
-  import { PUBLIC_API_URL } from '$env/static/public';
+  import { PUBLIC_API_URL } from "$env/static/public";
   import { jwt } from "$lib/stores/jwt.js";
   import { getPayload, headers } from "$lib/Auth.js";
 
@@ -222,14 +222,17 @@
 
   $: pageTitle = `${plant?.name || "Plant"} - Food Forest`;
 
-  async function deletePlant(){
-    if(confirm(t("confirmDeletePlant", $language))){
-      const request = await fetch(PUBLIC_API_URL + "/forests/api/v1/plants/" + plant.id, {
-        body: data,
-        method: "DELETE",
-        headers: headers($jwt)
-      });
-      if(!request.ok){
+  async function deletePlant() {
+    if (confirm(t("confirmDeletePlant", $language))) {
+      const request = await fetch(
+        PUBLIC_API_URL + "/forests/api/v1/plants/" + plant.id,
+        {
+          body: data,
+          method: "DELETE",
+          headers: headers($jwt),
+        },
+      );
+      if (!request.ok) {
         alert(request.statusText);
       } else {
         goBack();
@@ -248,25 +251,30 @@
       <div
         class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
       >
-        <ArrowLeft class="h-4 w-4" />
-        {t("back", $language)}
-      </button>
-      <div class="float-right flex gap-6">
-        {#if (getPayload($jwt).id === data.forestData.data.ownerId || getPayload($jwt).role === "admin" )}
-          <button
-            onclick={goto("/plant/"+ plant.id+ "/edit")}
-            class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
-          >
-            {t("edit", $language)}
-          </button>
-          
-          <button
-            onclick={deletePlant}
-            class="bg-(--status-critical) text-primary-foreground px-4 py-2 rounded-lg hover:bg-(--status-critical)/90 transition-colors cursor-pointer"
-          >
-            {t("delete", $language)}
-          </button>
-        {/if}
+        <button
+          on:click={goBack}
+          class="inline-flex items-center gap-2 text-foreground hover:text-primary transition-colors cursor-pointer"
+        >
+          <ArrowLeft class="h-4 w-4" />
+          {t("back", $language)}
+        </button>
+        <div class="float-right flex gap-6">
+          {#if getPayload($jwt).id === data.forestData.data.ownerId || getPayload($jwt).role === "admin"}
+            <button
+              on:click={() => goto(`/plant/${plant.id}/edit`)}
+              class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
+            >
+              {t("edit", $language)}
+            </button>
+
+            <button
+              on:click={deletePlant}
+              class="bg-(--status-critical) text-primary-foreground px-4 py-2 rounded-lg hover:bg-(--status-critical)/90 transition-colors cursor-pointer"
+            >
+              {t("delete", $language)}
+            </button>
+          {/if}
+        </div>
       </div>
 
       <!-- Header -->
@@ -553,12 +561,12 @@
               <input
                 type="text"
                 bind:value={commentText}
-                onkeypress={(e) => e.key === "Enter" && addComment()}
+                on:keydown={(e) => e.key === "Enter" && addComment()}
                 placeholder={t("addComment", $language)}
                 class="flex-1 rounded-lg border border-border bg-background px-4 py-2 text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <button
-                onclick={addComment}
+                on:click={addComment}
                 class="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer"
               >
                 <Send class="h-4 w-4" />
@@ -574,7 +582,7 @@
     <div class="text-center">
       <h1 class="text-2xl font-bold text-foreground mb-2">Plant Not Found</h1>
       <button
-        onclick={() => goto("/")}
+        on:click={() => goto("/")}
         class="text-primary hover:underline cursor-pointer"
       >
         Go back to map

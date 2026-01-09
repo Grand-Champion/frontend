@@ -23,6 +23,10 @@
   import { getPayload, updatePassword } from "$lib/Auth";
   import { jwt } from "$lib/stores/jwt";
 
+  let adminKey = "";
+  let showAdminKey = false;
+  let currentUser = null;
+
   let showUserMenu = false;
   let currentPassword = "";
   let newPassword = "";
@@ -34,6 +38,8 @@
   let userMenuElement;
   let showMobileMenu = false;
   let showChangePasswordModal = false;
+
+  $: currentUser = $jwt ? getPayload($jwt) : null;
 
   function toggleTheme() {
     theme.update((current) => (current === "light" ? "dark" : "light"));
@@ -62,7 +68,7 @@
     showUserMenu = false;
   }
 
-  function goToSettings(){
+  function goToSettings() {
     goto("/settings");
     showUserMenu = false;
   }
@@ -106,38 +112,15 @@
     }
 
     if ($jwt) {
-      let success = false;
-
-      if (isAdmin) {
-        // Use admin password change method
-        success = auth.changeAdminPassword(
-          adminKey,
-          currentPassword,
-          newPassword,
-        );
-        if (!success) {
-          passwordError =
-            t("invalidAdminKeyOrPassword", $language) ||
-            "Invalid admin key or current password";
-        }
-      } else {
-        success = auth.changePassword(
-          $auth.currentUser.id,
-          currentPassword,
-          newPassword,
-        );
-        if (!success) {
-          passwordError = t("incorrectCurrentPassword", $language);
-        }
-      }
-
-      if (success) {
+      try {
+        await updatePassword($jwt, currentPassword, newPassword);
         closeChangePasswordModal();
         alert(t("passwordChanged", $language));
-      } catch(e){
-        if(e?.message === "Invalid credentials") passwordError = t("incorrectCurrentPassword", $language);
+      } catch (e) {
+        if (e?.message === "Invalid credentials")
+          passwordError = t("incorrectCurrentPassword", $language);
         else passwordError = t("loginError", $language);
-      } 
+      }
     }
   }
 
@@ -150,7 +133,6 @@
       showUserMenu = false;
     }
   }
-
 </script>
 
 <svelte:body
@@ -249,17 +231,17 @@
           {#if $theme === "light"}
             <Moon class="w-4 h-4" />
             <span class="font-medium text-xs"
-              >{t("darkMode", $language) || "Dark"}</span
+              >{t("dark", $language) || "Dark"}</span
             >
           {:else}
             <Sun class="w-4 h-4" />
             <span class="font-medium text-xs"
-              >{t("lightMode", $language) || "Light"}</span
+              >{t("light", $language) || "Light"}</span
             >
           {/if}
         </button>
 
-        {#if $auth.currentUser}
+        {#if currentUser}
           <div
             class="relative ml-4 pl-[1.625rem] border-l border-border"
             bind:this={userMenuElement}
@@ -270,7 +252,7 @@
               aria-label="User menu"
             >
               <span class="text-sm font-bold text-foreground"
-                >{$auth.currentUser.fullName}</span
+                >{currentUser.fullName}</span
               >
               <ChevronDown class="w-4 h-4" />
             </button>
@@ -287,7 +269,7 @@
                         {t("fullName", $language)}
                       </p>
                       <p class="text-sm font-medium text-foreground">
-                        {$auth.currentUser.fullName}
+                        {currentUser.fullName}
                       </p>
                     </div>
                     <div>
@@ -295,13 +277,13 @@
                         {t("role", $language)}
                       </p>
                       <p class="text-sm font-medium text-foreground capitalize">
-                        {t($auth.currentUser.role, $language)}
+                        {t(currentUser.role, $language)}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {#if $auth.currentUser.role === "admin" || $auth.currentUser.role === "manager"}
+                {#if currentUser.role === "admin" || currentUser.role === "manager"}
                   <button
                     on:click={goToAdmin}
                     class="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2 border-b border-border cursor-pointer"
@@ -436,12 +418,12 @@
           {#if $theme === "light"}
             <Moon class="w-4 h-4" />
             <span class="font-medium text-sm"
-              >{t("darkMode", $language) || "Dark"}</span
+              >{t("dark", $language) || "Dark"}</span
             >
           {:else}
             <Sun class="w-4 h-4" />
             <span class="font-medium text-sm"
-              >{t("lightMode", $language) || "Light"}</span
+              >{t("light", $language) || "Light"}</span
             >
           {/if}
         </button>
@@ -450,14 +432,14 @@
       <!-- Push account section to bottom -->
       <div class="mt-auto"></div>
 
-      {#if $auth.currentUser}
+      {#if currentUser}
         <div class="grid gap-2 pb-6">
           <div
             class="px-2 py-3 text-xl font-semibold text-foreground border-b border-border"
           >
-            {$auth.currentUser.fullName}
+            {currentUser.fullName}
           </div>
-          {#if $auth.currentUser.role === "admin" || $auth.currentUser.role === "manager"}
+          {#if currentUser.role === "admin" || currentUser.role === "manager"}
             <button
               on:click={() => {
                 showMobileMenu = false;
@@ -524,7 +506,7 @@
         </div>
 
         <form on:submit|preventDefault={handleChangePassword} class="space-y-4">
-          {#if $auth.currentUser?.role === "admin"}
+          {#if currentUser?.role === "admin"}
             <div>
               <label
                 for="modal-admin-key"

@@ -117,7 +117,6 @@ export const translations = {
         unknown: 'Unknown',
         low: 'Low',
         searchSpecies: 'Search species',
-        email: 'Email',
         filters: 'Filters',
 
         // Plant detail page
@@ -142,6 +141,7 @@ export const translations = {
         soilMoisture: 'Soil Moisture',
         sunlight: 'Sunlight',
         careAdvice: 'Care Advice',
+        lastUpdated: 'Last updated',
         comments: 'Comments',
         addComment: 'Add a comment...',
         send: 'Send',
@@ -306,7 +306,6 @@ export const translations = {
         unknown: 'Onbekend',
         low: 'Laag',
         searchSpecies: 'Zoek soorten',
-        email: 'E-mail',
         filters: 'Filters',
 
         // Plant detail page
@@ -331,6 +330,7 @@ export const translations = {
         soilMoisture: 'Bodemvocht',
         sunlight: 'Zonlicht',
         careAdvice: 'Verzorgingsadvies',
+        lastUpdated: 'Laatst bijgewerkt',
         comments: 'Reacties',
         addComment: 'Voeg een reactie toe...',
         send: 'Verstuur',
@@ -396,7 +396,7 @@ export const translations = {
 };
 
 export function t(key: keyof typeof translations.en, lang: Language): string {
-    if(translations[lang][key]) return translations[lang][key];
+    if (translations[lang][key]) return translations[lang][key];
     else {
         console.warn(Error("Tried to translate " + key));
         return key;
