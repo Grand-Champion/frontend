@@ -21,6 +21,7 @@
   import { onMount } from 'svelte';
   import { jwt } from "$lib/stores/jwt.js";
   import { getPayload, headers } from "$lib/Auth.js";
+  import { getStatus, getStatusColor } from "$lib/utils/plant-helpers.js";
 
   export let data;
   let plantData = data?.plantData ?? null;
@@ -80,55 +81,6 @@
   return date.toLocaleString();
 }
 
-  function calculateStatus() {
-    if (!conditions || !species) return "critical";
-
-    let issueCount = 0;
-
-    const tempDiff = Math.max(
-      species.minTemperature - conditions.temperature,
-      conditions.temperature - species.maxTemperature,
-      0,
-    );
-    if (tempDiff > 0) issueCount++;
-
-    const humidityDiff = Math.max(
-      species.minHumidity - conditions.humidity,
-      conditions.humidity - species.maxHumidity,
-      0,
-    );
-    if (humidityDiff > 0) issueCount++;
-
-    const moistureDiff = Math.max(
-      species.minSoilMoisture - conditions.soilMoisture,
-      conditions.soilMoisture - species.maxSoilMoisture,
-      0,
-    );
-    if (moistureDiff > 0) issueCount++;
-
-    const sunlightDiff = Math.max(
-      species.minSunlight - conditions.sunlight,
-      conditions.sunlight - species.maxSunlight,
-      0,
-    );
-    if (sunlightDiff > 0) issueCount++;
-
-    if (issueCount === 0) return "good";
-    if (issueCount <= 2) return "attention";
-    return "critical";
-  }
-
-  function getStatusColor(status) {
-    switch (status) {
-      case "good":
-        return "var(--status-good)";
-      case "attention":
-        return "var(--status-attention)";
-      case "critical":
-        return "var(--status-critical)";
-    }
-  }
-
   const statusBg = (color) => `color-mix(in oklch, ${color} 12%, transparent)`;
   const statusBorder = (color) =>
     `color-mix(in oklch, ${color} 32%, transparent)`;
@@ -176,12 +128,12 @@
     return advice.length > 0 ? advice : [t("adviceOptimal", $language)];
   }
 
-  function getConditionColor(current, min, max, criticalThreshold) {
-    if (current >= min && current <= max) return getStatusColor("good");
-    const midpoint = (min + max) / 2;
-    return Math.abs(current - midpoint) > criticalThreshold
-      ? getStatusColor("critical")
-      : getStatusColor("attention");
+  function getConditionColor(current, min, max) {
+    // Groen als de condition binnen de range zit, rood als buiten range is
+    if (current >= min && current <= max) {
+      return getStatusColor("optimal");
+    }
+    return getStatusColor("critical");
   }
 
   function addComment() {
@@ -199,15 +151,12 @@
     }
   }
 
-  $: if (plant) {
-    overallStatus = calculateStatus(
-      plant.currentConditions,
-      plant.optimalConditions,
-    );
+  $: if (plant && conditions) {
+    overallStatus = getStatus(plant);
     overallColor = getStatusColor(overallStatus);
   } else {
-    overallStatus = null;
-    overallColor = null;
+    overallStatus = "unknown";
+    overallColor = getStatusColor("unknown");
   }
 
   $: pageTitle = `${plant?.name || "Plant"} - Food Forest`;
@@ -370,7 +319,7 @@
                 class="px-3 py-1 rounded-lg text-sm font-semibold text-white"
                 style={`background-color: ${overallColor || "var(--status-good)"};`}
               >
-                {overallStatus === "good"
+                {overallStatus === "optimal"
                   ? t("optimal", $language)
                   : overallStatus === "attention"
                     ? t("needsAttention", $language)
@@ -423,7 +372,6 @@
                     plant.conditions[0]?.temperature ?? 0,
                     plant.species?.minTemperature ?? 0,
                     plant.species?.maxTemperature ?? 0,
-                    5,
                   )}`}
                 >
                   {plant.conditions[0]?.temperature ?? "—"}°C
@@ -443,7 +391,6 @@
                     plant.conditions[0]?.humidity ?? 0,
                     plant.species?.minHumidity ?? 0,
                     plant.species?.maxHumidity ?? 0,
-                    15,
                   )}`}
                 >
                   {plant.conditions[0]?.humidity ?? "—"}%
@@ -465,7 +412,6 @@
                     plant.conditions[0]?.soilMoisture ?? 0,
                     plant.species?.minSoilMoisture ?? 0,
                     plant.species?.maxSoilMoisture ?? 0,
-                    20,
                   )}`}
                 >
                   {plant.conditions[0]?.soilMoisture ?? "—"}%
@@ -485,7 +431,6 @@
                     plant.conditions[0]?.sunlight ?? 0,
                     plant.species?.minSunlight ?? 0,
                     plant.species?.maxSunlight ?? 0,
-                    2,
                   )}`}
                 >
                   {plant.conditions[0]?.sunlight ?? "—"}%
