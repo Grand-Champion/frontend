@@ -1,9 +1,12 @@
 <script lang="ts">
+    import { theme } from "$lib/stores/theme";
+
     export interface MessageData {
     userId: number;
     message: string;
     createdAt: string;
   }
+
     const { message }: { message: MessageData } = $props();
 </script>
 
@@ -18,23 +21,72 @@
   <p class="message-body">
     {message.message}
   </p>
-
 </article>
+
+{#if $theme === "light"}
+  <style>
+    .message-card {
+      background: #ffffff;
+      border: 1px solid #eaeaea;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .message-header {
+      color: #666;
+    }
+
+    .author {
+      color: #333;
+    }
+
+    .message-body {
+      color: #222;
+    }
+  </style>
+{:else}
+  <style>
+    .message-card {
+      background: #032309;
+      border: 1px solid rgba(34, 197, 94, 0.15);
+      box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(255, 255, 255, 0.02);
+    }
+
+    .message-card:hover {
+      box-shadow:
+        0 14px 38px rgba(0, 0, 0, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    .message-header {
+      color: #9ca3af;
+    }
+
+    .author {
+      color: #d1fae5;
+    }
+
+    .date {
+      color: #6ee7b7;
+    }
+
+    .message-body {
+      color: #ecfdf5;
+    }
+  </style>
+{/if}
 
 <style>
   .message-card {
-    background: #ffffff;
     border-radius: 12px;
     padding: 1.25rem 1.5rem;
     margin-bottom: 1.5rem;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    border: 1px solid #eaeaea;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
   }
 
   .message-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
   }
 
   .message-header {
@@ -43,12 +95,10 @@
     align-items: center;
     margin-bottom: 0.75rem;
     font-size: 0.9rem;
-    color: #666;
   }
 
   .author {
     font-weight: 600;
-    color: #333;
   }
 
   .date {
@@ -58,7 +108,6 @@
   .message-body {
     font-size: 1rem;
     line-height: 1.6;
-    color: #222;
     white-space: pre-wrap;
   }
 </style>

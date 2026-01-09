@@ -1,10 +1,10 @@
 <script>
     import Message from '../../lib/components/Message.svelte';
-    let { data } = $props();
     import { goto } from '$app/navigation';
     import { resolve } from '$app/paths';
+    import { theme } from "$lib/stores/theme";
 
-    console.log('Hoi');
+    let { data } = $props();
     
     async function handleCreateMessage() {
         await goto(resolve('/messages/create'));
@@ -19,6 +19,20 @@
   Create message
 </button>
 
+{#if $theme === "light"}
+  <style>
+    .create-button {
+      color: #ffffff;
+    }
+  </style>
+{:else}
+  <style>
+    .create-button {
+      color: #000000;
+    }
+  </style>
+{/if}
+
 <style>
   .create-button {
   display: inline-flex;
@@ -31,7 +45,6 @@
   font-size: 0.95rem;
   font-weight: 600;
 
-  color: #ffffff;
   background: linear-gradient(135deg, #16a34a, #15803d);
 
   border: none;

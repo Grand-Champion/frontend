@@ -198,6 +198,7 @@ export const translations = {
 
         // Message create page
         message: "Message",
+        messages: "Messages",
         createMessage: "Create Message",
         selectImage: "Select image",
     },
@@ -384,6 +385,7 @@ export const translations = {
 
         //Message create page
         message: "Bericht",
+        messages: "Berichten",
         createMessage: "Schrijf een bericht",
         selectImage: "Selecteer afbeelding",
     }
