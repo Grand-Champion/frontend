@@ -21,64 +21,13 @@
   import ZoomableMap from "./ZoomableMap.svelte";
   import { jwt } from "$lib/stores/jwt";
   import { getPayload } from "$lib/Auth";
+  import { getStatus, getStatusColor } from "$lib/utils/plant-helpers";
 
   // Pak API data
   export let forestData;
 
   // Get plants array directly from API
   $: plants = forestData?.data?.plants || [];
-
-  // calculate status based on species optimal ranges
-  function getStatus(plant) {
-    if (!plant.conditions || !plant.conditions[0]) return 'critical';
-    if (!plant.species) return 'critical';
-    
-    const c = plant.conditions[0];
-    const s = plant.species;
-    let issuesCount = 0;
-
-    // Check conditions met species ranges
-    if (s.minTemperature !== null && s.maxTemperature !== null) {
-      if (
-        c.temperature < s.minTemperature ||
-        c.temperature > s.maxTemperature
-      ) {
-        issuesCount++;
-      }
-    }
-
-    if (s.minHumidity !== null && s.maxHumidity !== null) {
-      if (c.humidity < s.minHumidity || c.humidity > s.maxHumidity) {
-        issuesCount++;
-      }
-    }
-
-    if (s.minSoilMoisture !== null && s.maxSoilMoisture !== null) {
-      if (
-        c.soilMoisture < s.minSoilMoisture ||
-        c.soilMoisture > s.maxSoilMoisture
-      ) {
-        issuesCount++;
-      }
-    }
-
-    if (s.minSoilPH !== null && s.maxSoilPH !== null) {
-      if (c.soilPH < s.minSoilPH || c.soilPH > s.maxSoilPH) {
-        issuesCount++;
-      }
-    }
-
-    if (s.minSunlight !== null && s.maxSunlight !== null) {
-      if (c.sunlight < s.minSunlight || c.sunlight > s.maxSunlight) {
-        issuesCount++;
-      }
-    }
-
-    // Returned de status, kijkt naar hoeveelheid issues
-    if (issuesCount === 0) return "good";
-    if (issuesCount <= 2) return "attention";
-    return "critical";
-  }
 
   // Gebruik backend species types (Tree, Shrub, Plant)
   $: categoryConfig = {
@@ -111,6 +60,7 @@
   };
 
   // Local UI state
+  let selectedPlantId = null;
   let selectedPlant = null;
   let overallStatus = null;
   let overallColor = null;
@@ -120,15 +70,14 @@
   const comments = {};
   let commentText = "";
 
-  function getStatusColor(status) {
-    switch (status) {
-      case "good":
-        return "var(--status-good)";
-      case "attention":
-        return "var(--status-attention)";
-      case "critical":
-        return "var(--status-critical)";
+  // Plant care advice messages updaten zonder refresh
+  $: if (selectedPlantId !== null) {
+    selectedPlant = plants.find(p => p.id === selectedPlantId) || null;
+    if (!selectedPlant) {
+      selectedPlantId = null;
     }
+  } else {
+    selectedPlant = null;
   }
 
   const statusBg = (color) => `color-mix(in oklch, ${color} 12%, transparent)`;
@@ -182,12 +131,6 @@
       }
     }
 
-    // Check of soil pH binnen range zit
-    if (s.minSoilPH !== null && s.maxSoilPH !== null) {
-      if (c.soilPH < s.minSoilPH || c.soilPH > s.maxSoilPH) {
-        advice.push("Soil pH out of range.");
-      }
-    }
 
     // Check of sunlight binnen range zit
     if (s.minSunlight !== null && s.maxSunlight !== null) {
@@ -233,7 +176,7 @@
   }
 
   function viewPlantDetails(plantId) {
-    goto(`/plant/${plantId}`);
+    goto(`/plants/${plantId}`);
   }
 
   $: if (selectedPlant) {
@@ -243,6 +186,12 @@
     overallStatus = null;
     overallColor = null;
   }
+
+  // Update alle plant kleuren wanneer plants verandert
+  $: plantColors = plants.reduce((map, plant) => {
+    map[plant.id] = getStatusColor(getStatus(plant));
+    return map;
+  }, {});
 
 </script>
 
@@ -255,32 +204,32 @@
   </div>
 
   <!-- Center map area -->
+  
   <ZoomableMap image={forestData?.data?.image} alt="Food forest aerial view">
     {#each $filteredPlants as plant (plant.id)}
       {#if typeof plant.posX === "number" && typeof plant.posY === "number"}
         {@const config =
           categoryConfig[plant.species?.type?.toLowerCase() || "tree"]}
-        {@const status = getStatus(plant)}
-        {@const statusColor = getStatusColor(status)}
 
         <div
           style="position: absolute; left: {plant.posX}%; top: {plant.posY}%; transform: translate(-50%, -50%); text-align: center; width: 60px;"
         >
           <button
-            onclick={() => (selectedPlant = plant)}
+            onclick={() => (selectedPlantId = plant.id)}
             onmouseenter={() => (hoveredPlantId = plant.id)}
             onmouseleave={() => (hoveredPlantId = null)}
             class="flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-110 cursor-pointer {selectedPlant?.id ===
             plant.id
               ? 'ring-4 ring-white scale-110'
               : ''}"
-            style="background-color: {statusColor};"
+            style="background-color: {plantColors[plant.id]};"
             aria-label="View {plant.name}"
           >
             <svelte:component this={config.icon} class="h-5 w-5" />
           </button>
           <div class="text-xs text-white mt-1 truncate" title={plant.name}>
             {plant.name}
+              <span style="display:block; color:yellow; font-size:10px;">ID: {plant.id}</span> <!-- dit is zodat we kunnen zien welk id een plant heeft. Moet later verwijderd worden -->
           </div>
         </div>
       {/if}
@@ -323,7 +272,7 @@
                 </p>
               </div>
               <button
-                onclick={() => (selectedPlant = null)}
+                onclick={() => (selectedPlantId = null)}
                 class="p-2 hover:bg-muted rounded-lg cursor-pointer"
                 aria-label="Close details"><X class="h-4 w-4" /></button
               >
@@ -423,12 +372,18 @@
         </div>
       {/if}
       {#if (getPayload($jwt).role === "admin" || getPayload($jwt).id === forestData.data.ownerId)}
-      <button
-        onclick={goto("/plant/create")}
-        class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer map-overlay absolute left-6 top-6 "
-      >
-        {t("createPlant", $language)}
-      </button>
+        <button
+          onclick={goto("/plants/create")}
+          class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer map-overlay absolute left-6 top-6 "
+        >
+          {t("createPlant", $language)}
+        </button>
+        <button
+          onclick={goto("/species/create")}
+          class="bg-secondary text-secondary-foreground px-4 py-2 rounded-lg hover:bg-secondary/90 transition-colors cursor-pointer map-overlay absolute left-6 top-16 "
+        >
+          {t("createSpecies", $language)}
+        </button>
       {/if}
     </svelte:fragment>
   </ZoomableMap>

@@ -20,14 +20,14 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
   },
-  // "include": [
-  //   "src/**/*.ts",
-  //   "src/**/*.js",
-  //   "src/**/*.svelte",
-  //   "test/**/*.js",
-  //   "vite.config.ts",
-  //   "svelte.config.js",
-  //   "eslint.config.js"
-  // ],
+  //  "include": [
+  //  "src/**/*.ts",
+  //  "src/**/*.js",
+  //  "src/**/*.svelte",
+  //  "test/**/*.js",
+  //  "vite.config.ts",
+  //  "svelte.config.js",
+  //  "eslint.config.js"
+  //  ],
   "extends": "./.svelte-kit/tsconfig.json"
 }
