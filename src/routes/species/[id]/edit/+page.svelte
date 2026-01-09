@@ -43,10 +43,51 @@
       <div class="form-group">
         <label for="type">{t("category", $language)}</label>
         <select id="type" name="type" value="{species.type || ''}">
-          <option value="tree">{t("trees", $language)}</option>
-          <option value="shrub">{t("shrubs", $language)}</option>
-          <option value="herb">{t("herbs", $language)}</option>
-          <option value="vegetable">{t("vegetables", $language)}</option>
+          <option value="Tree">{t("trees", $language)}</option>
+          <option value="Shrub">{t("shrubs", $language)}</option>
+          <option value="Herb">{t("herbs", $language)}</option>
+          <option value="Vegetable">{t("vegetables", $language)}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="harvestSeason">{t("harvestSeason", $language) || "Harvest Season"}</label>
+        <select id="harvestSeason" name="harvestSeason" value="{species.harvestSeason || ''}">
+          <option value="">{t('harvestSeason', $language) || "Select..."}</option>
+          <option value="Spring">{t('spring', $language) || "Spring"}</option>
+          <option value="Summer">{t('summer', $language) || "Summer"}</option>
+          <option value="Autumn">{t('autumn', $language) || "Autumn"}</option>
+          <option value="Winter">{t('winter', $language) || "Winter"}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="sunRequirement">{t("sunRequirement", $language) || "Sun Requirement"}</label>
+        <select id="sunRequirement" name="sunRequirement" value="{species.sunRequirement || ''}">
+          <option value="">{t('sunRequirement', $language) || "Select..."}</option>
+          <option value="Full sun">{t('fullSun', $language) || "Full Sun"}</option>
+          <option value="Full sun to partial shade">{t('fullSunToPartialShade', $language) || "Full Sun to Partial Shade"}</option>
+          <option value="Full shade">{t('fullShade', $language) || "Full Shade"}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="waterNeeds">{t("waterNeeds", $language) || "Water Needs"}</label>
+        <select id="waterNeeds" name="waterNeeds" value="{species.waterNeeds || ''}">
+          <option value="">{t('waterNeeds', $language) || "Select..."}</option>
+          <option value="High">{t('high', $language) || "High"}</option>
+          <option value="Medium">{t('medium', $language) || "Medium"}</option>
+          <option value="Low">{t('low', $language) || "Low"}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="maintenance">{t("maintenanceLevel", $language) || "Maintenance Level"}</label>
+        <select id="maintenance" name="maintenance" value="{species.maintenance || ''}">
+          <option value="">{t('maintenanceLevel', $language) || "Select..."}</option>
+          <option value="High">{t('high', $language) || "High"}</option>
+          <option value="Medium">{t('medium', $language) || "Medium"}</option>
+          <option value="Low">{t('low', $language) || "Low"}</option>
         </select>
       </div>
 
@@ -55,7 +96,7 @@
       {/if}
 
       <div class="actions">
-        <button type="submit">{t("update", $language)}</button>
+        <button type="submit">{t("save", $language)}</button>
         <button type="button" on:click={() => goto('/species')}>{t("cancel", $language)}</button>
       </div>
     </form>
@@ -86,6 +127,14 @@
     padding: 0.5rem;
     border: 1px solid #ddd;
     border-radius: 4px;
+    color-scheme: light dark;
+    background-color: var(--card);
+    color: var(--card-foreground);
+  }
+
+  select option {
+    background-color: var(--card);
+    color: var(--card-foreground);
   }
 
   textarea {

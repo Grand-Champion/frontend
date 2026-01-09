@@ -42,7 +42,7 @@
   }
 
   async function handleDelete(id) {
-    if (confirm(t("confirmDelete", $language))) {
+    if (confirm(t("confirmDeleteSpecies", $language))) {
       try {
         const response = await fetch(`${PUBLIC_API_URL}/forests/api/v1/species/${id}`, {
           method: 'DELETE',
@@ -84,7 +84,7 @@
   <!-- Main Content - Species Grid -->
   <div class="flex-1 overflow-y-auto bg-background p-6">
     <div class="mb-6">
-      <h1 class="text-3xl font-bold text-card-foreground">Species List</h1>
+      <h1 class="text-3xl font-bold text-card-foreground">{t("species", $language)}</h1>
     </div>
     <div
       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
@@ -154,10 +154,6 @@
                 </div>
               {/if}
             </div>
-            <div class="card-actions">
-              <button on:click|stopPropagation={() => handleEdit(spec.id)} class="edit-button">Edit</button>
-              <button on:click|stopPropagation={() => handleDelete(spec.id)} class="delete-button">Delete</button>
-            </div>
           </div>
         </div>
       {/each}
@@ -165,37 +161,5 @@
   </div>
 </div>
 
-<style>
-  .card-actions {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: center;
-    margin-top: 1rem;
-  }
-
-  .edit-button {
-    background-color: #2196F3;
-    color: white;
-    border: none;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .edit-button:hover {
-    background-color: #0b7dda;
-  }
-
-  .delete-button {
-    background-color: #f44336;
-    color: white;
-    border: none;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .delete-button:hover {
-    background-color: #da190b;
-  }
-</style>
+  <style>
+  </style>

@@ -212,7 +212,7 @@
             : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
           <Grid3X3 class="w-4 h-4" />
-          <span class="font-medium">Species List</span>
+          <span class="font-medium">{t("species", $language)}</span>
         </a>
       </div>
     </div>

@@ -2,7 +2,7 @@
   import SpeciesList from "$lib/components/species-list.svelte";
   import { language, t } from "$lib/stores/language";
 
-  $: pageTitle = `Species List - Food Forest`;
+  $: pageTitle = `${t("species", $language)} - Food Forest`;
 
   export let data;
 </script>

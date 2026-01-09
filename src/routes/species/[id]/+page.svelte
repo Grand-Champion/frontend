@@ -1,19 +1,29 @@
 <script>
   import { language, t } from "$lib/stores/language";
   import { goto } from "$app/navigation";
+  import { browser } from "$app/environment";
   import { PUBLIC_API_URL } from '$env/static/public';
+  import { ArrowLeft } from "lucide-svelte";
 
   export let data;
 
   $: species = data.species;
   $: pageTitle = `${species?.name || 'Species'} - Food Forest`;
 
+  function goBack() {
+    if (browser && window.history.length > 1) {
+      window.history.back();
+    } else {
+      goto("/species");
+    }
+  }
+
   function handleEdit() {
     goto(`/species/${species.id}/edit`);
   }
 
   async function handleDelete() {
-    if (confirm(t("confirmDelete", $language))) {
+    if (confirm(t("confirmDeleteSpecies", $language))) {
       try {
         const response = await fetch(`${PUBLIC_API_URL}/forests/api/v1/species/${species.id}`, {
           method: 'DELETE',
@@ -35,13 +45,33 @@
   <title>{pageTitle}</title>
 </svelte:head>
 
-<div class="species-detail">
-  {#if species}
-    <div class="actions">
-      <button on:click={handleEdit} class="edit-button">{t("edit", $language)}</button>
-      <button on:click={handleDelete} class="delete-button">{t("delete", $language)}</button>
-      <button on:click={() => goto('/species')} class="back-button">{t("back", $language)}</button>
-    </div>
+<div class="bg-background">
+  <div class="max-w-5xl mx-auto px-6 py-8">
+    {#if species}
+      <!-- Back button -->
+      <button
+        onclick={goBack}
+        class="mb-6 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+      >
+        <ArrowLeft class="h-4 w-4" />
+        {t("back", $language)}
+      </button>
+
+      <!-- Action Buttons -->
+      <div class="mb-8 flex justify-end gap-6">
+        <button
+          onclick={handleEdit}
+          class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
+        >
+          {t("edit", $language)}
+        </button>
+        <button
+          onclick={handleDelete}
+          class="bg-[red] text-primary-foreground px-4 py-2 rounded-lg hover:bg-[#f00a] transition-colors cursor-pointer"
+        >
+          {t("delete", $language)}
+        </button>
+      </div>
 
     <!-- Species Card - matching plant card styling -->
     <div class="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-all hover:scale-[1.02] text-left w-full max-w-2xl mx-auto">
@@ -187,61 +217,9 @@
         </div>
       </div>
     </div>
-  {:else}
-    <p>Loading...</p>
-  {/if}
+    {/if}
+  </div>
 </div>
 
 <style>
-  .species-detail {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-
-  .actions {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    justify-content: center;
-  }
-
-  .edit-button {
-    background-color: #2196F3;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .edit-button:hover {
-    background-color: #0b7dda;
-  }
-
-  .delete-button {
-    background-color: #f44336;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .delete-button:hover {
-    background-color: #da190b;
-  }
-
-  .back-button {
-    background-color: #9E9E9E;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .back-button:hover {
-    background-color: #757575;
-  }
 </style>

@@ -38,12 +38,12 @@
       icon: Sprout,
       color: "var(--category-shrub)",
     },
-    herb: {
+    Herb: {
       label: t("herbs", $language),
       icon: Leaf,
       color: "var(--category-herb)",
     },
-    vegetable: {
+    Vegetable: {
       label: t("vegetables", $language),
       icon: Flower2,
       color: "var(--category-vegetable)",

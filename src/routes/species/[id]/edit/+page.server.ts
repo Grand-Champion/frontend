@@ -12,6 +12,8 @@ export async function load({ params }) {
 
     const speciesData = await response.json();
     const species = speciesData.data || speciesData;
+    
+    console.log('Loaded species:', JSON.stringify(species, null, 2));
 
     return {
       species
@@ -24,35 +26,44 @@ export async function load({ params }) {
 export const actions = {
   update: async ({ request, params }) => {
     const data = await request.formData();
-    const name = data.get('name');
-    const scientificName = data.get('scientificName');
-    const description = data.get('description');
-    const image = data.get('image');
-    const category = data.get('category');
+    
+    // Convert FormData to object, filtering out empty values
+    const body: any = {};
+    
+    for (const [key, value] of data.entries()) {
+      // Skip empty strings and empty files
+      if (value === '' || (value instanceof File && value.size === 0)) {
+        continue;
+      }
+      body[key] = value;
+    }
+
+    console.log('Sending update with body:', body);
 
     try {
       const response = await fetch(`${PUBLIC_API_URL}/forests/api/v1/species/${params.id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name,
-          scientificName,
-          description,
-          image,
-          category,
-        }),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
-        return fail(400, { error: `Failed to update species: ${response.status}` });
+        const errorText = await response.text();
+        console.error('Update error:', response.status, errorText);
+        return fail(response.status, { error: `Failed to update species: ${response.status}` });
       }
 
-      throw redirect(303, '/species');
+      redirect(303, '/species');
     } catch (err) {
-      if (err instanceof Response) throw err;
-      return fail(500, { error: 'Internal server error' });
+      // Only catch actual errors, not redirects
+      if (err instanceof Error && !(err instanceof Response)) {
+        console.error('Catch error:', err);
+        return fail(500, { error: 'Internal server error' });
+      }
+      // Re-throw redirects and responses
+      throw err;
     }
   },
 };
