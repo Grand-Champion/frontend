@@ -58,12 +58,12 @@
       icon: Sprout,
       color: "var(--category-shrub)",
     },
-    herb: {
+    Herb: {
       label: t("herbs", $language),
       icon: Leaf,
       color: "var(--category-herb)",
     },
-    vegetable: {
+    Vegetable: {
       label: t("vegetables", $language),
       icon: Flower2,
       color: "var(--category-vegetable)",
@@ -248,7 +248,7 @@
       <div class="float-right flex gap-6">
         {#if (getPayload($jwt).id === data.forestData.data.ownerId || getPayload($jwt).role === "admin" )}
           <button
-            onclick={goto("/plant/"+ plant.id+ "/edit")}
+            onclick={goto("/plants/"+ plant.id+ "/edit")}
             class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
           >
             {t("edit", $language)}

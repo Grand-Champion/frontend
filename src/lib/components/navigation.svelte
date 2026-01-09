@@ -167,6 +167,17 @@
         </a>
 
         <a
+          href="/plants"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
+            .url.pathname === '/plants'
+            ? 'bg-primary text-primary-foreground hover:bg-primary/80'
+            : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
+        >
+          <Grid3X3 class="w-4 h-4" />
+          <span class="font-medium">{t("plantsList", $language)}</span>
+        </a>
+
+        <a
           href="/species"
           class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
             .url.pathname === '/species'
@@ -174,7 +185,7 @@
             : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
           <Grid3X3 class="w-4 h-4" />
-          <span class="font-medium">{t("speciesList", $language)}</span>
+          <span class="font-medium">{t("species", $language)}</span>
         </a>
       </div>
     </div>
