@@ -3,60 +3,65 @@
  */
 
 /**
- * Calculate plant status based on conditions vs species optimal ranges
+ * Bereken condition status op basis van species min en max conditions
+ * (Same logic as backend calculateConditionStatus)
  */
-export function getStatus(plant) {
-  if (!plant.conditions || !plant.conditions[0] || !plant.species) {
-    return 'critical';
+export function calculateConditionStatus(conditions, species) {
+  if (!conditions || !species) {
+    return 'unknown';
   }
-  
-  let issuesCount = 0;
-  const conditions = plant.conditions[0];
-  const species = plant.species;
+
+  let outOfRange = 0;
 
   // Check temperature
-  if (species.minTemperature !== null && species.maxTemperature !== null) {
-    if (
-      conditions.temperature < species.minTemperature ||
-      conditions.temperature > species.maxTemperature
-    ) {
-      issuesCount++;
-    }
+  if (conditions.temperature < species.minTemperature || 
+      conditions.temperature > species.maxTemperature) {
+    outOfRange += 1;
   }
 
   // Check humidity
-  if (species.minHumidity !== null && species.maxHumidity !== null) {
-    if (
-      conditions.humidity < species.minHumidity ||
-      conditions.humidity > species.maxHumidity
-    ) {
-      issuesCount++;
-    }
+  if (conditions.humidity < species.minHumidity || 
+      conditions.humidity > species.maxHumidity) {
+    outOfRange += 1;
   }
 
-  // Check soil moisture
-  if (species.minSoilMoisture !== null && species.maxSoilMoisture !== null) {
-    if (
-      conditions.soilMoisture < species.minSoilMoisture ||
-      conditions.soilMoisture > species.maxSoilMoisture
-    ) {
-      issuesCount++;
-    }
+  // Check soilMoisture
+  if (conditions.soilMoisture < species.minSoilMoisture || 
+      conditions.soilMoisture > species.maxSoilMoisture) {
+    outOfRange += 1;
   }
 
   // Check sunlight
-  if (species.minSunlight !== null && species.maxSunlight !== null) {
-    if (
-      conditions.sunlight < species.minSunlight ||
-      conditions.sunlight > species.maxSunlight
-    ) {
-      issuesCount++;
-    }
+  if (conditions.sunlight < species.minSunlight || 
+      conditions.sunlight > species.maxSunlight) {
+    outOfRange += 1;
   }
 
-  if (issuesCount === 0) return "good";
-  if (issuesCount <= 2) return "attention";
-  return "critical";
+  // Bepaal status op basis van hoeveel conditions buiten de range zijn
+  if (outOfRange === 0) {
+    return 'optimal';
+  }
+  if (outOfRange <= 2) {
+    return 'attention';
+  }
+  return 'critical';
+}
+
+/**
+ * Get plant status
+ */
+export function getStatus(plant) {
+  if (!plant.conditions || !plant.conditions[0]) {
+    return 'unknown';
+  }
+  
+  // Pak nieuwste condition data vanaf backend.
+  const status = plant.conditions[0].status || 'unknown';
+  
+  if (status === 'good') return 'optimal';
+  if (status === 'Unknown') return 'unknown';
+  
+  return status.toLowerCase();
 }
 
 /**
@@ -64,11 +69,15 @@ export function getStatus(plant) {
  */
 export function getStatusColor(status) {
   switch (status) {
+    case "optimal":
     case "good":
       return "var(--status-good)";
     case "attention":
       return "var(--status-attention)";
     case "critical":
+    case "unknown":
+      return "var(--status-critical)";
+    default:
       return "var(--status-critical)";
   }
 }
