@@ -1,14 +1,25 @@
 <script>
-  import PlantList from "$lib/components/plant-list.svelte";
+  import SpeciesList from "$lib/components/species-list.svelte";
   import { language, t } from "$lib/stores/language";
-
-  $: pageTitle = `${t("plantsList", $language)} - Food Forest`;
+  import { onMount } from 'svelte';
+  import { fetchLatest } from "$lib/utils/forest-data";
 
   export let data;
+  let forestData = data?.forestData ?? null;
+
+  $: pageTitle = `${t("speciesList", $language)} - Food Forest`;
+
+  onMount(() => {
+    const interval = setInterval(async () => {
+      const result = await fetchLatest(1);
+      if (result) forestData = result;
+    }, 5000);
+    return () => clearInterval(interval);
+  });
 </script>
 
 <svelte:head>
   <title>{pageTitle}</title>
 </svelte:head>
 
-<PlantList forestData={data.forestData} />
+<SpeciesList forestData={forestData} />
