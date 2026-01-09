@@ -1,5 +1,5 @@
 <script>
-    import Message from '../../lib/components/Message.svelte';
+    import Message from '$lib/components/Message.svelte';
     import { goto } from '$app/navigation';
     import { resolve } from '$app/paths';
     import { theme } from "$lib/stores/theme";
@@ -7,7 +7,7 @@
     let { data } = $props();
     
     async function handleCreateMessage() {
-        await goto(resolve('/messages/create'));
+        await goto(resolve('/forests/[forestId]/messages/create', {forestId: data.forestId}));
     }
 </script>
 

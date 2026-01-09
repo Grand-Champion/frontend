@@ -5,7 +5,7 @@
   $: forestId = data.forestId;
   $: forestData = data.forestData?.data;
 
-  $: pageTitle = `${t("home", $language)} - ${forestData.name}`;
+  $: pageTitle = `${t("home", $language)} - ${forestData?.name}`;
 </script>
 
 <svelte:head>
