@@ -26,6 +26,7 @@
   // Pak API data
   export let forestData;
 
+
   // Get plants array directly from API
   $: plants = forestData?.data?.plants || [];
 
@@ -373,7 +374,7 @@
       {/if}
       {#if (getPayload($jwt).role === "admin" || getPayload($jwt).id === forestData.data.ownerId)}
         <button
-          onclick={goto("/plants/create")}
+          onclick={goto(`/forests/${forestData.data.id}/plants/create`)}
           class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer map-overlay absolute left-6 top-6 "
         >
           {t("createPlant", $language)}

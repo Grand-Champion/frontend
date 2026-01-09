@@ -17,7 +17,7 @@ export async function load({ fetch, params }) {
 
     return {
       forestsData,
-      forestId: 1
+      forestId: params.forestId ?? 1
     };
 
   } catch (error) {
