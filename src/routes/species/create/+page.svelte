@@ -7,6 +7,8 @@
   } from "lucide-svelte";
   import { PUBLIC_API_URL } from '$env/static/public';
   import SpeciesForm from "$lib/components/SpeciesForm.svelte";
+  import { headers } from "$lib/Auth";
+  import { jwt } from "$lib/stores/jwt";
 
   $: pageTitle = `${t("createSpecies", $language)} - Food Forest`;
 
@@ -32,7 +34,8 @@
       const data = new URLSearchParams(new FormData(formulier));
       const request = await fetch(PUBLIC_API_URL + `/forests/api/v1/species`, {
         body: data,
-        method: "POST"
+        method: "POST",
+        headers: headers($jwt)
       });
 
       if(!request.ok){
