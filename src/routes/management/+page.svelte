@@ -40,7 +40,7 @@
     let newRole = "user";
     let createError = "";
 
-    let sortBy: "email" | "displayName" | "role" | "createdAt" = "email";
+    let sortBy: "email" | "displayName" | "username" | "role" | "createdAt" = "email";
     let sortAsc = true;
     let searchFilter = "";
 
@@ -92,7 +92,7 @@
             !(user.role === "manager" && user.id === currentUser?.id)
         ) {
             userToDelete = userId;
-            userToDeleteName = user.fullName;
+            userToDeleteName = user.displayName;
             showDeleteConfirm = true;
             deleteConfirmPassword = "";
             deleteError = "";
@@ -121,118 +121,13 @@
                 if (e?.message == "Invalid credentials") {
                     deleteError = t("invalidCredentials", $language);
                 } else {
-                    deleteError = e?.message ?? t("error", $language);
+                    deleteError = "An error occurred";
                 }
             }
         }
     }
 
-    async function handleEditUser(userId: string) {
-        const user = await getUser($jwt as string, userId);
-        if (!user) return;
-
-        const newDisplayName = editDisplayName[userId] || user.displayName;
-        const newEmail = editEmail[userId] || user.email;
-        const newPassword = editPassword[userId];
-        const newRole = editRole[userId] || user.role;
-
-        // Validate required fields
-        if (!newDisplayName.trim() || !newEmail.trim()) {
-            editError[userId] = t("pleaseEnterCredentials", $language);
-            return;
-        }
-
-        // Validate email format (must have TLD)
-        if (
-            !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(
-                newEmail,
-            ) &&
-            user.role !== "admin"
-        ) {
-            editError[userId] = t("emailFormatError", $language);
-            return;
-        }
-
-        const updates: Record<string, string> = {
-            displayName: newDisplayName,
-            email: newEmail,
-            role: newRole,
-        };
-
-        if (newPassword) {
-            if (newPassword.length >= 6) {
-                updates.password = newPassword;
-            } else {
-                editError[userId] = t("passwordTooShort", $language);
-                return;
-            }
-        }
-        if (userId === getPayload($jwt as string).id) {
-            delete updates.role;
-            delete updates.password;
-        }
-        try {
-            await updateUser($jwt as string, userId, updates);
-            editingUser[userId] = false;
-            editPassword[userId] = "";
-            editError[userId] = "";
-            passwordVisibility[userId] = false;
-            await sortUsers();
-        } catch (e) {
-            editError[userId] = e?.message ?? t("error", $language);
-        }
-    }
-
-    async function handleCreateUser() {
-        createError = "";
-
-        if (!newDisplayName || !newEmail || !newPassword) {
-            createError = t("pleaseEnterCredentials", $language);
-            return;
-        }
-
-        // Validate email format (must have TLD)
-        if (
-            !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(
-                newEmail,
-            ) &&
-            newRole !== "admin"
-        ) {
-            createError = t("emailFormatError", $language);
-            return;
-        }
-
-        // Check if email already exists
-        if (
-            (await getUsers($jwt as string)).find((u) => u.email === newEmail)
-        ) {
-            createError = t("usernameExists", $language);
-            return;
-        }
-
-        const data = {
-            displayName: newDisplayName,
-            email: newEmail,
-            password: newPassword,
-            role: newRole,
-        };
-
-        await createUser($jwt as string, data);
-        newDisplayName = "";
-        newEmail = "";
-        newPassword = "";
-        newRole = "";
-        showCreateForm = false;
-        sortUsers();
-    }
-
-    function handleDeleteUser(userId: string) {
-        openDeleteConfirm(userId);
-    }
-
-    async function toggleSort(
-        column: "displayName" | "role" | "createdAt" | "email",
-    ) {
+    async function toggleSort(column: 'displayName' | 'username' | 'email' | 'role' | 'createdAt') {
         if (sortBy === column) {
             sortAsc = !sortAsc;
         } else {
@@ -269,6 +164,10 @@
                         if (!aDisplayName && !bDisplayName) return 0;
                         aVal = aDisplayName.toLowerCase();
                         bVal = bDisplayName.toLowerCase();
+                        break;
+                    case "username":
+                        aVal = (a as any)?.username?.toLowerCase?.() || "";
+                        bVal = (b as any)?.username?.toLowerCase?.() || "";
                         break;
                     case "role":
                         aVal = a.role;
@@ -501,6 +400,21 @@
                             </th>
                             <th
                                 class="px-6 py-3 text-left text-sm font-semibold text-foreground cursor-pointer hover:bg-muted/80 transition-colors"
+                                on:click={() => toggleSort("username")}
+                            >
+                                <div class="flex items-center gap-2">
+                                    {t("username", $language)}
+                                    {#if sortBy === "username"}
+                                        {#if sortAsc}
+                                            <ChevronUp class="w-4 h-4" />
+                                        {:else}
+                                            <ChevronDown class="w-4 h-4" />
+                                        {/if}
+                                    {/if}
+                                </div>
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-sm font-semibold text-foreground cursor-pointer hover:bg-muted/80 transition-colors"
                                 on:click={() => toggleSort("email")}
                             >
                                 <div class="flex items-center gap-2">
@@ -555,11 +469,8 @@
                         {#each sortedUsers as user}
                             <tr class="hover:bg-muted/50">
                                 <td class="px-6 py-4 text-sm text-foreground">
-                                    {user.username}
-                                </td>
-                                <td class="px-6 py-4 text-sm text-foreground">
                                     <div class="flex items-center gap-2">
-                                        {user.fullName}
+                                        {user.displayName}
                                         {#if user.id === $auth.currentUser?.id}
                                             <div
                                                 title={$language === "en"
@@ -576,9 +487,10 @@
                                         {/if}
                                     </div>
                                 </td>
-                                <td
-                                    class="px-6 py-4 text-sm text-muted-foreground"
-                                >
+                                <td class="px-6 py-4 text-sm text-foreground">
+                                    {user.username}
+                                </td>
+                                <td class="px-6 py-4 text-sm text-foreground">
                                     {user.email}
                                 </td>
                                 <td class="px-6 py-4 text-sm">
@@ -609,7 +521,7 @@
                                                             ] = user.username;
                                                             editFullName[
                                                                 user.id
-                                                            ] = user.fullName;
+                                                            ] = user.displayName;
                                                             editEmail[user.id] =
                                                                 user.email;
                                                             editPassword[
@@ -915,7 +827,7 @@
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
                                     <h3 class="font-semibold text-foreground">
-                                        {user.fullName}
+                                        {user.displayName}
                                     </h3>
                                     {#if user.id === $auth.currentUser?.id}
                                         <div
@@ -988,7 +900,7 @@
                                                 editUsername[user.id] =
                                                     user.username;
                                                 editFullName[user.id] =
-                                                    user.fullName;
+                                                    user.displayName;
                                                 editEmail[user.id] = user.email;
                                                 editPassword[user.id] =
                                                     user.password;
