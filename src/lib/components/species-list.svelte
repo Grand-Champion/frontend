@@ -59,63 +59,6 @@
   // Mobile toggle between 1 or 2 columns
   let mobileTwoCols = false;
 
-  // Calculate plant status based on conditions vs species optimal ranges
-  function getStatus(plant) {
-    if (!plant.conditions || !plant.conditions[0] || !plant.species)
-      return "critical";
-
-    let issuesCount = 0;
-    const conditions = plant.conditions[0];
-    const species = plant.species;
-
-    // Check elke condition tegen min/max ranges van species
-    if (
-      conditions.temperature < species.minTemperature ||
-      conditions.temperature > species.maxTemperature
-    ) {
-      issuesCount++;
-    }
-    if (
-      conditions.humidity < species.minHumidity ||
-      conditions.humidity > species.maxHumidity
-    ) {
-      issuesCount++;
-    }
-    if (
-      conditions.soilMoisture < species.minSoilMoisture ||
-      conditions.soilMoisture > species.maxSoilMoisture
-    ) {
-      issuesCount++;
-    }
-    if (
-      conditions.soilPH < species.minSoilPH ||
-      conditions.soilPH > species.maxSoilPH
-    ) {
-      issuesCount++;
-    }
-    if (
-      conditions.sunlight < species.minSunlight ||
-      conditions.sunlight > species.maxSunlight
-    ) {
-      issuesCount++;
-    }
-
-    if (issuesCount === 0) return "good";
-    if (issuesCount <= 2) return "attention";
-    return "critical";
-  }
-
-  function getStatusColor(status) {
-    switch (status) {
-      case "good":
-        return "var(--status-good)";
-      case "attention":
-        return "var(--status-attention)";
-      case "critical":
-        return "var(--status-critical)";
-    }
-  }
-
   const statusBg = (color) => `color-mix(in oklch, ${color} 12%, transparent)`;
   const statusBorder = (color) =>
     `color-mix(in oklch, ${color} 32%, transparent)`;
@@ -149,7 +92,7 @@
     const status = getStatus(plant);
     map[plant.id] = {
       status,
-      color: getStatusColor(status)
+      color: getStatusColor(status),
     };
     return map;
   }, {});

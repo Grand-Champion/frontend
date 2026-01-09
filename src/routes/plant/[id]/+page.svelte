@@ -1,9 +1,10 @@
 <script>
+  import { onMount } from "svelte";
   import { page } from "$app/stores";
   import { goto } from "$app/navigation";
   import { browser } from "$app/environment";
   import { language, t } from "$lib/stores/language";
-  import { PUBLIC_API_URL } from '$env/static/public';
+  import { PUBLIC_API_URL } from "$env/static/public";
   import {
     Leaf,
     Trees,
@@ -18,7 +19,6 @@
     MessageCircle,
     Send,
   } from "lucide-svelte";
-  import { PUBLIC_API_URL } from "$env/static/public";
   import { jwt } from "$lib/stores/jwt.js";
   import { getPayload, headers } from "$lib/Auth.js";
 
@@ -30,19 +30,31 @@
   $: species = plant?.species;
   $: conditions = plant?.conditions[0] ?? {};
 
-  
+  let errorCount = 0;
+  const maxErrors = 3;
+
   async function fetchLatest() {
+    if (!plant?.id || errorCount >= maxErrors) return;
     try {
-      const res = await fetch(`${PUBLIC_API_URL}/forests/api/v1/plants/${plant?.id}`);
-      if (!res.ok) return;
+      const res = await fetch(
+        `${PUBLIC_API_URL}/forests/api/v1/plants/${plant.id}`,
+      );
+      if (!res.ok) {
+        errorCount++;
+        return;
+      }
       plantData = await res.json();
+      errorCount = 0;
     } catch (err) {
-      console.error('Error fetching latest plant data', err);
+      errorCount++;
+      if (errorCount >= maxErrors) {
+        console.warn("Stopped polling due to repeated errors");
+      }
     }
   }
 
   onMount(() => {
-     const interval = setInterval(fetchLatest, 5000);
+    const interval = setInterval(fetchLatest, 5000);
     return () => clearInterval(interval);
   });
 
@@ -159,7 +171,6 @@
     } else if (conditions.humidity > species.maxHumidity) {
       advice.push(t("adviceHumidityTooHigh", $language));
     }
-
 
     if (conditions.soilMoisture < species.minSoilMoisture) {
       advice.push(t("adviceSoilTooDry", $language));
@@ -453,7 +464,6 @@
                   {plant.conditions[0]?.humidity ?? "—"}%
                 </span>
               </div>
-
 
               <div
                 class="flex items-center justify-between rounded-lg bg-muted p-4"

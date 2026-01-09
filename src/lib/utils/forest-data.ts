@@ -10,20 +10,19 @@ export async function fetchLatest(forestId: number = 1) {
       fetch(`${PUBLIC_API_URL}/forests/api/v1/forests/${forestId}`),
       fetch(`${PUBLIC_API_URL}/forests/api/v1/forests/${forestId}/species`)
     ]);
-    
+
     if (!forestRes.ok || !speciesRes.ok) {
-      console.error('Failed to fetch forest or species data');
       return null;
     }
-    
+
     const forestJson = await forestRes.json();
     const speciesJson = await speciesRes.json();
-    
+
     const speciesMap: Record<number, any> = {};
     speciesJson.data?.forEach((species: any) => {
       speciesMap[species.id] = species;
     });
-    
+
     if (forestJson.data?.plants) {
       forestJson.data.plants = forestJson.data.plants.map((plant: any) => ({
         ...plant,
@@ -31,7 +30,7 @@ export async function fetchLatest(forestId: number = 1) {
         species: speciesMap[plant.speciesId] || null
       }));
     }
-    
+
     return { ...forestJson };
   } catch (err) {
     console.error('Error fetching latest forest data', err);

@@ -40,7 +40,8 @@
     let newRole = "user";
     let createError = "";
 
-    let sortBy: "email" | "displayName" | "username" | "role" | "createdAt" = "email";
+    let sortBy: "email" | "displayName" | "username" | "role" | "createdAt" =
+        "email";
     let sortAsc = true;
     let searchFilter = "";
 
@@ -127,7 +128,9 @@
         }
     }
 
-    async function toggleSort(column: 'displayName' | 'username' | 'email' | 'role' | 'createdAt') {
+    async function toggleSort(
+        column: "displayName" | "username" | "email" | "role" | "createdAt",
+    ) {
         if (sortBy === column) {
             sortAsc = !sortAsc;
         } else {
@@ -521,7 +524,8 @@
                                                             ] = user.username;
                                                             editFullName[
                                                                 user.id
-                                                            ] = user.displayName;
+                                                            ] =
+                                                                user.displayName;
                                                             editEmail[user.id] =
                                                                 user.email;
                                                             editPassword[

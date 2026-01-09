@@ -29,56 +29,6 @@
   // Plants from API
   $: plants = forestData?.data?.plants || [];
 
-  // Calculate status based on species optimal ranges
-  function getStatus(plant) {
-    if (!plant.conditions || !plant.conditions[0]) return "critical";
-    if (!plant.species) return "critical";
-
-    const c = plant.conditions[0];
-    const s = plant.species;
-    let issuesCount = 0;
-
-    if (s.minTemperature !== null && s.maxTemperature !== null) {
-      if (
-        c.temperature < s.minTemperature ||
-        c.temperature > s.maxTemperature
-      ) {
-        issuesCount++;
-      }
-    }
-
-    if (s.minHumidity !== null && s.maxHumidity !== null) {
-      if (c.humidity < s.minHumidity || c.humidity > s.maxHumidity) {
-        issuesCount++;
-      }
-    }
-
-    if (s.minSoilMoisture !== null && s.maxSoilMoisture !== null) {
-      if (
-        c.soilMoisture < s.minSoilMoisture ||
-        c.soilMoisture > s.maxSoilMoisture
-      ) {
-        issuesCount++;
-      }
-    }
-
-    if (s.minSoilPH !== null && s.maxSoilPH !== null) {
-      if (c.soilPH < s.minSoilPH || c.soilPH > s.maxSoilPH) {
-        issuesCount++;
-      }
-    }
-
-    if (s.minSunlight !== null && s.maxSunlight !== null) {
-      if (c.sunlight < s.minSunlight || c.sunlight > s.maxSunlight) {
-        issuesCount++;
-      }
-    }
-
-    if (issuesCount === 0) return "good";
-    if (issuesCount <= 2) return "attention";
-    return "critical";
-  }
-
   // Backend species types
   $: categoryConfig = {
     tree: {
@@ -120,16 +70,6 @@
   let hoveredPlantId = null;
   const comments = {};
   let commentText = "";
-
-  // Plant care advice messages updaten zonder refresh
-  $: if (selectedPlantId !== null) {
-    selectedPlant = plants.find(p => p.id === selectedPlantId) || null;
-    if (!selectedPlant) {
-      selectedPlantId = null;
-    }
-  } else {
-    selectedPlant = null;
-  }
 
   const statusBg = (color) => `color-mix(in oklch, ${color} 12%, transparent)`;
   const statusBorder = (color) =>
@@ -217,6 +157,13 @@
     },
   );
 
+  // Map plant IDs to colors based on their status
+  $: plantColors = plants.reduce((acc, plant) => {
+    const status = getStatus(plant);
+    acc[plant.id] = getStatusColor(status);
+    return acc;
+  }, {});
+
   function getConditionColor(current, min, max, criticalThreshold) {
     if (current >= min && current <= max) return getStatusColor("good");
     const midpoint = (min + max) / 2;
@@ -257,7 +204,7 @@
   </div>
 
   <!-- Center map area -->
-  
+
   <ZoomableMap image={forestData?.data?.image} alt="Food forest aerial view">
     {#each $filteredPlants as plant (plant.id)}
       {#if typeof plant.posX === "number" && typeof plant.posY === "number"}
@@ -282,7 +229,6 @@
           </button>
           <div class="text-xs text-white mt-1 truncate" title={plant.name}>
             {plant.name}
-              <span style="display:block; color:yellow; font-size:10px;">ID: {plant.id}</span> <!-- dit is zodat we kunnen zien welk id een plant heeft. Moet later verwijderd worden -->
           </div>
         </div>
       {/if}
@@ -460,13 +406,13 @@
           </div>
         </div>
       {/if}
-      {#if (getPayload($jwt).role === "admin" || getPayload($jwt).id === forestData.data.ownerId)}
-      <button
-        on:click={() => goto("/plant/create")}
-        class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer map-overlay absolute left-6 top-6"
-      >
-        {t("createPlant", $language)}
-      </button>
+      {#if getPayload($jwt).role === "admin" || getPayload($jwt).id === forestData.data.ownerId}
+        <button
+          on:click={() => goto("/plant/create")}
+          class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer map-overlay absolute left-6 top-6"
+        >
+          {t("createPlant", $language)}
+        </button>
       {/if}
     </svelte:fragment>
   </ZoomableMap>
