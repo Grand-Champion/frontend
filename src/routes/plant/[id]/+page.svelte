@@ -18,6 +18,8 @@
     Send,
   } from "lucide-svelte";
   import { PUBLIC_API_URL } from '$env/static/public';
+  import { jwt } from "$lib/stores/jwt.js";
+  import { getPayload, headers } from "$lib/Auth.js";
 
   export let data;
 
@@ -221,10 +223,11 @@
   $: pageTitle = `${plant?.name || "Plant"} - Food Forest`;
 
   async function deletePlant(){
-    if(confirm("Weet je het zeker?")){
+    if(confirm(t("confirmDeletePlant", $language))){
       const request = await fetch(PUBLIC_API_URL + "/forests/api/v1/plants/" + plant.id, {
         body: data,
-        method: "DELETE"
+        method: "DELETE",
+        headers: headers($jwt)
       });
       if(!request.ok){
         alert(request.statusText);
@@ -253,20 +256,21 @@
         {t("back", $language)}
       </button>
       <div class="float-right flex gap-6">
-        <button
-          onclick={goto("/plant/"+ plant.id+ "/edit")}
-          class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
-        >
-          {t("edit", $language)}
-        </button>
-
-        
-        <button
-          onclick={deletePlant}
-          class="bg-[red] text-primary-foreground px-4 py-2 rounded-lg hover:bg-[#f00a] transition-colors cursor-pointer"
-        >
-          {t("delete", $language)}
-        </button>
+        {#if (getPayload($jwt).id === data.forestData.data.ownerId || getPayload($jwt).role === "admin" )}
+          <button
+            onclick={goto("/plant/"+ plant.id+ "/edit")}
+            class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
+          >
+            {t("edit", $language)}
+          </button>
+          
+          <button
+            onclick={deletePlant}
+            class="bg-(--status-critical) text-primary-foreground px-4 py-2 rounded-lg hover:bg-(--status-critical)/90 transition-colors cursor-pointer"
+          >
+            {t("delete", $language)}
+          </button>
+        {/if}
       </div>
 
       <!-- Header -->
@@ -389,7 +393,7 @@
                   {t("currentStage", $language)}
                 </p>
                 <p class="text-lg font-semibold capitalize text-foreground">
-                  {formatStage(plant?.plantStage)}
+                  {formatStage(plant?.stage)}
                 </p>
               </div>
               <div class="bg-background/50 rounded-lg p-3 border border-border">

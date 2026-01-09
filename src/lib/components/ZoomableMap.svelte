@@ -58,7 +58,7 @@
     }
 
     function mapPointerUp(e){
-        if(pointerPos.screenX == downPos.screenX && pointerPos.screenY == pointerPos.screenY){
+        if(pointerPos && downPos && pointerPos.screenX == downPos.screenX && pointerPos.screenY == downPos.screenY){
             imageClicked();
         }
         pointerPos = undefined;
@@ -80,20 +80,22 @@
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="overflow-hidden w-full h-full relative {classes}" bind:clientHeight={mapViewHeight} bind:clientWidth={mapViewWidth} onwheelcapture={mapZoom} bind:this={mapView} onmousedown={mapPointerDown} onmousemove={mapPointerMove} onmouseup={mapPointerUp}>
-    <div class="relative flex-1 bg-muted" style:width="{mapWidth}px" style:height="{mapHeight}px" style:transform="scale({mapZoomState.zoom*mapZoomState.zoomMultiplier})" style:transform-origin="{mapZoomState.originX}px {mapZoomState.originY}px">
-        <div class="absolute inset-0">
-            <img
-                src="{image}"
-                alt="{alt}"
-                bind:naturalHeight={mapHeight}
-                bind:naturalWidth={mapWidth}
-            />
-        <div class="absolute inset-0 bg-black/10"></div>
-        </div>
+<div class="overflow-hidden w-full h-full relative {classes}">
+    <div class="overflow-hidden w-full h-full relative" bind:clientHeight={mapViewHeight} bind:clientWidth={mapViewWidth} onwheelcapture={mapZoom} bind:this={mapView} onmousedown={mapPointerDown} onmousemove={mapPointerMove} onmouseup={mapPointerUp}>
+        <div class="relative flex-1 bg-muted" style:width="{mapWidth}px" style:height="{mapHeight}px" style:transform="scale({mapZoomState.zoom*mapZoomState.zoomMultiplier})" style:transform-origin="{mapZoomState.originX}px {mapZoomState.originY}px">
+            <div class="absolute inset-0">
+                <img
+                    src="{image}"
+                    alt="{alt}"
+                    bind:naturalHeight={mapHeight}
+                    bind:naturalWidth={mapWidth}
+                />
+            <div class="absolute inset-0 bg-black/10"></div>
+            </div>
 
-        <div class="absolute inset-0" style:width="{mapWidth}px" style:height="{mapHeight}px" style:pointer-events="{clickable? "auto" : "none"}">
-            <slot mapZoom={mapZoomState.zoom} />
+            <div class="absolute inset-0" style:width="{mapWidth}px" style:height="{mapHeight}px" style:pointer-events="{clickable? "auto" : "none"}">
+                <slot mapZoom={mapZoomState.zoom} />
+            </div>
         </div>
     </div>
     <slot name="over" />
