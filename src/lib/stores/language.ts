@@ -210,6 +210,11 @@ export const translations = {
         location: "Location",
         createPlant: "Create plant",
         delete: "Delete",
+
+        // Message create page
+        message: "Message",
+        messages: "Messages",
+        createMessage: "Create Message",
         selectImage: "Select image",
     },
     nl: {
@@ -407,6 +412,11 @@ export const translations = {
         location: "Locatie",
         createPlant: "Voeg plant toe",
         delete: "Verwijder",
+
+        //Message create page
+        message: "Bericht",
+        messages: "Berichten",
+        createMessage: "Schrijf een bericht",
         selectImage: "Selecteer afbeelding",
     }
 };
