@@ -5,6 +5,7 @@
   import { goto } from "$app/navigation";
   import Filters from "$lib/components/Filters.svelte";
   import { language, t } from "$lib/stores/language";
+  import { getStatus, getStatusColor } from "$lib/utils/plant-helpers";
 
   // API data
   export let forestData;
@@ -45,62 +46,6 @@
   let speciesOpen = true;
   let statusOpen = true;
 
-  // Calculate plant status based on conditions vs species optimal ranges
-  function getStatus(plant) {
-    if (!plant.conditions || !plant.conditions[0] || !plant.species) return 'critical';
-    
-    let issuesCount = 0;
-    const conditions = plant.conditions[0];
-    const species = plant.species;
-
-    // Check elke condition tegen min/max ranges van species
-    if (
-      conditions.temperature < species.minTemperature ||
-      conditions.temperature > species.maxTemperature
-    ) {
-      issuesCount++;
-    }
-    if (
-      conditions.humidity < species.minHumidity ||
-      conditions.humidity > species.maxHumidity
-    ) {
-      issuesCount++;
-    }
-    if (
-      conditions.soilMoisture < species.minSoilMoisture ||
-      conditions.soilMoisture > species.maxSoilMoisture
-    ) {
-      issuesCount++;
-    }
-    if (
-      conditions.soilPH < species.minSoilPH ||
-      conditions.soilPH > species.maxSoilPH
-    ) {
-      issuesCount++;
-    }
-    if (
-      conditions.sunlight < species.minSunlight ||
-      conditions.sunlight > species.maxSunlight
-    ) {
-      issuesCount++;
-    }
-
-    if (issuesCount === 0) return "good";
-    if (issuesCount <= 2) return "attention";
-    return "critical";
-  }
-
-  function getStatusColor(status) {
-    switch (status) {
-      case "good":
-        return "var(--status-good)";
-      case "attention":
-        return "var(--status-attention)";
-      case "critical":
-        return "var(--status-critical)";
-    }
-  }
-
   const statusBg = (color) => `color-mix(in oklch, ${color} 12%, transparent)`;
   const statusBorder = (color) =>
     `color-mix(in oklch, ${color} 32%, transparent)`;
@@ -128,6 +73,16 @@
   function viewPlant(plantId) {
     goto(`/plant/${plantId}`);
   }
+
+  // Update alle plant status en kleuren wanneer plants verandert
+  $: plantStatus = plants.reduce((map, plant) => {
+    const status = getStatus(plant);
+    map[plant.id] = {
+      status,
+      color: getStatusColor(status)
+    };
+    return map;
+  }, {});
 
   const filteredPlants = derived(
     [selectedCategories, selectedStatus],
@@ -159,8 +114,6 @@
       {#each $filteredPlants as plant (plant.id)}
         {@const category = plant.species?.type?.toLowerCase() || "tree"}
         {@const config = categoryConfig[category]}
-        {@const status = getStatus(plant)}
-        {@const statusColor = getStatusColor(status)}
         <button
           on:click={() => viewPlant(plant.id)}
           class="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-all hover:scale-[1.02] text-left w-full"
@@ -176,7 +129,7 @@
             <div class="absolute top-2 right-2">
               <div
                 class="h-4 w-4 rounded-full border-2 border-white shadow-md"
-                style={`background-color: ${statusColor};`}
+                style={`background-color: ${plantStatus[plant.id]?.color};`}
               ></div>
             </div>
           </div>
@@ -210,11 +163,11 @@
             <div class="mt-3 text-xs">
               <div
                 class="inline-block px-2 py-1 rounded-full font-semibold text-white"
-                style={`background-color: ${getStatusColor(status)};`}
+                style={`background-color: ${plantStatus[plant.id]?.color};`}
               >
-                {status === "good"
+                {plantStatus[plant.id]?.status === "good"
                   ? t("good", $language)
-                  : status === "attention"
+                  : plantStatus[plant.id]?.status === "attention"
                     ? t("needsAttention", $language)
                     : t("critical", $language)}
               </div>
