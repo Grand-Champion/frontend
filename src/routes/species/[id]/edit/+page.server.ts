@@ -1,6 +1,7 @@
 import { PUBLIC_API_URL } from '$env/static/public';
 import { error, fail } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
+import { headers } from '$lib/Auth.js';
 
 export async function load({ params }) {
   try {
@@ -45,6 +46,7 @@ export const actions = {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
+          "Authorization": `Bearer ${body.jwt}`
         },
         body: JSON.stringify(body),
       });

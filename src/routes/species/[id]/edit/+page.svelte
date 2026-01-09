@@ -3,6 +3,7 @@
   import { enhance } from "$app/forms";
   import { goto } from "$app/navigation";
   import ImageInput from "$lib/components/ImageInput.svelte";
+  import { jwt } from "$lib/stores/jwt";
 
   $: pageTitle = `${t("editSpecies", $language)} - Food Forest`;
 
@@ -21,6 +22,7 @@
 
   {#if species}
     <form method="POST" action="?/update" use:enhance>
+      <input type="hidden" value={$jwt} name="jwt" />
       <div class="form-group">
         <label for="name">{t("name", $language)}</label>
         <input type="text" id="name" name="name" value="{species.name || ''}" required />
