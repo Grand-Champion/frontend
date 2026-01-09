@@ -2,6 +2,7 @@
     import { selectedCategories, selectedStatus } from "$lib/stores/filters";
     import { Leaf, Trees, Flower2, Sprout, ChevronDown } from "lucide-svelte";
     import { language, t } from "$lib/stores/language";
+    import { getStatusColor } from "$lib/utils/plant-helpers";
 
     // Gebruik backend types direct (lowercase: tree, shrub, herb, vegetable)
     $: categoryConfig = {
@@ -28,7 +29,7 @@
     };
 
     $: statusConfig = {
-        good: { label: t("good", $language) },
+        optimal: { label: t("optimal", $language) },
         attention: { label: t("needsAttention", $language) },
         critical: { label: t("critical", $language) },
     };
@@ -79,19 +80,6 @@
                 return next;
             }
         });
-    }
-
-    function getStatusColor(status) {
-        switch (status) {
-            case "good":
-                return "var(--status-good)";
-            case "attention":
-                return "var(--status-attention)";
-            case "critical":
-                return "var(--status-critical)";
-            default:
-                return "var(--muted-foreground)";
-        }
     }
 </script>
 

@@ -38,7 +38,7 @@
   };
 
   $: statusConfig = {
-    good: { label: t("good", $language) },
+    optimal: { label: t("optimal", $language) },
     attention: { label: t("needsAttention", $language) },
     critical: { label: t("critical", $language) },
   };
@@ -89,11 +89,16 @@
     ([$categories, $statuses]) => {
       if (!plants || plants.length === 0) return [];
 
-      return plants.filter(
-        (plant) =>
+      return plants.filter((plant) => {
+        const status = getStatus(plant);
+        // 'unknown' is zelfde als 'critical' voor filters
+        const normalizedStatus = status === 'unknown' ? 'critical' : status;
+        
+        return (
           $categories.includes(plant.species?.type?.toLowerCase() || "tree") &&
-          $statuses.includes(getStatus(plant)),
-      );
+          $statuses.includes(normalizedStatus)
+        );
+      });
     },
   );
 </script>
@@ -165,8 +170,8 @@
                 class="inline-block px-2 py-1 rounded-full font-semibold text-white"
                 style={`background-color: ${plantStatus[plant.id]?.color};`}
               >
-                {plantStatus[plant.id]?.status === "good"
-                  ? t("good", $language)
+                {plantStatus[plant.id]?.status === "optimal"
+                  ? t("optimal", $language)
                   : plantStatus[plant.id]?.status === "attention"
                     ? t("needsAttention", $language)
                     : t("critical", $language)}
