@@ -176,7 +176,7 @@
   }
 
   function viewPlantDetails(plantId) {
-    goto(`/plant/${plantId}`);
+    goto(`/plants/${plantId}`);
   }
 
   $: if (selectedPlant) {
@@ -373,7 +373,7 @@
       {/if}
       {#if (getPayload($jwt).role === "admin" || getPayload($jwt).id === forestData.data.ownerId)}
         <button
-          onclick={goto("/plant/create")}
+          onclick={goto("/plants/create")}
           class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer map-overlay absolute left-6 top-6 "
         >
           {t("createPlant", $language)}

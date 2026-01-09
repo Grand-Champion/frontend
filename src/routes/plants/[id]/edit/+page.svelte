@@ -36,7 +36,7 @@
     if(!request.ok){
       alert(request.statusText);
     } else{
-      goto("/plant/"+plant.id);
+      goto("/plants/"+plant.id);
     }
   }
 

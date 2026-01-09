@@ -71,7 +71,7 @@
   }
 
   function viewPlant(plantId) {
-    goto(`/plant/${plantId}`);
+    goto(`/plants/${plantId}`);
   }
 
   // Update alle plant status en kleuren wanneer plants verandert
