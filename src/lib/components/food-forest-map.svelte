@@ -21,6 +21,7 @@
   import ZoomableMap from "./ZoomableMap.svelte";
   import { jwt } from "$lib/stores/jwt";
   import { getPayload } from "$lib/Auth";
+  import { getStatus, getStatusColor } from "$lib/utils/plant-helpers";
 
   // API data
   export let forestData;
@@ -120,15 +121,14 @@
   const comments = {};
   let commentText = "";
 
-  function getStatusColor(status) {
-    switch (status) {
-      case "good":
-        return "var(--status-good)";
-      case "attention":
-        return "var(--status-attention)";
-      case "critical":
-        return "var(--status-critical)";
+  // Plant care advice messages updaten zonder refresh
+  $: if (selectedPlantId !== null) {
+    selectedPlant = plants.find(p => p.id === selectedPlantId) || null;
+    if (!selectedPlant) {
+      selectedPlantId = null;
     }
+  } else {
+    selectedPlant = null;
   }
 
   const statusBg = (color) => `color-mix(in oklch, ${color} 12%, transparent)`;
@@ -257,13 +257,12 @@
   </div>
 
   <!-- Center map area -->
+  
   <ZoomableMap image={forestData?.data?.image} alt="Food forest aerial view">
     {#each $filteredPlants as plant (plant.id)}
       {#if typeof plant.posX === "number" && typeof plant.posY === "number"}
         {@const config =
           categoryConfig[plant.species?.type?.toLowerCase() || "tree"]}
-        {@const status = getStatus(plant)}
-        {@const statusColor = getStatusColor(status)}
 
         <div
           style="position: absolute; left: {plant.posX}%; top: {plant.posY}%; transform: translate(-50%, -50%); text-align: center; width: 60px;"
@@ -276,13 +275,14 @@
             plant.id
               ? 'ring-4 ring-white scale-110'
               : ''}"
-            style="background-color: {statusColor};"
+            style="background-color: {plantColors[plant.id]};"
             aria-label="View {plant.name}"
           >
             <svelte:component this={config.icon} class="h-5 w-5" />
           </button>
           <div class="text-xs text-white mt-1 truncate" title={plant.name}>
             {plant.name}
+              <span style="display:block; color:yellow; font-size:10px;">ID: {plant.id}</span> <!-- dit is zodat we kunnen zien welk id een plant heeft. Moet later verwijderd worden -->
           </div>
         </div>
       {/if}
