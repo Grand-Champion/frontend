@@ -21,6 +21,12 @@
   import { goto } from "$app/navigation";
   import { getPayload, updatePassword } from "$lib/Auth";
   import { jwt } from "$lib/stores/jwt";
+  import SelectOption from "./SelectOption.svelte";
+  import { page as statePage} from '$app/state';
+    import { browser } from "$app/environment";
+
+  export let forests = [], forestId;
+  $: selectedForest = forestId;
 
   let showUserMenu = false;
   let showChangePasswordModal = false;
@@ -32,6 +38,7 @@
   let showNewPassword = false;
   let showConfirmPassword = false;
   let userMenuElement;
+  let forestSelector;
 
   function toggleTheme() {
     theme.update((current) => (current === "light" ? "dark" : "light"));
@@ -127,6 +134,14 @@
     }
   }
 
+  async function handleChangeForest(e) {
+    selectedForest = e.target.value;
+    const oldUrl = statePage.url.pathname;
+    const newUrl = oldUrl.replace(/\/forests\/\d+/, `/forests/${selectedForest}`);
+    await goto(newUrl);
+    if(browser && oldUrl !== newUrl) window.location.reload();
+    console.log(oldUrl, newUrl, browser);
+  }
 </script>
 
 <svelte:window on:click={handleClickOutside} />
@@ -138,16 +153,25 @@
         <div
           class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"
         >
-          <span class="text-primary-foreground font-semibold text-sm">FF</span>
+          <span class="text-primary-foreground font-semibold text-sm">{forestSelector?.selectedOptions[0].innerText.split(" ").map(str=>str.substr(0,1)).join("")}</span>
         </div>
-        <span class="font-semibold text-lg">Food Forest</span>
+        <select
+          class="font-semibold text-lg"
+          on:change={handleChangeForest}
+          bind:this={forestSelector}
+        >
+          {#each forests as forest}
+            <SelectOption name={forest.name} value={forest.id} currentValue={selectedForest} />
+          {/each}
+        </select>
       </div>
 
       <div class="flex gap-1">
+
         <a
-          href="/"
+          href="/forests/{selectedForest}"
           class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
-            .url.pathname === '/'
+            .url.pathname === `/forests/${selectedForest}`
             ? 'bg-primary text-primary-foreground hover:bg-primary/80'
             : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
@@ -156,9 +180,9 @@
         </a>
 
         <a
-          href="/map"
+          href="/forests/{selectedForest}/map"
           class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
-            .url.pathname === '/map'
+            .url.pathname.endsWith("/map")
             ? 'bg-primary text-primary-foreground hover:bg-primary/80'
             : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
@@ -167,14 +191,25 @@
         </a>
 
         <a
-          href="/plants"
+          href="/forests/{selectedForest}/plants"
           class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
-            .url.pathname === '/plants'
+            .url.pathname.endsWith("/plants")
             ? 'bg-primary text-primary-foreground hover:bg-primary/80'
             : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
           <Grid3X3 class="w-4 h-4" />
           <span class="font-medium">{t("plantsList", $language)}</span>
+        </a>
+
+        <a
+          href="/forests/{selectedForest}/messages"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
+            .url.pathname.endsWith('/messages')
+            ? 'bg-primary text-primary-foreground hover:bg-primary/80'
+            : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
+        >
+          <Grid3X3 class="w-4 h-4" />
+          <span class="font-medium">{t("messages", $language)}</span>
         </a>
 
         <a
@@ -186,17 +221,6 @@
         >
           <Grid3X3 class="w-4 h-4" />
           <span class="font-medium">{t("species", $language)}</span>
-        </a>
-
-        <a
-          href="/messages"
-          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
-            .url.pathname === '/messages'
-            ? 'bg-primary text-primary-foreground hover:bg-primary/80'
-            : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
-        >
-          <Grid3X3 class="w-4 h-4" />
-          <span class="font-medium">{t("messages", $language)}</span>
         </a>
       </div>
     </div>

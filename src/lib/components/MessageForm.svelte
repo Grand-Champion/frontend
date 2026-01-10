@@ -8,15 +8,7 @@
 
 <div class="form-stack">
     <div class="scroll-container">
-    <div class="form-box">
-        <label for="user">user</label>
-        <input type="number" name="userId" id="user" value={user.id}/>
-    </div>
-
-    <div class="form-box">
-        <label for="forest">forest</label>
-        <input type="number" name="foodForestId" id="forest" value={forest.id}/>
-    </div>
+    <input type="hidden" name="foodForestId" id="forest" value={forest.id}/>
 
 
     <div class="form-box message-box">
