@@ -6,14 +6,14 @@
   import { theme } from "$lib/stores/theme";
 
   // Make plant detail pages, species pages, home page, and management page scrollable
-  $: isPlantPage = $page.url.pathname.startsWith("/plants/");
-  $: isSpeciesPage = $page.url.pathname.startsWith("/species");
-  $: isHomePage = $page.url.pathname === "/";
-  $: isManagementPage = $page.url.pathname === "/management";
-  $: isLoginPage = $page.url.pathname === "/login";
   $: isScrollable =
-    isPlantPage || isSpeciesPage || isHomePage || isManagementPage || isLoginPage;
+    !$page.url.pathname.endsWith("/map");
 
+  export let data;
+
+  $: forests = data.forestsData?.data;
+  let forestId = data.forestId;
+  
   // Initialize theme on mount
   onMount(() => {
     if ($theme === "dark") {
@@ -38,7 +38,7 @@
 </svelte:head>
 
 <div class="h-screen w-full flex flex-col">
-  <Navigation />
+  <Navigation {forests} {forestId} />
   <main
     class="flex-1"
     class:overflow-auto={isScrollable}

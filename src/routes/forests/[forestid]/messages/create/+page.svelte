@@ -35,7 +35,7 @@
     if(!request.ok){
       alert(request.statusText);
     } else{
-      goto("/messages");
+      goto(`/forests/${forest.id}/messages`);
     }
   }
 

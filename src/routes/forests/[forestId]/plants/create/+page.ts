@@ -2,7 +2,6 @@ import { PUBLIC_API_URL } from '$env/static/public';
 
 export async function load({ fetch, params }) {
   try {
-    const FOREST = 1;
     const speciesResponse = await fetch(
       `${PUBLIC_API_URL}/forests/api/v1/species`
     );
@@ -16,7 +15,7 @@ export async function load({ fetch, params }) {
     
     const speciesData = await speciesResponse.json();
 
-    const forestResponse = await fetch(`${PUBLIC_API_URL}/forests/api/v1/forests/${FOREST}`);
+    const forestResponse = await fetch(`${PUBLIC_API_URL}/forests/api/v1/forests/${params.forestId}`);
 
     if (!forestResponse.ok) {
       return { 
