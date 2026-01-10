@@ -27,7 +27,7 @@
   async function stuurUpdate(){
     const data = new URLSearchParams(new FormData(formulier));
     console.log(forest.id);
-    const request = await fetch(PUBLIC_API_URL + `/forests/api/v1/messages`, {
+    const request = await fetch(PUBLIC_API_URL + `/forests/api/v1/forests/${forest.id}/messages`, {
       body: data,
       method: "POST",
       headers: headers($jwt)

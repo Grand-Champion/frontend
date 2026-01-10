@@ -2,9 +2,11 @@
     import { theme } from "$lib/stores/theme";
 
     export interface MessageData {
-    userId: number;
     message: string;
     createdAt: string;
+    user: {
+      displayName?: string;
+  }
   }
 
     const { message }: { message: MessageData } = $props();
@@ -12,7 +14,7 @@
 
 <article class="message-card">
   <header class="message-header">
-    <span class="author">User #{message.userId}</span>
+    <span class="author">{message.user.displayName}</span>
     <time class="date">
       {new Date(message.createdAt).toLocaleDateString()}
     </time>
