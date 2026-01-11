@@ -79,7 +79,7 @@
     const status = getStatus(plant);
     map[plant.id] = {
       status,
-      color: getStatusColor(status)
+      color: getStatusColor(status),
     };
     return map;
   }, {});
@@ -92,8 +92,8 @@
       return plants.filter((plant) => {
         const status = getStatus(plant);
         // 'unknown' is zelfde als 'critical' voor filters
-        const normalizedStatus = status === 'unknown' ? 'critical' : status;
-        
+        const normalizedStatus = status === "unknown" ? "critical" : status;
+
         return (
           $categories.includes(plant.species?.type?.toLowerCase() || "tree") &&
           $statuses.includes(normalizedStatus)
@@ -113,6 +113,11 @@
 
   <!-- Main Content - Species Grid -->
   <div class="flex-1 overflow-y-auto bg-background p-6">
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold text-card-foreground">
+        {t("plantsList", $language)}
+      </h1>
+    </div>
     <div
       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
     >

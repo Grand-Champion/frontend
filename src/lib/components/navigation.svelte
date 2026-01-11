@@ -13,7 +13,9 @@
     Key,
     Eye,
     EyeOff,
-    Settings
+    Settings,
+    Leaf,
+    MessageCircle,
   } from "lucide-svelte";
   import { page } from "$app/stores";
   import { theme } from "$lib/stores/theme";
@@ -22,10 +24,11 @@
   import { getPayload, updatePassword } from "$lib/Auth";
   import { jwt } from "$lib/stores/jwt";
   import SelectOption from "./SelectOption.svelte";
-  import { page as statePage} from '$app/state';
-    import { browser } from "$app/environment";
+  import { page as statePage } from "$app/state";
+  import { browser } from "$app/environment";
 
-  export let forests = [], forestId;
+  export let forests = [],
+    forestId;
   $: selectedForest = forestId;
 
   let showUserMenu = false;
@@ -67,7 +70,7 @@
     showUserMenu = false;
   }
 
-  function goToSettings(){
+  function goToSettings() {
     goto("/settings");
     showUserMenu = false;
   }
@@ -113,14 +116,15 @@
     if ($jwt) {
       let success = false;
 
-      try{
+      try {
         await updatePassword($jwt, currentPassword, newPassword);
         closeChangePasswordModal();
         alert(t("passwordChanged", $language));
-      } catch(e){
-        if(e?.message === "Invalid credentials") passwordError = t("incorrectCurrentPassword", $language);
+      } catch (e) {
+        if (e?.message === "Invalid credentials")
+          passwordError = t("incorrectCurrentPassword", $language);
         else passwordError = t("loginError", $language);
-      } 
+      }
     }
   }
 
@@ -137,9 +141,12 @@
   async function handleChangeForest(e) {
     selectedForest = e.target.value;
     const oldUrl = statePage.url.pathname;
-    const newUrl = oldUrl.replace(/\/forests\/\d+/, `/forests/${selectedForest}`);
+    const newUrl = oldUrl.replace(
+      /\/forests\/\d+/,
+      `/forests/${selectedForest}`,
+    );
     await goto(newUrl);
-    if(browser && oldUrl !== newUrl) window.location.reload();
+    if (browser && oldUrl !== newUrl) window.location.reload();
     console.log(oldUrl, newUrl, browser);
   }
 </script>
@@ -153,7 +160,12 @@
         <div
           class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"
         >
-          <span class="text-primary-foreground font-semibold text-sm">{forestSelector?.selectedOptions[0].innerText.split(" ").map(str=>str.substr(0,1)).join("")}</span>
+          <span class="text-primary-foreground font-semibold text-sm"
+            >{forestSelector?.selectedOptions[0].innerText
+              .split(" ")
+              .map((str) => str.substr(0, 1))
+              .join("")}</span
+          >
         </div>
         <select
           class="font-semibold text-lg"
@@ -161,13 +173,16 @@
           bind:this={forestSelector}
         >
           {#each forests as forest}
-            <SelectOption name={forest.name} value={forest.id} currentValue={selectedForest} />
+            <SelectOption
+              name={forest.name}
+              value={forest.id}
+              currentValue={selectedForest}
+            />
           {/each}
         </select>
       </div>
 
       <div class="flex gap-1">
-
         <a
           href="/forests/{selectedForest}"
           class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
@@ -181,8 +196,9 @@
 
         <a
           href="/forests/{selectedForest}/map"
-          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
-            .url.pathname.endsWith("/map")
+          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page.url.pathname.endsWith(
+            '/map',
+          )
             ? 'bg-primary text-primary-foreground hover:bg-primary/80'
             : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
@@ -192,24 +208,14 @@
 
         <a
           href="/forests/{selectedForest}/plants"
-          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
-            .url.pathname.endsWith("/plants")
+          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page.url.pathname.endsWith(
+            '/plants',
+          )
             ? 'bg-primary text-primary-foreground hover:bg-primary/80'
             : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
           <Grid3X3 class="w-4 h-4" />
           <span class="font-medium">{t("plantsList", $language)}</span>
-        </a>
-
-        <a
-          href="/forests/{selectedForest}/messages"
-          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
-            .url.pathname.endsWith('/messages')
-            ? 'bg-primary text-primary-foreground hover:bg-primary/80'
-            : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
-        >
-          <Grid3X3 class="w-4 h-4" />
-          <span class="font-medium">{t("messages", $language)}</span>
         </a>
 
         <a
@@ -219,8 +225,20 @@
             ? 'bg-primary text-primary-foreground hover:bg-primary/80'
             : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
-          <Grid3X3 class="w-4 h-4" />
+          <Leaf class="w-4 h-4" />
           <span class="font-medium">{t("species", $language)}</span>
+        </a>
+
+        <a
+          href="/forests/{selectedForest}/messages"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page.url.pathname.endsWith(
+            '/messages',
+          )
+            ? 'bg-primary text-primary-foreground hover:bg-primary/80'
+            : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
+        >
+          <MessageCircle class="w-4 h-4" />
+          <span class="font-medium">{t("messages", $language)}</span>
         </a>
       </div>
     </div>
@@ -294,7 +312,7 @@
                 </div>
               </div>
 
-              {#if getPayload($jwt).role === "admin" }
+              {#if getPayload($jwt).role === "admin"}
                 <button
                   on:click={goToAdmin}
                   class="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2 border-b border-border cursor-pointer"

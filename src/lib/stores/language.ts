@@ -38,6 +38,7 @@ export const translations = {
         welcomeBack: 'Welcome',
         loginToAccount: 'Sign in to your account',
         enterUsername: 'Enter your username',
+        enterEmail: 'Enter your email',
         enterDisplayName: 'Enter your full name',
         enterPassword: 'Enter your password',
         pleaseEnterCredentials: 'Please enter all required fields',
@@ -208,8 +209,11 @@ export const translations = {
         height: "Height",
         harvestPrediction: "Harvest prediction",
         location: "Location",
-        createPlant: "Create plant",
+        createPlant: "Create Plant",
         delete: "Delete",
+        viewFullDetails: "View Full Details",
+        unknown: "Unknown",
+        lastUpdated: "Last updated",
 
         // Message create page
         message: "Message",
@@ -240,6 +244,7 @@ export const translations = {
         welcomeBack: 'Welkom',
         loginToAccount: 'Log in op je account',
         enterUsername: 'Voer je gebruikersnaam in',
+        enterEmail: 'Voer je e-mail in',
         enterDisplayName: 'Voer je volledige naam in',
         enterPassword: 'Voer je wachtwoord in',
         pleaseEnterCredentials: 'Vul alle vereiste velden in',
@@ -412,6 +417,9 @@ export const translations = {
         location: "Locatie",
         createPlant: "Voeg plant toe",
         delete: "Verwijder",
+        viewFullDetails: "Bekijk Volledige Details",
+        unknown: "Onbekend",
+        lastUpdated: "Laatst bijgewerkt",
 
         //Message create page
         message: "Bericht",
@@ -422,7 +430,7 @@ export const translations = {
 };
 
 export function t(key: keyof typeof translations.en, lang: Language): string {
-    if(translations[lang][key]) return translations[lang][key];
+    if (translations[lang][key]) return translations[lang][key];
     else {
         console.warn(Error("Tried to translate " + key));
         return key;
