@@ -340,7 +340,9 @@
     >
       <div
         class="w-full h-full bg-card/85 backdrop-blur-xl border-l border-border shadow-2xl overflow-y-auto"
+        role="presentation"
         on:click={(e) => e.stopPropagation()}
+        on:keydown={(e) => e.stopPropagation()}
       >
         <div
           class="flex items-center justify-between px-4 py-3 border-b border-border sticky top-0 bg-card/95 backdrop-blur-xl z-10"

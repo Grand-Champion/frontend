@@ -251,7 +251,7 @@
     <svelte:fragment slot="over">
       {#if selectedPlant}
         <div
-          class="map-overlay fixed top-16 left-0 right-0 bottom-0 md:absolute md:right-6 md:top-6 md:bottom-6 md:w-96 md:max-w-[95%] md:rounded-lg border border-white/40 dark:border-white/10 bg-white/70 dark:bg-green-950/25 backdrop-blur-lg shadow-xl z-50 overflow-y-auto pointer-events-auto"
+          class="map-overlay fixed top-16 left-0 right-0 bottom-0 md:absolute md:left-auto md:right-6 md:top-6 md:bottom-6 md:w-96 md:max-w-[95%] md:rounded-lg border border-white/40 dark:border-white/10 bg-white/70 dark:bg-green-950/25 backdrop-blur-lg shadow-xl z-50 overflow-y-auto pointer-events-auto"
         >
           <div class="p-6">
             <div class="mb-4 flex items-start justify-between">
@@ -380,7 +380,7 @@
           </div>
         </div>
       {/if}
-      {#if getPayload($jwt).role === "admin" || getPayload($jwt).id === forestData.data.ownerId}
+      {#if forestData?.data && (getPayload($jwt).role === "admin" || getPayload($jwt).id === forestData.data.ownerId)}
         <div
           class="action-buttons map-overlay absolute left-6 top-6 flex flex-col gap-3"
         >
@@ -455,7 +455,9 @@
     >
       <div
         class="w-full h-full bg-card/85 backdrop-blur-xl border-l border-border shadow-2xl overflow-y-auto"
+        role="presentation"
         onclick={(e) => e.stopPropagation()}
+        onkeydown={(e) => e.stopPropagation()}
       >
         <div
           class="flex items-center justify-between px-4 py-3 border-b border-border sticky top-0 bg-card/95 backdrop-blur-xl z-10"

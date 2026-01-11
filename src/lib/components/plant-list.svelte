@@ -344,6 +344,7 @@
       on:keydown={(e) => e.key === "Enter" && (showFilters = false)}
     >
       <div
+        role="presentation"
         class="w-full h-full bg-card/85 backdrop-blur-xl border-l border-border shadow-2xl overflow-y-auto"
         on:click={(e) => e.stopPropagation()}
       >

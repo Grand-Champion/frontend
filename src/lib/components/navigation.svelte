@@ -340,9 +340,9 @@
         aria-label="Toggle theme"
       >
         {#if $theme === "light"}
-          <Sun class="w-4 h-4" />
-        {:else}
           <Moon class="w-4 h-4" />
+        {:else}
+          <Sun class="w-4 h-4" />
         {/if}
       </button>
 

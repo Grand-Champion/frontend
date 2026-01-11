@@ -3,8 +3,10 @@
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import { theme } from "$lib/stores/theme";
+  import { Search } from "lucide-svelte";
 
   let { data } = $props();
+  let searchQuery = $state("");
 
   async function handleCreateMessage() {
     await goto(
@@ -13,6 +15,18 @@
       }),
     );
   }
+
+  const filteredMessages = $derived(
+    data.messages.data.filter((message) => {
+      const query = searchQuery.toLowerCase();
+      return (
+        (message.message && message.message.toLowerCase().includes(query)) ||
+        (message.user &&
+          message.user.displayName &&
+          message.user.displayName.toLowerCase().includes(query))
+      );
+    }),
+  );
 </script>
 
 <div class="messages-page">
@@ -39,8 +53,18 @@
     </button>
   </div>
 
+  <div class="search-box">
+    <Search class="h-4 w-4" />
+    <input
+      type="text"
+      bind:value={searchQuery}
+      placeholder="Search messages..."
+      class="search-input"
+    />
+  </div>
+
   <div class="message-list">
-    {#if data.messages.data.length === 0}
+    {#if filteredMessages.length === 0}
       <div class="empty-state">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -57,11 +81,17 @@
             d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
           />
         </svg>
-        <h3>No messages yet</h3>
-        <p>Be the first to start a conversation</p>
+        <h3>
+          {searchQuery ? "No messages match your search" : "No messages yet"}
+        </h3>
+        <p>
+          {searchQuery
+            ? "Try a different search term"
+            : "Be the first to start a conversation"}
+        </p>
       </div>
     {:else}
-      {#each data.messages.data as message (`${message.userId}-${message.foodForestID}-${message.createdAt}`)}
+      {#each filteredMessages as message (`${message.userId}-${message.foodForestID}-${message.createdAt}`)}
         <Message {message} />
       {/each}
     {/if}
@@ -69,6 +99,15 @@
 </div>
 
 <style>
+  :root {
+    --color-primary: rgba(22, 163, 74, 0.15);
+    --color-text-white: #ffffff;
+    --color-overlay-bg: rgba(255, 255, 255, 0.1);
+    --color-overlay-border: rgba(255, 255, 255, 0.2);
+    --color-overlay-text: rgba(255, 255, 255, 0.6);
+    --color-overlay-placeholder: rgba(255, 255, 255, 0.5);
+  }
+
   .messages-page {
     max-width: 800px;
     margin: 0 auto;
@@ -80,16 +119,42 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     padding-bottom: 1.5rem;
-    border-bottom: 2px solid rgba(22, 163, 74, 0.15);
+    border-bottom: 2px solid var(--color-primary);
+    gap: 1rem;
   }
 
   .page-title {
     font-size: 2rem;
     font-weight: 700;
     margin: 0;
-    color: #ffffff;
+    color: var(--color-text-white);
+  }
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: var(--color-overlay-bg);
+    border: 1px solid var(--color-overlay-border);
+    border-radius: 0.5rem;
+    color: var(--color-overlay-text);
+    margin-bottom: 1.5rem;
+  }
+
+  .search-input {
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--color-text-white);
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .search-input::placeholder {
+    color: var(--color-overlay-placeholder);
   }
 
   .message-list {
@@ -131,13 +196,22 @@
     }
 
     .page-header {
-      flex-direction: column;
-      align-items: flex-start;
+      flex-direction: row;
+      align-items: center;
       gap: 1rem;
     }
 
     .page-title {
       font-size: 1.5rem;
+      flex: 1;
+    }
+
+    .search-box {
+      width: 100%;
+    }
+
+    .search-input {
+      width: 100%;
     }
   }
 </style>
