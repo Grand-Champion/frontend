@@ -139,10 +139,5 @@
     .page-title {
       font-size: 1.5rem;
     }
-
-    .create-button {
-      width: 100%;
-      justify-content: center;
-    }
   }
 </style>

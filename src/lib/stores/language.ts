@@ -18,6 +18,7 @@ export const translations = {
     en: {
         // Navigation
         home: 'Home',
+        forest: 'Forest',
         mapView: 'Map View',
         plantsList: 'Plants List',
         species: 'Species',
@@ -122,6 +123,9 @@ export const translations = {
         // Species list / Filters
         filterBySpecies: 'Filter by Species',
         filterByStatus: 'Filter by Status',
+        filter: 'Filter',
+        filters: 'Filters',
+        close: 'Close',
         good: 'Good',
         needsAttention: 'Needs Attention',
         critical: 'Critical',
@@ -224,6 +228,7 @@ export const translations = {
     nl: {
         // Navigation
         home: 'Home',
+        forest: 'Bos',
         mapView: 'Kaart',
         plantsList: 'Planten',
         species: 'Soorten',
@@ -328,6 +333,9 @@ export const translations = {
         // Species list / Filters
         filterBySpecies: 'Filter op Soorten',
         filterByStatus: 'Filter op Status',
+        filter: 'Filter',
+        filters: 'Filters',
+        close: 'Sluiten',
         good: 'Goed',
         needsAttention: 'Aandacht Nodig',
         critical: 'Kritiek',

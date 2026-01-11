@@ -1,6 +1,6 @@
 <script>
   import { derived } from "svelte/store";
-  import { Leaf, Trees, Flower2, Sprout } from "lucide-svelte";
+  import { Leaf, Trees, Flower2, Sprout, Filter, X } from "lucide-svelte";
   import { selectedCategories, selectedStatus } from "$lib/stores/filters";
   import { goto } from "$app/navigation";
   import Filters from "$lib/components/Filters.svelte";
@@ -43,12 +43,7 @@
     critical: { label: t("critical", $language) },
   };
 
-  let speciesOpen = true;
-  let statusOpen = true;
-
-  const statusBg = (color) => `color-mix(in oklch, ${color} 12%, transparent)`;
-  const statusBorder = (color) =>
-    `color-mix(in oklch, ${color} 32%, transparent)`;
+  let showFilters = false;
 
   function toggleCategory(category) {
     selectedCategories.update((categories) => {
@@ -103,23 +98,28 @@
   );
 </script>
 
-<div class="flex h-full w-full">
-  <!-- Left Sidebar - Filters (shared) -->
+<svelte:window
+  on:keydown={(e) => e.key === "Escape" && (showFilters = false)}
+/>
+
+<div class="relative flex h-full w-full">
+  <!-- Left Sidebar - Filters (desktop) -->
   <div
-    class="w-64 rounded-none border-y-0 border-l-0 bg-card border-r border-border"
+    class="hidden md:block w-64 rounded-none border-y-0 border-l-0 bg-card border-r border-border"
   >
     <Filters />
   </div>
 
   <!-- Main Content - Species Grid -->
-  <div class="flex-1 overflow-y-auto bg-background p-6">
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold text-card-foreground">
+  <div class="flex-1 overflow-y-auto bg-background p-4 md:p-6 pb-24 md:pb-6">
+    <div class="mb-4 md:mb-6 flex items-center justify-between">
+      <h1 class="text-2xl md:text-3xl font-bold text-card-foreground">
         {t("plantsList", $language)}
       </h1>
     </div>
+
     <div
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
     >
       {#each $filteredPlants as plant (plant.id)}
         {@const category = plant.species?.type?.toLowerCase() || "tree"}
@@ -187,4 +187,58 @@
       {/each}
     </div>
   </div>
+
+  <!-- Mobile floating filter button -->
+  <div class="md:hidden pointer-events-none">
+    <div
+      class="pointer-events-auto fixed bottom-4 left-1/2 -translate-x-1/2 z-40"
+    >
+      <button
+        class="inline-flex w-[92vw] max-w-md items-center justify-center gap-2 rounded-full border border-border bg-card px-4 py-3 text-sm font-semibold text-card-foreground shadow-sm"
+        on:click={() => (showFilters = true)}
+      >
+        <Filter class="h-4 w-4" />
+        {t("filter", $language) || "Filters"}
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile filter overlay -->
+  {#if showFilters}
+    <div
+      class="md:hidden fixed inset-0 z-50 flex items-end bg-black/50 backdrop-blur-sm"
+      role="dialog"
+      tabindex="0"
+      aria-modal="true"
+      aria-label={t("filter", $language) || "Filters"}
+      on:click={() => (showFilters = false)}
+      on:keydown={(e) => e.key === "Enter" && (showFilters = false)}
+    >
+      <div
+        class="w-full rounded-t-3xl bg-card/85 backdrop-blur-xl border border-border shadow-2xl"
+        on:click={(e) => e.stopPropagation()}
+      >
+        <div
+          class="flex items-center justify-between px-4 py-3 border-b border-border"
+        >
+          <div
+            class="flex items-center gap-2 text-sm font-semibold text-card-foreground"
+          >
+            <Filter class="h-4 w-4" />
+            {t("filters", $language) || "Filters"}
+          </div>
+          <button
+            class="rounded-full p-2 hover:bg-muted"
+            on:click={() => (showFilters = false)}
+            aria-label={t("close", $language) || "Close"}
+          >
+            <X class="h-4 w-4" />
+          </button>
+        </div>
+        <div class="max-h-[70vh] overflow-y-auto p-4">
+          <Filters />
+        </div>
+      </div>
+    </div>
+  {/if}
 </div>

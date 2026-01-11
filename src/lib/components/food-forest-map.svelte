@@ -14,6 +14,7 @@
     MessageCircle,
     Send,
     ExternalLink,
+    Filter,
   } from "lucide-svelte";
   import { selectedCategories, selectedStatus } from "$lib/stores/filters";
   import { goto } from "$app/navigation";
@@ -67,6 +68,7 @@
   let speciesOpen = true;
   let maintenanceOpen = true;
   let hoveredPlantId = null;
+  let showFilters = false;
   const comments = {};
   let commentText = "";
 
@@ -197,10 +199,12 @@
   }, {});
 </script>
 
-<div class="flex h-full w-full">
+<svelte:window onkeydown={(e) => e.key === "Escape" && (showFilters = false)} />
+
+<div class="relative flex h-full w-full">
   <!-- Left Sidebar (shared filters) -->
   <div
-    class="w-64 rounded-none border-y-0 border-l-0 bg-card border-r border-border"
+    class="hidden md:block w-64 rounded-none border-y-0 border-l-0 bg-card border-r border-border"
   >
     <Filters />
   </div>
@@ -422,6 +426,60 @@
       {/if}
     </svelte:fragment>
   </ZoomableMap>
+
+  <!-- Mobile floating filter button -->
+  <div class="md:hidden pointer-events-none">
+    <div
+      class="pointer-events-auto fixed bottom-4 left-1/2 -translate-x-1/2 z-40"
+    >
+      <button
+        class="inline-flex w-[92vw] max-w-md items-center justify-center gap-2 rounded-full border border-border bg-card px-4 py-3 text-sm font-semibold text-card-foreground shadow-sm"
+        onclick={() => (showFilters = true)}
+      >
+        <Filter class="h-4 w-4" />
+        {t("filter", $language) || "Filters"}
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile filter overlay -->
+  {#if showFilters}
+    <div
+      class="md:hidden fixed inset-0 z-50 flex items-end bg-black/50 backdrop-blur-sm"
+      role="dialog"
+      tabindex="0"
+      aria-modal="true"
+      aria-label={t("filter", $language) || "Filters"}
+      onclick={() => (showFilters = false)}
+      onkeydown={(e) => e.key === "Enter" && (showFilters = false)}
+    >
+      <div
+        class="w-full rounded-t-3xl bg-card/85 backdrop-blur-xl border border-border shadow-2xl"
+        onclick={(e) => e.stopPropagation()}
+      >
+        <div
+          class="flex items-center justify-between px-4 py-3 border-b border-border"
+        >
+          <div
+            class="flex items-center gap-2 text-sm font-semibold text-card-foreground"
+          >
+            <Filter class="h-4 w-4" />
+            {t("filters", $language) || "Filters"}
+          </div>
+          <button
+            class="rounded-full p-2 hover:bg-muted"
+            onclick={() => (showFilters = false)}
+            aria-label={t("close", $language) || "Close"}
+          >
+            <X class="h-4 w-4" />
+          </button>
+        </div>
+        <div class="max-h-[70vh] overflow-y-auto p-4">
+          <Filters />
+        </div>
+      </div>
+    </div>
+  {/if}
 </div>
 
 <style>
