@@ -55,7 +55,7 @@
   };
 
   $: statusConfig = {
-    good: { label: t("good", $language) },
+    optimal: { label: t("optimal", $language) },
     attention: { label: t("needsAttention", $language) },
     critical: { label: t("critical", $language) },
   };
@@ -160,16 +160,20 @@
     ([$categories, $statuses]) => {
       if (!plants || plants.length === 0) return [];
 
-      return plants.filter(
-        (plant) =>
+      return plants.filter((plant) => {
+        const status = getStatus(plant);
+        const normalizedStatus = status === 'unknown' ? 'critical' : status;
+        
+        return (
           $categories.includes(plant.species?.type?.toLowerCase() || "tree") &&
-          $statuses.includes(getStatus(plant)),
-      );
+          $statuses.includes(normalizedStatus)
+        );
+      });
     },
   );
 
   function getConditionColor(current, min, max, criticalThreshold) {
-    if (current >= min && current <= max) return getStatusColor("good");
+    if (current >= min && current <= max) return getStatusColor("optimal");
     const midpoint = (min + max) / 2;
     return Math.abs(current - midpoint) > criticalThreshold
       ? getStatusColor("critical")
@@ -306,7 +310,7 @@
                     class="px-2 py-1 rounded text-xs font-semibold text-white"
                     style={`background-color: ${overallColor};`}
                   >
-                    {overallStatus === "good"
+                    {overallStatus === "optimal"
                       ? "Optimal"
                       : overallStatus === "attention"
                         ? "Needs Attention"
