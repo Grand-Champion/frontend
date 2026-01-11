@@ -21,6 +21,15 @@
             return;
         }
 
+        // Validate email format only if it's not "admin"
+        if (identifier !== "admin") {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(identifier)) {
+                errorMessage = t("pleaseEnterValidEmail", $language);
+                return;
+            }
+        }
+
         try {
             await login(identifier, password);
             if ($jwt) {
@@ -76,7 +85,7 @@
                     </label>
                     <input
                         id="identifier"
-                        type="email"
+                        type="text"
                         bind:value={identifier}
                         class="w-full px-4 py-2.5 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                         placeholder={t("enterEmail", $language)}

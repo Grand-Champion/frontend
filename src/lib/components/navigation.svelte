@@ -22,6 +22,7 @@
   import { page } from "$app/stores";
   import { theme } from "$lib/stores/theme";
   import { language, t } from "$lib/stores/language";
+  import { selectedForestId } from "$lib/stores/selectedForest";
   import { goto } from "$app/navigation";
   import { getPayload, updatePassword } from "$lib/Auth";
   import { jwt } from "$lib/stores/jwt";
@@ -32,6 +33,9 @@
   export let forests = [],
     forestId;
   $: selectedForest = forestId;
+  $: if (selectedForest) {
+    selectedForestId.set(String(selectedForest));
+  }
 
   let showUserMenu = false;
   let showMobileMenu = false;
@@ -47,6 +51,33 @@
   let forestSelector;
   let mobileMenuElement;
   let mobileMenuButton;
+
+  // Compute forest initials - directly in reactive statement for reliability
+  $: {
+    if (!forests || forests.length === 0 || !selectedForest) {
+      forestInitials = "";
+    } else {
+      // Try to find forest by ID (handle both string and number comparison)
+      let forest = forests.find((f) => String(f.id) === String(selectedForest));
+
+      // If not found, use the first forest as fallback
+      if (!forest && forests.length > 0) {
+        forest = forests[0];
+      }
+
+      if (forest && forest.name) {
+        forestInitials = forest.name
+          .split(" ")
+          .map((str) => str[0])
+          .join("")
+          .toUpperCase();
+      } else {
+        forestInitials = "";
+      }
+    }
+  }
+
+  let forestInitials = "";
 
   // Reset menu state when forest changes
   $: if (forestId) {
@@ -183,12 +214,11 @@
   }
 
   async function handleChangeForest(e) {
-    selectedForest = e.target.value;
+    const newForestId = e.target.value;
+    selectedForest = newForestId;
+    selectedForestId.set(String(newForestId));
     const oldUrl = statePage.url.pathname;
-    const newUrl = oldUrl.replace(
-      /\/forests\/\d+/,
-      `/forests/${selectedForest}`,
-    );
+    const newUrl = oldUrl.replace(/\/forests\/\d+/, `/forests/${newForestId}`);
     const navigated = oldUrl !== newUrl;
     await goto(newUrl);
     if (browser && navigated) {
@@ -209,10 +239,7 @@
           class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"
         >
           <span class="text-primary-foreground font-semibold text-sm"
-            >{forestSelector?.selectedOptions[0].innerText
-              .split(" ")
-              .map((str) => str.substr(0, 1))
-              .join("")}</span
+            >{forestInitials}</span
           >
         </div>
         <select
@@ -413,7 +440,7 @@
 
       <!-- Mobile Menu Button -->
       <button
-        on:click={toggleMobileMenu}
+        on:click|stopPropagation={toggleMobileMenu}
         class="md:hidden flex items-center justify-center p-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
         aria-label="Toggle mobile menu"
         bind:this={mobileMenuButton}
