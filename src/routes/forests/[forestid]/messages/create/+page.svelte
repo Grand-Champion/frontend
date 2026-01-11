@@ -27,7 +27,7 @@
   async function stuurUpdate(){
     const data = new URLSearchParams(new FormData(formulier));
     console.log(forest.id);
-    const request = await fetch(PUBLIC_API_URL + `/forests/api/v1/messages`, {
+    const request = await fetch(PUBLIC_API_URL + `/forests/api/v1/forests/${forest.id}/messages`, {
       body: data,
       method: "POST",
       headers: headers($jwt)
@@ -46,6 +46,7 @@
   <title>{pageTitle}</title>
 </svelte:head>
 
+<div class="scrollable-container">
   <div class="bg-background">
     <div class="max-w-5xl mx-auto px-6 py-8">
       <!-- Back button -->
@@ -77,3 +78,12 @@
       </div>
     </div>
   </div>
+</div>
+
+<style>
+  .scrollable-container {
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+  }
+</style>

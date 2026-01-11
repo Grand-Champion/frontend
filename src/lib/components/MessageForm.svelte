@@ -8,15 +8,21 @@
 
 <div class="form-stack">
     <div class="scroll-container">
-    <input type="hidden" name="foodForestId" id="forest" value={forest.id}/>
+      
+    <div class="form-box">
+      <label>{t("username", $language)}</label>
+      <strong>{user.displayName}</strong>
+    </div>
 
+    <div class="form-box">
+      <label>{t("foodGarden", $language)}</label>
+      <strong>{forest.name}</strong>
+    </div>
 
     <div class="form-box message-box">
         <label for="message">{t("message", $language)}</label>
-    <!-- <input type="text" name="message" id="message" value={message?.message} class="border rounded-l" /> -->
         <textarea name="message" id="message" rows="5">{message?.message}</textarea>
     </div>
-
 
     <div class="form-box">
         <label>Image</label>
@@ -110,6 +116,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
+    margin-bottom: 0.35rem;
 
     padding: 0.9rem 1rem;
     border-radius: 10px;
