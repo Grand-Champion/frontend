@@ -251,7 +251,7 @@
     <svelte:fragment slot="over">
       {#if selectedPlant}
         <div
-          class="map-overlay absolute right-6 top-6 bottom-6 w-96 max-w-[95%] rounded-lg border border-white/40 dark:border-white/10 bg-white/70 dark:bg-green-950/25 backdrop-blur-lg shadow-xl z-50 overflow-y-auto pointer-events-auto"
+          class="map-overlay fixed top-16 left-0 right-0 bottom-0 md:absolute md:right-6 md:top-6 md:bottom-6 md:w-96 md:max-w-[95%] md:rounded-lg border border-white/40 dark:border-white/10 bg-white/70 dark:bg-green-950/25 backdrop-blur-lg shadow-xl z-50 overflow-y-auto pointer-events-auto"
         >
           <div class="p-6">
             <div class="mb-4 flex items-start justify-between">
@@ -445,7 +445,7 @@
   <!-- Mobile filter overlay -->
   {#if showFilters}
     <div
-      class="md:hidden fixed inset-0 z-50 flex items-end bg-black/50 backdrop-blur-sm"
+      class="md:hidden fixed top-16 left-0 right-0 bottom-0 z-50 bg-black/20 backdrop-blur-sm"
       role="dialog"
       tabindex="0"
       aria-modal="true"
@@ -454,11 +454,11 @@
       onkeydown={(e) => e.key === "Enter" && (showFilters = false)}
     >
       <div
-        class="w-full rounded-t-3xl bg-card/85 backdrop-blur-xl border border-border shadow-2xl"
+        class="w-full h-full bg-card/85 backdrop-blur-xl border-l border-border shadow-2xl overflow-y-auto"
         onclick={(e) => e.stopPropagation()}
       >
         <div
-          class="flex items-center justify-between px-4 py-3 border-b border-border"
+          class="flex items-center justify-between px-4 py-3 border-b border-border sticky top-0 bg-card/95 backdrop-blur-xl z-10"
         >
           <div
             class="flex items-center gap-2 text-sm font-semibold text-card-foreground"
@@ -474,7 +474,7 @@
             <X class="h-4 w-4" />
           </button>
         </div>
-        <div class="max-h-[70vh] overflow-y-auto p-4">
+        <div class="p-4">
           <Filters />
         </div>
       </div>

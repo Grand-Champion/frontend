@@ -1,7 +1,7 @@
 <script>
   import {
     Map,
-    Grid3X3,
+    List,
     Home,
     Sun,
     Moon,
@@ -290,7 +290,7 @@
             ? 'bg-primary text-primary-foreground hover:bg-primary/80'
             : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
-          <Grid3X3 class="w-4 h-4" />
+          <List class="w-4 h-4" />
           <span class="font-medium">{safeT("plantsList")}</span>
         </a>
 
@@ -328,7 +328,7 @@
         aria-label="Toggle language"
       >
         <Languages class="w-4 h-4" />
-        <span class="font-medium text-xs md:text-sm hidden sm:inline"
+        <span class="font-medium text-xs md:text-sm"
           >{$language === "en" ? "NL" : "EN"}</span
         >
       </button>
@@ -372,10 +372,10 @@
                 <div class="grid grid-cols-2 gap-4">
                   <div>
                     <p class="text-xs text-muted-foreground mb-1">
-                      {safeT("username")}
+                      {safeT("name")}
                     </p>
                     <p class="text-sm font-medium text-foreground">
-                      {getPayload($jwt).email}
+                      {getPayload($jwt).displayName}
                     </p>
                   </div>
                   <div>
@@ -462,7 +462,7 @@
       style="z-index: 40;"
     >
       <div
-        class="bg-card/80 backdrop-blur-md border-b border-border shadow-xl max-h-[calc(100vh-4rem)] overflow-y-auto"
+        class="bg-card/80 backdrop-blur-md border-b border-border shadow-xl h-[calc(100vh-4rem)] flex flex-col"
         style="z-index: 41;"
       >
         <!-- Forest Selector for Mobile -->
@@ -493,7 +493,7 @@
         </div>
 
         <!-- Mobile Navigation Links -->
-        <div class="px-4 py-2 space-y-2">
+        <div class="px-4 py-2 space-y-2 flex-1 overflow-y-auto">
           <a
             href="/forests/{selectedForest}"
             on:click={closeMobileMenu}
@@ -528,7 +528,7 @@
               ? 'bg-primary text-primary-foreground hover:bg-primary/80'
               : ''}"
           >
-            <Grid3X3 class="w-5 h-5" />
+            <List class="w-5 h-5" />
             <span class="font-medium">{safeT("plantsList")}</span>
           </a>
 
@@ -558,12 +558,12 @@
           </a>
         </div>
 
-        <!-- Mobile User Menu / Login -->
+        <!-- Mobile User Menu / Login (at bottom) -->
         {#if $jwt}
           <div class="border-t border-border px-4 py-3 space-y-2">
             <div class="pb-2 mb-2 border-b border-border">
               <p class="text-xs text-muted-foreground">
-                {safeT("username")}
+                {safeT("name")}
               </p>
               <p class="text-sm font-medium text-foreground">
                 {getPayload($jwt).displayName}

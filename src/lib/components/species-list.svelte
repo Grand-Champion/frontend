@@ -1,6 +1,17 @@
 <script>
   import { derived } from "svelte/store";
-  import { Leaf, Trees, Flower2, Sprout, Filter, X } from "lucide-svelte";
+  import {
+    Leaf,
+    Trees,
+    Flower2,
+    Sprout,
+    Filter,
+    X,
+    Square,
+    Columns,
+    Grid2x2,
+    Grid3x3,
+  } from "lucide-svelte";
   import { selectedCategories } from "$lib/stores/filters";
   import { goto } from "$app/navigation";
   import SpeciesFilters from "$lib/components/SpeciesFilters.svelte";
@@ -12,6 +23,11 @@
 
   // Get species array from API
   $: species = speciesData?.data || [];
+
+  // Search and layout state
+  let searchQuery = "";
+  let mobileColumns = 1;
+  let cardSize = "large"; // 'large', 'medium', 'small'
 
   // Category config for species types
   $: categoryConfig = {
@@ -66,9 +82,36 @@
   const filteredSpecies = derived([selectedCategories], ([$categories]) => {
     if (!species || species.length === 0) return [];
 
-    return species.filter((spec) =>
-      $categories.includes(spec.type?.toLowerCase() || "tree"),
-    );
+    return species.filter((spec) => {
+      const matchesCategory = $categories.includes(
+        spec.type?.toLowerCase() || "tree",
+      );
+      const matchesSearch =
+        searchQuery.trim() === "" ||
+        (spec.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (spec.scientificName || "")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        (spec.description || "")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
+
+      return matchesCategory && matchesSearch;
+    });
+  });
+
+  // Re-filter when searchQuery changes
+  $: filteredSpeciesWithSearch = $filteredSpecies.filter((spec) => {
+    const matchesSearch =
+      searchQuery.trim() === "" ||
+      (spec.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (spec.scientificName || "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      (spec.description || "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+    return matchesSearch;
   });
 
   let showFilters = false;
@@ -88,15 +131,96 @@
 
   <!-- Main Content - Species Grid -->
   <div class="flex-1 overflow-y-auto bg-background p-4 md:p-6 pb-24 md:pb-6">
-    <div class="mb-4 md:mb-6">
+    <div class="mb-4 md:mb-6 space-y-4">
       <h1 class="text-2xl md:text-3xl font-bold text-card-foreground">
         {t("species", $language)}
       </h1>
+
+      <!-- Search and Layout Controls -->
+      <div class="flex flex-row gap-3 items-center">
+        <input
+          type="text"
+          bind:value={searchQuery}
+          placeholder="{t('search', $language)}..."
+          class="flex-1 px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+        />
+
+        <!-- Mobile Columns Toggle (hidden on desktop) -->
+        <div
+          class="md:hidden flex border border-border rounded-lg overflow-hidden"
+        >
+          <button
+            on:click={() => (mobileColumns = 1)}
+            class="p-2 transition-colors {mobileColumns === 1
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-background text-foreground hover:bg-muted'}"
+            aria-label="1 column"
+            title="1 column"
+          >
+            <Square class="w-5 h-5" />
+          </button>
+          <div class="w-px bg-border"></div>
+          <button
+            on:click={() => (mobileColumns = 2)}
+            class="p-2 transition-colors {mobileColumns === 2
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-background text-foreground hover:bg-muted'}"
+            aria-label="2 columns"
+            title="2 columns"
+          >
+            <Columns class="w-5 h-5" />
+          </button>
+        </div>
+
+        <!-- Desktop Card Size Toggle (hidden on mobile) -->
+        <div
+          class="hidden md:flex border border-border rounded-lg overflow-hidden"
+        >
+          <button
+            on:click={() => (cardSize = "large")}
+            class="p-2 transition-colors {cardSize === 'large'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-background text-foreground hover:bg-muted'}"
+            aria-label="Large cards"
+            title="Large cards"
+          >
+            <Square class="w-5 h-5" />
+          </button>
+          <div class="w-px bg-border"></div>
+          <button
+            on:click={() => (cardSize = "medium")}
+            class="p-2 transition-colors {cardSize === 'medium'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-background text-foreground hover:bg-muted'}"
+            aria-label="Medium cards"
+            title="Medium cards"
+          >
+            <Grid2x2 class="w-5 h-5" />
+          </button>
+          <div class="w-px bg-border"></div>
+          <button
+            on:click={() => (cardSize = "small")}
+            class="p-2 transition-colors {cardSize === 'small'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-background text-foreground hover:bg-muted'}"
+            aria-label="Small cards"
+            title="Small cards"
+          >
+            <Grid3x3 class="w-5 h-5" />
+          </button>
+        </div>
+      </div>
     </div>
     <div
-      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
+      class="grid gap-4 md:gap-6 sm:grid-cols-2 {cardSize === 'large'
+        ? 'lg:grid-cols-3 xl:grid-cols-4'
+        : cardSize === 'medium'
+          ? 'lg:grid-cols-4 xl:grid-cols-5'
+          : 'lg:grid-cols-5 xl:grid-cols-6'}"
+      class:grid-cols-1={mobileColumns === 1}
+      class:grid-cols-2={mobileColumns === 2}
     >
-      {#each $filteredSpecies as spec (spec.id)}
+      {#each filteredSpeciesWithSearch as spec (spec.id)}
         {@const category = spec.type?.toLowerCase() || "tree"}
         {@const config = categoryConfig[category]}
         <div
@@ -206,7 +330,7 @@
   <!-- Mobile filter overlay -->
   {#if showFilters}
     <div
-      class="md:hidden fixed inset-0 z-50 flex items-end bg-black/50 backdrop-blur-sm"
+      class="md:hidden fixed top-16 left-0 right-0 bottom-0 z-50 bg-black/20 backdrop-blur-sm"
       role="dialog"
       tabindex="0"
       aria-modal="true"
@@ -215,11 +339,11 @@
       on:keydown={(e) => e.key === "Enter" && (showFilters = false)}
     >
       <div
-        class="w-full rounded-t-3xl bg-card/85 backdrop-blur-xl border border-border shadow-2xl"
+        class="w-full h-full bg-card/85 backdrop-blur-xl border-l border-border shadow-2xl overflow-y-auto"
         on:click={(e) => e.stopPropagation()}
       >
         <div
-          class="flex items-center justify-between px-4 py-3 border-b border-border"
+          class="flex items-center justify-between px-4 py-3 border-b border-border sticky top-0 bg-card/95 backdrop-blur-xl z-10"
         >
           <div
             class="flex items-center gap-2 text-sm font-semibold text-card-foreground"
@@ -235,7 +359,7 @@
             <X class="h-4 w-4" />
           </button>
         </div>
-        <div class="max-h-[70vh] overflow-y-auto p-4">
+        <div class="p-4">
           <SpeciesFilters />
         </div>
       </div>
