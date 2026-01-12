@@ -29,16 +29,18 @@
         <input type="text" name="location" id="location" value={forest?.location} class="border rounded-l" />
     </div>
 
-    <div class="flex justify-between py-2">
-        <label for="ownerId">{t("owner", $language)}</label>
-        <select name="ownerId" id="ownerId" class="border rounded-l">
-            {#if users}
-                {#each users as s}
-                    <SelectOption value={s.id} name="{s.displayName} ({s.email})" currentValue={forest?.ownerId} />
-                {/each}
-            {/if}
-        </select>
-    </div>
+    {#if (getPayload(jwt).role == "admin")}
+        <div class="flex justify-between py-2">
+            <label for="ownerId">{t("owner", $language)}</label>
+            <select name="ownerId" id="ownerId" class="border rounded-l">
+                {#if users}
+                    {#each users as s}
+                        <SelectOption value={s.id} name="{s.displayName} ({s.email})" currentValue={forest?.ownerId} />
+                    {/each}
+                {/if}
+            </select>
+        </div>
+    {/if}
 </div>
 
 <div class="space-y-3">
