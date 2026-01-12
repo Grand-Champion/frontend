@@ -225,6 +225,14 @@ export const translations = {
         messages: "Messages",
         createMessage: "Create Message",
         selectImage: "Select image",
+
+        forestsManagement: "Food forest management",
+        owner: "Owner",
+        updatedAt: "Updated At",
+        confirmDeleteForest: "Are you sure you want to delete this forest?",
+        createForest: "Create forest",
+        editForest: "Edit forest",
+        forestManagement: "Forest management",
     },
     nl: {
         // Navigation
@@ -271,8 +279,8 @@ export const translations = {
         image: 'Afbeelding',
         category: 'Categorie',
         user: "Gebruiker",
-        createdAt: 'Aangemaakt Op',
-        createdBy: 'Aangemaakt Door',
+        createdAt: 'Aangemaakt op',
+        createdBy: 'Aangemaakt door',
         actions: 'Acties',
         create: 'Aanmaken',
         cancel: 'Annuleren',
@@ -436,6 +444,14 @@ export const translations = {
         messages: "Berichten",
         createMessage: "Schrijf een bericht",
         selectImage: "Selecteer afbeelding",
+
+        forestsManagement: "Voedselbosbeheer",
+        owner: "Eigenaar",
+        updatedAt: "Geüpdatet op",
+        confirmDeleteForest: "Weet je zeker dat je dit voedselbos wil verwijderen?",
+        createForest: "Maak voedselbos",
+        editForest: "Bewerk voedselbos",
+        forestManagement: "Voedselbosbeheer"
     }
 };
 
