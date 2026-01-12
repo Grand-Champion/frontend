@@ -18,9 +18,9 @@
 
     function goBack() {
         if (browser && window.history.length > 1) {
-        window.history.back();
+            window.history.back();
         } else {
-        goto("/");
+            goto("/");
         }
     }
 
@@ -35,7 +35,7 @@
         if(!request.ok){
             alert(request.statusText);
         } else{
-            invalidateAll().then(()=>goto("/forests"));
+            invalidateAll().then(()=>goBack());
         }
     }
 </script>
