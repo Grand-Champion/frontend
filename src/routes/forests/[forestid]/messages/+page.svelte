@@ -54,13 +54,15 @@
     </button>
   </div>
 
-  <div class="search-box">
-    <Search class="h-4 w-4" />
+  <div
+    class="search-box flex items-center gap-2 px-3 py-2 border border-border rounded-lg bg-background text-foreground mb-6"
+  >
+    <Search class="h-4 w-4 text-muted-foreground" />
     <input
       type="text"
       bind:value={searchQuery}
       placeholder={t("searchMessages", $language)}
-      class="search-input"
+      class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground"
     />
   </div>
 
@@ -105,6 +107,7 @@
   :root {
     --color-primary: rgba(22, 163, 74, 0.15);
     --color-text-white: #ffffff;
+    --color-text-dark: #000000;
     --color-overlay-bg: rgba(255, 255, 255, 0.1);
     --color-overlay-border: rgba(255, 255, 255, 0.2);
     --color-overlay-text: rgba(255, 255, 255, 0.6);
@@ -132,32 +135,17 @@
     font-size: 2rem;
     font-weight: 700;
     margin: 0;
+    color: var(--color-text-dark);
+  }
+
+  /* In dark mode we keep the original white title for contrast */
+  :global(.dark) .messages-page .page-title {
     color: var(--color-text-white);
   }
 
+  /* Keep the component-specific spacing for the search container */
   .search-box {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background-color: var(--color-overlay-bg);
-    border: 1px solid var(--color-overlay-border);
-    border-radius: 0.5rem;
-    color: var(--color-overlay-text);
-    margin-bottom: 1.5rem;
-  }
-
-  .search-input {
-    background: none;
-    border: none;
-    outline: none;
-    color: var(--color-text-white);
-    flex: 1;
-    min-width: 150px;
-  }
-
-  .search-input::placeholder {
-    color: var(--color-overlay-placeholder);
+    min-width: 0;
   }
 
   .message-list {
@@ -210,10 +198,6 @@
     }
 
     .search-box {
-      width: 100%;
-    }
-
-    .search-input {
       width: 100%;
     }
   }
