@@ -8,34 +8,54 @@
     import { getPayload, getUsers } from "$lib/Auth";
     const { jwt, forest } = $props();
     const users = $state([]);
-    onMount(async ()=>{ 
+    onMount(async () => {
         if (browser && (!jwt || getPayload(jwt)?.role !== "admin")) {
             goto("/");
         }
-        if(browser && jwt){
+        if (browser && jwt) {
             await users.push(...(await getUsers(jwt)));
         }
     });
 </script>
 
 <div class="space-y-3">
-    <div class="flex justify-between py-2">
+    <div class="flex justify-between items-center py-2">
         <label for="name">{t("name", $language)}</label>
-        <input type="text" name="name" id="name" value={forest?.name} class="border rounded-l" />
+        <input
+            type="text"
+            name="name"
+            id="name"
+            value={forest?.name}
+            class="px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+        />
     </div>
 
-    <div class="flex justify-between py-2">
+    <div class="flex justify-between items-center py-2">
         <label for="location">{t("location", $language)}</label>
-        <input type="text" name="location" id="location" value={forest?.location} class="border rounded-l" />
+        <input
+            type="text"
+            name="location"
+            id="location"
+            value={forest?.location}
+            class="px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+        />
     </div>
 
-    {#if (getPayload(jwt).role == "admin")}
-        <div class="flex justify-between py-2">
+    {#if getPayload(jwt).role == "admin"}
+        <div class="flex justify-between items-center py-2">
             <label for="ownerId">{t("owner", $language)}</label>
-            <select name="ownerId" id="ownerId" class="border rounded-l">
+            <select
+                name="ownerId"
+                id="ownerId"
+                class="px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+            >
                 {#if users}
                     {#each users as s}
-                        <SelectOption value={s.id} name="{s.displayName} ({s.email})" currentValue={forest?.ownerId} />
+                        <SelectOption
+                            value={s.id}
+                            name="{s.displayName} ({s.email})"
+                            currentValue={forest?.ownerId}
+                        />
                     {/each}
                 {/if}
             </select>
@@ -43,10 +63,18 @@
     {/if}
 </div>
 
+<div class="border-t border-border my-6"></div>
+
 <div class="space-y-3">
     <ImageInput image={forest?.image} />
 </div>
 
+<div class="border-t border-border my-6"></div>
+
 <div class="space-y-3">
-    <input type="submit" value="{t("save", $language)}" class="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors cursor-pointer">
+    <input
+        type="submit"
+        value={t("save", $language)}
+        class="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors cursor-pointer"
+    />
 </div>
