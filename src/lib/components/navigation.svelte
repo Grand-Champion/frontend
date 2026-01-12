@@ -162,6 +162,11 @@
     showUserMenu = false;
   }
 
+  function goToForests() {
+    goto("/forests");
+    showUserMenu = false;
+  }
+
   function openChangePasswordModal() {
     showChangePasswordModal = true;
     showUserMenu = false;
@@ -417,6 +422,13 @@
                 >
                   <UserCog class="w-4 h-4" />
                   {translations.accountManagement}
+                </button>
+                <button
+                  on:click={goToForests}
+                  class="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2 border-b border-border cursor-pointer"
+                >
+                  <Settings class="w-4 h-4" />
+                  {safeT("forestManagement")}
                 </button>
               {/if}
 
