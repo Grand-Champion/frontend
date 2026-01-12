@@ -2,10 +2,8 @@
   import { goto } from "$app/navigation";
   import { browser } from "$app/environment";
   import { language, t } from "$lib/stores/language";
-  import {
-    ArrowLeft
-  } from "lucide-svelte";
-  import { PUBLIC_API_URL } from '$env/static/public';
+  import { ArrowLeft } from "lucide-svelte";
+  import { PUBLIC_API_URL } from "$env/static/public";
   import SpeciesForm from "$lib/components/SpeciesForm.svelte";
   import { headers } from "$lib/Auth";
   import { jwt } from "$lib/stores/jwt";
@@ -25,7 +23,7 @@
   }
 
   let formulier;
-  async function stuurUpdate(){
+  async function stuurUpdate() {
     errorMessage = "";
     successMessage = "";
     isSubmitting = true;
@@ -35,13 +33,16 @@
       const request = await fetch(PUBLIC_API_URL + `/forests/api/v1/species`, {
         body: data,
         method: "POST",
-        headers: headers($jwt)
+        headers: headers($jwt),
       });
 
-      if(!request.ok){
-        errorMessage = t("errorCreatingSpecies", $language) || "Error creating species";
-      } else{
-        successMessage = t("speciesCreatedSuccessfully", $language) || "Species created successfully!";
+      if (!request.ok) {
+        errorMessage =
+          t("errorCreatingSpecies", $language) || "Error creating species";
+      } else {
+        successMessage =
+          t("speciesCreatedSuccessfully", $language) ||
+          "Species created successfully!";
         // Auto-hide success message and redirect after 2 seconds
         setTimeout(() => {
           goto("/species");
@@ -73,7 +74,7 @@
     <!-- Header -->
     <div class="mb-8">
       <h1 class="text-4xl font-bold text-foreground mb-2">
-        { t("createSpecies", $language) }
+        {t("createSpecies", $language)}
       </h1>
     </div>
 
@@ -101,9 +102,14 @@
       <div class="space-y-6">
         <!-- Basic Info -->
         <div class="bg-card border border-border rounded-xl p-6">
-          <form action="javascript://" bind:this={formulier} onsubmit={stuurUpdate}>
+          <form
+            action="javascript://"
+            bind:this={formulier}
+            onsubmit={stuurUpdate}
+          >
             <SpeciesForm />
           </form>
+          <div class="border-t border-border my-6"></div>
           <div class="mt-6">
             <button
               type="submit"
@@ -112,9 +118,9 @@
               class="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {#if isSubmitting}
-                {t('creating', $language) || 'Creating...'}
+                {t("creating", $language) || "Creating..."}
               {:else}
-                {t('create', $language)}
+                {t("create", $language)}
               {/if}
             </button>
           </div>
