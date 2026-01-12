@@ -236,6 +236,11 @@
           <div class="text-xs text-white mt-1 truncate" title={plant.name}>
             {plant.name}
           </div>
+          {#if plant.id === 1}
+            <div class="text-xs text-white/80 mt-0.5">
+              ID: {plant.id}
+            </div>
+          {/if}
         </div>
       {/if}
 
