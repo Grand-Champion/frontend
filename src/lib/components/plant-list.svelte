@@ -169,7 +169,7 @@
           <input
             type="text"
             bind:value={searchQuery}
-            placeholder="Search plants..."
+            placeholder={t("searchPlants", $language)}
             class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground text-sm"
           />
         </div>

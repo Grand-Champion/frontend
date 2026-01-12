@@ -10,6 +10,7 @@
         Eye,
         EyeOff,
         Pencil,
+        Search,
     } from "lucide-svelte";
     import { jwt } from "$lib/stores/jwt";
     import {
@@ -297,12 +298,17 @@
                 <UserPlus class="w-4 h-4" />
                 {t("createNewAccount", $language)}
             </button>
-            <input
-                type="text"
-                bind:value={searchFilter}
-                placeholder="{t('search', $language)}..."
-                class="px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary w-full md:w-80"
-            />
+            <div
+                class="flex items-center gap-2 px-3 py-2 border border-border rounded-lg bg-background text-foreground w-full md:w-80"
+            >
+                <Search class="h-4 w-4 text-muted-foreground" />
+                <input
+                    type="text"
+                    bind:value={searchFilter}
+                    placeholder={t("searchUsers", $language)}
+                    class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground text-sm"
+                />
+            </div>
         </div>
 
         <!-- Create User Form -->
