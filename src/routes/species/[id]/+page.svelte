@@ -4,6 +4,8 @@
   import { browser } from "$app/environment";
   import { PUBLIC_API_URL } from '$env/static/public';
   import { ArrowLeft } from "lucide-svelte";
+  import { headers } from "$lib/Auth.js";
+  import { jwt } from "$lib/stores/jwt.js";
 
   export let data;
 
@@ -27,6 +29,7 @@
       try {
         const response = await fetch(`${PUBLIC_API_URL}/forests/api/v1/species/${species.id}`, {
           method: 'DELETE',
+          headers: headers($jwt)
         });
 
         if (response.ok) {
