@@ -35,7 +35,7 @@
     if(!request.ok){
       alert(request.statusText);
     } else{
-      goto("/map");
+      goto(`/forests/${forest.id}/map`);
     }
   }
 
