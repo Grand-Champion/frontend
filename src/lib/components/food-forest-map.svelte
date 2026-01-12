@@ -11,8 +11,6 @@
     Droplets,
     Sun,
     Thermometer,
-    MessageCircle,
-    Send,
     ExternalLink,
     Filter,
   } from "lucide-svelte";
@@ -69,8 +67,6 @@
   let maintenanceOpen = true;
   let hoveredPlantId = null;
   let showFilters = false;
-  const comments = {};
-  let commentText = "";
 
   // Plant care advice messages updaten zonder refresh
   $: if (selectedPlantId !== null) {
@@ -143,16 +139,6 @@
     }
 
     return advice.length ? advice : ["All conditions are optimal."];
-  }
-
-  function addComment() {
-    if (commentText.trim() && selectedPlant) {
-      comments[selectedPlant.id] = [
-        ...(comments[selectedPlant.id] || []),
-        commentText,
-      ];
-      commentText = "";
-    }
   }
 
   const filteredPlants = derived(
@@ -345,41 +331,6 @@
                   >{t("viewFullDetails", $language)}
                   <ExternalLink class="h-4 w-4" /></button
                 >
-
-                <div class="mb-3 flex items-center gap-2">
-                  <MessageCircle class="h-4 w-4" />
-                  <h3 class="text-sm font-semibold text-card-foreground">
-                    {t("comments", $language)} ({Array.isArray(
-                      comments[selectedPlant.id],
-                    )
-                      ? comments[selectedPlant.id].length
-                      : 0})
-                  </h3>
-                </div>
-
-                <div class="space-y-2 mb-3 max-h-32 overflow-y-auto">
-                  {#each Array.isArray(comments[selectedPlant.id]) ? comments[selectedPlant.id] : [] as comment, i (i)}
-                    <div class="rounded-lg bg-muted p-2">
-                      <p class="text-sm text-muted-foreground">{comment}</p>
-                    </div>
-                  {/each}
-                </div>
-
-                <div class="flex gap-2">
-                  <input
-                    type="text"
-                    bind:value={commentText}
-                    onkeypress={(e) => e.key === "Enter" && addComment()}
-                    placeholder={t("addComment", $language)}
-                    class="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                  <button
-                    onclick={addComment}
-                    class="px-3 py-2 rounded-lg border border-border hover:bg-muted cursor-pointer"
-                    aria-label={t("send", $language)}
-                    ><Send class="h-3 w-3" /></button
-                  >
-                </div>
               </div>
             </div>
           </div>
