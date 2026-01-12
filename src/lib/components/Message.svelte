@@ -1,6 +1,8 @@
 <script lang="ts">
+
   export interface MessageData {
     message: string;
+    image: string;
     createdAt: string;
     user: {
       displayName?: string;
@@ -38,6 +40,8 @@
   >
     {message.message}
   </p>
+
+  <img src={message.image}>
 </article>
 
 <style>
