@@ -7,32 +7,33 @@
 </script>
 
 <div class="form-stack">
-    <div class="scroll-container">
-      
+  <div class="scroll-container">
     <div class="form-box">
-      <label>{t("username", $language)}</label>
-      <strong>{user.displayName}</strong>
+      <label for="username">{t("username", $language)}</label>
+      <strong id="username">{user?.displayName || "Loading..."}</strong>
     </div>
 
     <div class="form-box">
-      <label>{t("foodGarden", $language)}</label>
-      <strong>{forest.name}</strong>
+      <label for="forest">{t("foodGarden", $language)}</label>
+      <strong id="forest">{forest?.name || "Loading..."}</strong>
     </div>
 
     <div class="form-box message-box">
-        <label for="message">{t("message", $language)}</label>
-        <textarea name="message" id="message" rows="5">{message?.message}</textarea>
+      <label for="message">{t("message", $language)}</label>
+      <textarea name="message" id="message" rows="5"
+        >{message?.message}</textarea
+      >
     </div>
 
     <div class="form-box">
-        <label>Image</label>
-    <ImageInput image={message?.image} />
+      <label for="image">Image</label>
+      <ImageInput id="image" image={message?.image} />
     </div>
 
     <div class="form-actions">
-        <input type="submit" value="{t("save", $language)}" class="submit-button">
+      <input type="submit" value={t("save", $language)} class="submit-button" />
     </div>
-</div>
+  </div>
 </div>
 
 {#if $theme === "light"}
@@ -120,7 +121,9 @@
 
     padding: 0.9rem 1rem;
     border-radius: 10px;
-    transition: box-shadow 0.15s ease, background 0.15s ease;
+    transition:
+      box-shadow 0.15s ease,
+      background 0.15s ease;
   }
 
   /*Labels*/

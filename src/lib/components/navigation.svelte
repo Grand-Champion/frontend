@@ -1,7 +1,7 @@
 <script>
   import {
     Map,
-    Grid3X3,
+    List,
     Home,
     Sun,
     Moon,
@@ -13,22 +13,32 @@
     Key,
     Eye,
     EyeOff,
-    Settings
+    Settings,
+    Leaf,
+    MessageCircle,
+    Menu,
+    X,
   } from "lucide-svelte";
   import { page } from "$app/stores";
   import { theme } from "$lib/stores/theme";
   import { language, t } from "$lib/stores/language";
+  import { selectedForestId } from "$lib/stores/selectedForest";
   import { goto } from "$app/navigation";
   import { getPayload, updatePassword } from "$lib/Auth";
   import { jwt } from "$lib/stores/jwt";
   import SelectOption from "./SelectOption.svelte";
-  import { page as statePage} from '$app/state';
-    import { browser } from "$app/environment";
+  import { page as statePage } from "$app/state";
+  import { browser } from "$app/environment";
 
-  export let forests = [], forestId;
+  export let forests = [],
+    forestId;
   $: selectedForest = forestId;
+  $: if (selectedForest) {
+    selectedForestId.set(String(selectedForest));
+  }
 
   let showUserMenu = false;
+  let showMobileMenu = false;
   let showChangePasswordModal = false;
   let currentPassword = "";
   let newPassword = "";
@@ -39,6 +49,47 @@
   let showConfirmPassword = false;
   let userMenuElement;
   let forestSelector;
+  let mobileMenuElement;
+  let mobileMenuButton;
+
+  // Compute forest initials - directly in reactive statement for reliability
+  $: {
+    if (!forests || forests.length === 0 || !selectedForest) {
+      forestInitials = "";
+    } else {
+      // Try to find forest by ID (handle both string and number comparison)
+      let forest = forests.find((f) => String(f.id) === String(selectedForest));
+
+      // If not found, use the first forest as fallback
+      if (!forest && forests.length > 0) {
+        forest = forests[0];
+      }
+
+      if (forest && forest.name) {
+        forestInitials = forest.name
+          .split(" ")
+          .map((str) => str[0])
+          .join("")
+          .toUpperCase();
+      } else {
+        forestInitials = "";
+      }
+    }
+  }
+
+  let forestInitials = "";
+
+  // Reset menu state when forest changes
+  $: if (forestId) {
+    showMobileMenu = false;
+    showUserMenu = false;
+    showChangePasswordModal = false;
+  }
+
+  // Also reset menu state when page changes
+  $: if ($page.url.pathname) {
+    showMobileMenu = false;
+  }
 
   function toggleTheme() {
     theme.update((current) => (current === "light" ? "dark" : "light"));
@@ -46,6 +97,24 @@
 
   function toggleLanguage() {
     language.update((current) => (current === "en" ? "nl" : "en"));
+  }
+
+  // Fallback translation to avoid hard crashes when a key is missing
+  const safeT = (key) => {
+    try {
+      return t(key, $language);
+    } catch (err) {
+      console.warn("Missing translation", key, err);
+      return key;
+    }
+  };
+
+  function toggleMobileMenu() {
+    showMobileMenu = !showMobileMenu;
+  }
+
+  function closeMobileMenu() {
+    showMobileMenu = false;
   }
 
   function handleLogin() {
@@ -67,7 +136,7 @@
     showUserMenu = false;
   }
 
-  function goToSettings(){
+  function goToSettings() {
     goto("/settings");
     showUserMenu = false;
   }
@@ -96,31 +165,32 @@
     passwordError = "";
 
     if (!currentPassword || !newPassword || !confirmPassword) {
-      passwordError = t("pleaseEnterAllFields", $language);
+      passwordError = safeT("pleaseEnterAllFields");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      passwordError = t("passwordsDoNotMatch", $language);
+      passwordError = safeT("passwordsDoNotMatch");
       return;
     }
 
     if (newPassword.length < 6) {
-      passwordError = t("passwordTooShort", $language);
+      passwordError = safeT("passwordTooShort");
       return;
     }
 
     if ($jwt) {
       let success = false;
 
-      try{
+      try {
         await updatePassword($jwt, currentPassword, newPassword);
         closeChangePasswordModal();
-        alert(t("passwordChanged", $language));
-      } catch(e){
-        if(e?.message === "Invalid credentials") passwordError = t("incorrectCurrentPassword", $language);
-        else passwordError = t("loginError", $language);
-      } 
+        alert(safeT("passwordChanged"));
+      } catch (e) {
+        if (e?.message === "Invalid credentials")
+          passwordError = safeT("incorrectCurrentPassword");
+        else passwordError = safeT("loginError");
+      }
     }
   }
 
@@ -132,42 +202,63 @@
     ) {
       showUserMenu = false;
     }
+    if (
+      showMobileMenu &&
+      mobileMenuElement &&
+      mobileMenuButton &&
+      !mobileMenuElement.contains(event.target) &&
+      !mobileMenuButton.contains(event.target)
+    ) {
+      showMobileMenu = false;
+    }
   }
 
   async function handleChangeForest(e) {
-    selectedForest = e.target.value;
+    const newForestId = e.target.value;
+    selectedForest = newForestId;
+    selectedForestId.set(String(newForestId));
     const oldUrl = statePage.url.pathname;
-    const newUrl = oldUrl.replace(/\/forests\/\d+/, `/forests/${selectedForest}`);
+    const newUrl = oldUrl.replace(/\/forests\/\d+/, `/forests/${newForestId}`);
+    const navigated = oldUrl !== newUrl;
     await goto(newUrl);
-    if(browser && oldUrl !== newUrl) window.location.reload();
-    console.log(oldUrl, newUrl, browser);
+    if (browser && navigated) {
+      // Force full refresh to ensure all forest-scoped data is reset
+      setTimeout(() => window.location.reload(), 50);
+    }
   }
 </script>
 
 <svelte:window on:click={handleClickOutside} />
 
-<nav class="bg-background border-b border-border">
-  <div class="flex items-center justify-between h-16 px-6">
-    <div class="flex items-center gap-8">
+<nav class="bg-background border-b border-border sticky top-0 z-50">
+  <div class="flex items-center justify-between h-16 px-4 md:px-6">
+    <!-- Left: Forest Selector and Logo (Mobile hidden, Desktop visible) -->
+    <div class="flex items-center gap-4 md:gap-8 flex-1 md:flex-none">
       <div class="flex items-center gap-2">
         <div
           class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"
         >
-          <span class="text-primary-foreground font-semibold text-sm">{forestSelector?.selectedOptions[0].innerText.split(" ").map(str=>str.substr(0,1)).join("")}</span>
+          <span class="text-primary-foreground font-semibold text-sm"
+            >{forestInitials}</span
+          >
         </div>
         <select
-          class="font-semibold text-lg"
+          class="font-semibold text-sm md:text-lg hidden md:block"
           on:change={handleChangeForest}
           bind:this={forestSelector}
         >
           {#each forests as forest}
-            <SelectOption name={forest.name} value={forest.id} currentValue={selectedForest} />
+            <SelectOption
+              name={forest.name}
+              value={forest.id}
+              currentValue={selectedForest}
+            />
           {/each}
         </select>
       </div>
 
-      <div class="flex gap-1">
-
+      <!-- Desktop Navigation -->
+      <div class="hidden md:flex gap-1">
         <a
           href="/forests/{selectedForest}"
           class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
@@ -176,40 +267,31 @@
             : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
           <Home class="w-4 h-4" />
-          <span class="font-medium">{t("home", $language)}</span>
+          <span class="font-medium">{safeT("home")}</span>
         </a>
 
         <a
           href="/forests/{selectedForest}/map"
-          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
-            .url.pathname.endsWith("/map")
+          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page.url.pathname.endsWith(
+            '/map',
+          )
             ? 'bg-primary text-primary-foreground hover:bg-primary/80'
             : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
           <Map class="w-4 h-4" />
-          <span class="font-medium">{t("mapView", $language)}</span>
+          <span class="font-medium">{safeT("mapView")}</span>
         </a>
 
         <a
           href="/forests/{selectedForest}/plants"
-          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
-            .url.pathname.endsWith("/plants")
+          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page.url.pathname.endsWith(
+            '/plants',
+          )
             ? 'bg-primary text-primary-foreground hover:bg-primary/80'
             : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
-          <Grid3X3 class="w-4 h-4" />
-          <span class="font-medium">{t("plantsList", $language)}</span>
-        </a>
-
-        <a
-          href="/forests/{selectedForest}/messages"
-          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page
-            .url.pathname.endsWith('/messages')
-            ? 'bg-primary text-primary-foreground hover:bg-primary/80'
-            : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
-        >
-          <Grid3X3 class="w-4 h-4" />
-          <span class="font-medium">{t("messages", $language)}</span>
+          <List class="w-4 h-4" />
+          <span class="font-medium">{safeT("plantsList")}</span>
         </a>
 
         <a
@@ -219,21 +301,34 @@
             ? 'bg-primary text-primary-foreground hover:bg-primary/80'
             : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
-          <Grid3X3 class="w-4 h-4" />
-          <span class="font-medium">{t("species", $language)}</span>
+          <Leaf class="w-4 h-4" />
+          <span class="font-medium">{safeT("species")}</span>
+        </a>
+
+        <a
+          href="/forests/{selectedForest}/messages"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {$page.url.pathname.endsWith(
+            '/messages',
+          )
+            ? 'bg-primary text-primary-foreground hover:bg-primary/80'
+            : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
+        >
+          <MessageCircle class="w-4 h-4" />
+          <span class="font-medium">{safeT("messages")}</span>
         </a>
       </div>
     </div>
 
-    <div class="flex items-center gap-2">
+    <!-- Right: Controls and Mobile Menu Button -->
+    <div class="flex items-center gap-1 md:gap-2">
       <!-- Language Toggle -->
       <button
         on:click={toggleLanguage}
-        class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
+        class="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer text-sm md:text-base"
         aria-label="Toggle language"
       >
         <Languages class="w-4 h-4" />
-        <span class="font-medium text-sm"
+        <span class="font-medium text-xs md:text-sm"
           >{$language === "en" ? "NL" : "EN"}</span
         >
       </button>
@@ -241,24 +336,24 @@
       <!-- Theme Toggle -->
       <button
         on:click={toggleTheme}
-        class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
+        class="flex items-center gap-2 px-2 md:px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
         aria-label="Toggle theme"
       >
         {#if $theme === "light"}
-          <Sun class="w-4 h-4" />
-        {:else}
           <Moon class="w-4 h-4" />
+        {:else}
+          <Sun class="w-4 h-4" />
         {/if}
       </button>
 
       {#if $jwt}
-        <!-- User Menu -->
+        <!-- Desktop User Menu -->
         <div
-          class="relative ml-4 pl-[1.625rem] border-l border-border"
+          class="relative hidden md:block ml-2 md:ml-4 md:pl-[1.625rem] border-l border-border"
           bind:this={userMenuElement}
         >
           <button
-            on:click={toggleUserMenu}
+            on:click={() => (showUserMenu = !showUserMenu)}
             class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
             aria-label="User menu"
           >
@@ -277,15 +372,15 @@
                 <div class="grid grid-cols-2 gap-4">
                   <div>
                     <p class="text-xs text-muted-foreground mb-1">
-                      {t("username", $language)}
+                      {safeT("name")}
                     </p>
                     <p class="text-sm font-medium text-foreground">
-                      {getPayload($jwt).email}
+                      {getPayload($jwt).displayName}
                     </p>
                   </div>
                   <div>
                     <p class="text-xs text-muted-foreground mb-1">
-                      {t("role", $language)}
+                      {safeT("role")}
                     </p>
                     <p class="text-sm font-medium text-foreground capitalize">
                       {t(getPayload($jwt).role, $language)}
@@ -294,13 +389,13 @@
                 </div>
               </div>
 
-              {#if getPayload($jwt).role === "admin" }
+              {#if getPayload($jwt).role === "admin"}
                 <button
                   on:click={goToAdmin}
                   class="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2 border-b border-border cursor-pointer"
                 >
                   <UserCog class="w-4 h-4" />
-                  {t("accountManagement", $language)}
+                  {safeT("accountManagement")}
                 </button>
               {/if}
 
@@ -309,7 +404,7 @@
                 class="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2 border-b border-border cursor-pointer"
               >
                 <Key class="w-4 h-4" />
-                {t("changePassword", $language)}
+                {safeT("changePassword")}
               </button>
 
               <button
@@ -317,7 +412,7 @@
                 class="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2 border-b border-border cursor-pointer"
               >
                 <Settings class="w-4 h-4" />
-                {t("userSettings", $language)}
+                {safeT("userSettings")}
               </button>
 
               <button
@@ -326,24 +421,219 @@
                 style="color: var(--status-critical);"
               >
                 <LogOut class="w-4 h-4" />
-                {t("logout", $language)}
+                {safeT("logout")}
               </button>
             </div>
           {/if}
         </div>
       {:else}
-        <!-- Login Button -->
+        <!-- Login Button (Desktop) -->
         <button
           on:click={handleLogin}
-          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
+          class="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg transition-colors bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
           aria-label="Login"
         >
           <LogIn class="w-4 h-4" />
-          <span class="font-medium">{t("login", $language)}</span>
+          <span class="font-medium">{safeT("login")}</span>
         </button>
       {/if}
+
+      <!-- Mobile Menu Button -->
+      <button
+        on:click|stopPropagation={toggleMobileMenu}
+        class="md:hidden flex items-center justify-center p-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
+        aria-label="Toggle mobile menu"
+        bind:this={mobileMenuButton}
+      >
+        {#if showMobileMenu}
+          <X class="w-6 h-6" />
+        {:else}
+          <Menu class="w-6 h-6" />
+        {/if}
+      </button>
     </div>
   </div>
+
+  <!-- Mobile Menu -->
+  {#if showMobileMenu}
+    <div
+      class="md:hidden fixed top-16 left-0 right-0 bottom-0 bg-black/20 backdrop-blur-sm"
+      bind:this={mobileMenuElement}
+      style="z-index: 40;"
+    >
+      <div
+        class="bg-card/80 backdrop-blur-md border-b border-border shadow-xl h-[calc(100vh-4rem)] flex flex-col"
+        style="z-index: 41;"
+      >
+        <!-- Forest Selector for Mobile -->
+        <div class="px-4 py-3 border-b border-border">
+          <label
+            for="mobile-forest-selector"
+            class="block text-xs font-medium text-muted-foreground mb-2"
+          >
+            {safeT("forest")}
+          </label>
+          <select
+            id="mobile-forest-selector"
+            class="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            on:change={(e) => {
+              handleChangeForest(e);
+              closeMobileMenu();
+            }}
+            bind:this={forestSelector}
+          >
+            {#each forests as forest}
+              <SelectOption
+                name={forest.name}
+                value={forest.id}
+                currentValue={selectedForest}
+              />
+            {/each}
+          </select>
+        </div>
+
+        <!-- Mobile Navigation Links -->
+        <div class="px-4 py-2 space-y-2 flex-1 overflow-y-auto">
+          <a
+            href="/forests/{selectedForest}"
+            on:click={closeMobileMenu}
+            class="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted {$page
+              .url.pathname === `/forests/${selectedForest}`
+              ? 'bg-primary text-primary-foreground hover:bg-primary/80'
+              : ''}"
+          >
+            <Home class="w-5 h-5" />
+            <span class="font-medium">{safeT("home")}</span>
+          </a>
+
+          <a
+            href="/forests/{selectedForest}/map"
+            on:click={closeMobileMenu}
+            class="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted {$page.url.pathname.endsWith(
+              '/map',
+            )
+              ? 'bg-primary text-primary-foreground hover:bg-primary/80'
+              : ''}"
+          >
+            <Map class="w-5 h-5" />
+            <span class="font-medium">{safeT("mapView")}</span>
+          </a>
+
+          <a
+            href="/forests/{selectedForest}/plants"
+            on:click={closeMobileMenu}
+            class="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted {$page.url.pathname.endsWith(
+              '/plants',
+            )
+              ? 'bg-primary text-primary-foreground hover:bg-primary/80'
+              : ''}"
+          >
+            <List class="w-5 h-5" />
+            <span class="font-medium">{safeT("plantsList")}</span>
+          </a>
+
+          <a
+            href="/species"
+            on:click={closeMobileMenu}
+            class="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted {$page
+              .url.pathname === '/species'
+              ? 'bg-primary text-primary-foreground hover:bg-primary/80'
+              : ''}"
+          >
+            <Leaf class="w-5 h-5" />
+            <span class="font-medium">{safeT("species")}</span>
+          </a>
+
+          <a
+            href="/forests/{selectedForest}/messages"
+            on:click={closeMobileMenu}
+            class="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted {$page.url.pathname.endsWith(
+              '/messages',
+            )
+              ? 'bg-primary text-primary-foreground hover:bg-primary/80'
+              : ''}"
+          >
+            <MessageCircle class="w-5 h-5" />
+            <span class="font-medium">{safeT("messages")}</span>
+          </a>
+        </div>
+
+        <!-- Mobile User Menu / Login (at bottom) -->
+        {#if $jwt}
+          <div class="border-t border-border px-4 py-3 space-y-2">
+            <div class="pb-2 mb-2 border-b border-border">
+              <p class="text-xs text-muted-foreground">
+                {safeT("name")}
+              </p>
+              <p class="text-sm font-medium text-foreground">
+                {getPayload($jwt).displayName}
+              </p>
+            </div>
+
+            {#if getPayload($jwt).role === "admin"}
+              <button
+                on:click={() => {
+                  goToAdmin();
+                  closeMobileMenu();
+                }}
+                class="w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer text-left"
+              >
+                <UserCog class="w-5 h-5" />
+                {safeT("accountManagement")}
+              </button>
+            {/if}
+
+            <button
+              on:click={() => {
+                openChangePasswordModal();
+                closeMobileMenu();
+              }}
+              class="w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer text-left"
+            >
+              <Key class="w-5 h-5" />
+              {safeT("changePassword")}
+            </button>
+
+            <button
+              on:click={() => {
+                goToSettings();
+                closeMobileMenu();
+              }}
+              class="w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer text-left"
+            >
+              <Settings class="w-5 h-5" />
+              {safeT("userSettings")}
+            </button>
+
+            <button
+              on:click={() => {
+                handleLogout();
+                closeMobileMenu();
+              }}
+              class="w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors hover:bg-muted cursor-pointer text-left"
+              style="color: var(--status-critical);"
+            >
+              <LogOut class="w-5 h-5" />
+              {safeT("logout")}
+            </button>
+          </div>
+        {:else}
+          <div class="border-t border-border px-4 py-3">
+            <button
+              on:click={() => {
+                handleLogin();
+                closeMobileMenu();
+              }}
+              class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-colors bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
+            >
+              <LogIn class="w-5 h-5" />
+              <span class="font-medium">{safeT("login")}</span>
+            </button>
+          </div>
+        {/if}
+      </div>
+    </div>
+  {/if}
 </nav>
 
 <!-- Change Password Modal -->

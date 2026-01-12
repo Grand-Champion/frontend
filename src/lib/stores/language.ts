@@ -18,6 +18,7 @@ export const translations = {
     en: {
         // Navigation
         home: 'Home',
+        forest: 'Forest',
         mapView: 'Map View',
         plantsList: 'Plants List',
         species: 'Species',
@@ -38,6 +39,7 @@ export const translations = {
         welcomeBack: 'Welcome',
         loginToAccount: 'Sign in to your account',
         enterUsername: 'Enter your username',
+        enterEmail: 'Enter your email',
         enterDisplayName: 'Enter your full name',
         enterPassword: 'Enter your password',
         pleaseEnterCredentials: 'Please enter all required fields',
@@ -91,6 +93,7 @@ export const translations = {
         invalidAdminKeyOrPassword: 'Invalid your password',
         pleaseEnterAdminKey: 'Please enter your password',
         emailFormatError: 'Email must be in format: example@domain.com',
+        pleaseEnterValidEmail: 'Please enter a valid email address',
         loginError: "Error logging in",
         email: "Email",
         userSettings: "User settings",
@@ -121,6 +124,9 @@ export const translations = {
         // Species list / Filters
         filterBySpecies: 'Filter by Species',
         filterByStatus: 'Filter by Status',
+        filter: 'Filter',
+        filters: 'Filters',
+        close: 'Close',
         good: 'Good',
         needsAttention: 'Needs Attention',
         critical: 'Critical',
@@ -208,8 +214,11 @@ export const translations = {
         height: "Height",
         harvestPrediction: "Harvest prediction",
         location: "Location",
-        createPlant: "Create plant",
+        createPlant: "Create Plant",
         delete: "Delete",
+        viewFullDetails: "View Full Details",
+        unknown: "Unknown",
+        lastUpdated: "Last updated",
 
         // Message create page
         message: "Message",
@@ -220,6 +229,7 @@ export const translations = {
     nl: {
         // Navigation
         home: 'Home',
+        forest: 'Bos',
         mapView: 'Kaart',
         plantsList: 'Planten',
         species: 'Soorten',
@@ -240,6 +250,7 @@ export const translations = {
         welcomeBack: 'Welkom',
         loginToAccount: 'Log in op je account',
         enterUsername: 'Voer je gebruikersnaam in',
+        enterEmail: 'Voer je e-mail in',
         enterDisplayName: 'Voer je volledige naam in',
         enterPassword: 'Voer je wachtwoord in',
         pleaseEnterCredentials: 'Vul alle vereiste velden in',
@@ -293,6 +304,7 @@ export const translations = {
         invalidAdminKeyOrPassword: 'Jouw of huidig wachtwoord ongeldig',
         pleaseEnterAdminKey: 'Voer jouw wachtwoord in',
         emailFormatError: 'E-mail moet in het formaat zijn: example@domain.com',
+        pleaseEnterValidEmail: 'Voer een geldig e-mailadres in',
         loginError: "Error tijdens inloggen",
         email: "Email",
         userSettings: "Gebruikersinstellingen",
@@ -323,6 +335,9 @@ export const translations = {
         // Species list / Filters
         filterBySpecies: 'Filter op Soorten',
         filterByStatus: 'Filter op Status',
+        filter: 'Filter',
+        filters: 'Filters',
+        close: 'Sluiten',
         good: 'Goed',
         needsAttention: 'Aandacht Nodig',
         critical: 'Kritiek',
@@ -412,6 +427,9 @@ export const translations = {
         location: "Locatie",
         createPlant: "Voeg plant toe",
         delete: "Verwijder",
+        viewFullDetails: "Bekijk Volledige Details",
+        unknown: "Onbekend",
+        lastUpdated: "Laatst bijgewerkt",
 
         //Message create page
         message: "Bericht",
@@ -422,7 +440,7 @@ export const translations = {
 };
 
 export function t(key: keyof typeof translations.en, lang: Language): string {
-    if(translations[lang][key]) return translations[lang][key];
+    if (translations[lang][key]) return translations[lang][key];
     else {
         console.warn(Error("Tried to translate " + key));
         return key;
