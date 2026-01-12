@@ -34,9 +34,16 @@ Een backend bestaat als een afzonderlijk systeem, maar moet ook opgestart worden
 ## Installatie en uitvoeren van het project
 Om de frontend lokaal te installeren en uit te voeren:
 
-```bash
-npm install
-npm run dev
-```
-
+1. Clone de repository
+   ```bash
+   git clone <url-van-de-repo>
+   ```
+2. Ga naar de projectmappen, installeer dependencies:
+   ```bash
+   npm install
+   ```
+3. bouw en start containers:
+   ```bash
+   npm run dev
+   ```
 De development server zal starten en een lokaal adres beschikbaar maken voor testen.
