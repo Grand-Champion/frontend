@@ -25,6 +25,21 @@
     import { onMount } from "svelte";
     import SelectOption from "$lib/components/SelectOption.svelte";
 
+    const formatDate = (value: string | number | Date | undefined) => {
+        if (!value) return "";
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return String(value);
+        return date.toLocaleString("nl-NL", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+        });
+    };
+
     $: pageTitle = `${t("accountManagement", $language)}`;
 
     // Redirect if not admin or manager
@@ -549,7 +564,7 @@
                                 <td
                                     class="px-6 py-4 text-sm text-muted-foreground"
                                 >
-                                    {new Date(user.createdAt).toLocaleString()}
+                                    {formatDate(user.createdAt)}
                                 </td>
                                 <td class="px-6 py-4 text-sm">
                                     <div class="flex items-center gap-2">
@@ -587,11 +602,12 @@
                                                         editError[user.id] = "";
                                                     }
                                                 }}
-                                                class="cursor-pointer hover:opacity-80 transition-opacity"
-                                                style="color: var(--action-icon);"
+                                                class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm transition-colors cursor-pointer"
+                                                style="background-color: color-mix(in oklch, var(--action-icon) 12%, transparent); color: var(--foreground);"
                                                 aria-label="Edit user"
                                             >
                                                 <Pencil class="w-4 h-4" />
+                                                {t("edit", $language)}
                                             </button>
                                         {:else}
                                             <span
@@ -603,11 +619,12 @@
                                             <button
                                                 on:click={() =>
                                                     handleDeleteUser(user.id)}
-                                                class="cursor-pointer"
-                                                style="color: var(--status-critical);"
+                                                class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm transition-colors cursor-pointer"
+                                                style="background-color: color-mix(in oklch, var(--status-critical) 18%, transparent); color: var(--status-critical);"
                                                 aria-label="Delete user"
                                             >
                                                 <Trash2 class="w-4 h-4" />
+                                                {t("delete", $language)}
                                             </button>
                                         {/if}
                                     </div>
@@ -856,9 +873,7 @@
                                         {t("createdAt", $language)}
                                     </p>
                                     <p class="text-xs text-foreground">
-                                        {new Date(
-                                            user.createdAt,
-                                        ).toLocaleDateString()}
+                                        {formatDate(user.createdAt)}
                                     </p>
                                 </div>
                             </div>
@@ -898,7 +913,7 @@
                                 <button
                                     on:click={() => openDeleteConfirm(user.id)}
                                     class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm transition-colors"
-                                    style="color: white; background-color: var(--status-critical);"
+                                    style="background-color: color-mix(in oklch, var(--status-critical) 18%, transparent); color: var(--status-critical);"
                                     aria-label="Delete user"
                                 >
                                     <Trash2 class="w-4 h-4" />
