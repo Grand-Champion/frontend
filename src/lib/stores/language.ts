@@ -234,7 +234,6 @@ export const translations = {
         tryDifferentSearch: "Try a different search term",
         noMessagesYet: "No messages yet",
         beFirstToStart: "Be the first to start a conversation",
-        selectImage: "Select image",
         forestsManagement: "Food forest management",
         owner: "Owner",
         updatedAt: "Updated At",
