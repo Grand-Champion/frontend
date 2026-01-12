@@ -99,14 +99,35 @@
     language.update((current) => (current === "en" ? "nl" : "en"));
   }
 
-  // Fallback translation to avoid hard crashes when a key is missing
-  const safeT = (key) => {
-    try {
-      return t(key, $language);
-    } catch (err) {
-      console.warn("Missing translation", key, err);
-      return key;
-    }
+  // Reactive translations - update whenever language changes
+  $: translations = {
+    home: t("home", $language),
+    mapView: t("mapView", $language),
+    plantsList: t("plantsList", $language),
+    species: t("species", $language),
+    messages: t("messages", $language),
+    forest: t("forest", $language),
+    name: t("name", $language),
+    role: t("role", $language),
+    accountManagement: t("accountManagement", $language),
+    changePassword: t("changePassword", $language),
+    userSettings: t("userSettings", $language),
+    logout: t("logout", $language),
+    login: t("login", $language),
+    pleaseEnterAllFields: t("pleaseEnterAllFields", $language),
+    passwordsDoNotMatch: t("passwordsDoNotMatch", $language),
+    passwordTooShort: t("passwordTooShort", $language),
+    incorrectCurrentPassword: t("incorrectCurrentPassword", $language),
+    passwordChanged: t("passwordChanged", $language),
+    loginError: t("loginError", $language),
+    currentPassword: t("currentPassword", $language),
+    newPassword: t("newPassword", $language),
+    confirmPassword: t("confirmPassword", $language),
+    enterCurrentPassword: t("enterCurrentPassword", $language),
+    enterNewPassword: t("enterNewPassword", $language),
+    confirmNewPassword: t("confirmNewPassword", $language),
+    cancel: t("cancel", $language),
+    change: t("change", $language),
   };
 
   function toggleMobileMenu() {
@@ -165,17 +186,17 @@
     passwordError = "";
 
     if (!currentPassword || !newPassword || !confirmPassword) {
-      passwordError = safeT("pleaseEnterAllFields");
+      passwordError = translations.pleaseEnterAllFields;
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      passwordError = safeT("passwordsDoNotMatch");
+      passwordError = translations.passwordsDoNotMatch;
       return;
     }
 
     if (newPassword.length < 6) {
-      passwordError = safeT("passwordTooShort");
+      passwordError = translations.passwordTooShort;
       return;
     }
 
@@ -185,11 +206,11 @@
       try {
         await updatePassword($jwt, currentPassword, newPassword);
         closeChangePasswordModal();
-        alert(safeT("passwordChanged"));
+        alert(translations.passwordChanged);
       } catch (e) {
         if (e?.message === "Invalid credentials")
-          passwordError = safeT("incorrectCurrentPassword");
-        else passwordError = safeT("loginError");
+          passwordError = translations.incorrectCurrentPassword;
+        else passwordError = translations.loginError;
       }
     }
   }
@@ -267,7 +288,7 @@
             : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
           <Home class="w-4 h-4" />
-          <span class="font-medium">{safeT("home")}</span>
+          <span class="font-medium">{translations.home}</span>
         </a>
 
         <a
@@ -279,7 +300,7 @@
             : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
           <Map class="w-4 h-4" />
-          <span class="font-medium">{safeT("mapView")}</span>
+          <span class="font-medium">{translations.mapView}</span>
         </a>
 
         <a
@@ -291,7 +312,7 @@
             : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
           <List class="w-4 h-4" />
-          <span class="font-medium">{safeT("plantsList")}</span>
+          <span class="font-medium">{translations.plantsList}</span>
         </a>
 
         <a
@@ -302,7 +323,7 @@
             : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
           <Leaf class="w-4 h-4" />
-          <span class="font-medium">{safeT("species")}</span>
+          <span class="font-medium">{translations.species}</span>
         </a>
 
         <a
@@ -314,7 +335,7 @@
             : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-muted'}"
         >
           <MessageCircle class="w-4 h-4" />
-          <span class="font-medium">{safeT("messages")}</span>
+          <span class="font-medium">{translations.messages}</span>
         </a>
       </div>
     </div>
@@ -372,7 +393,7 @@
                 <div class="grid grid-cols-2 gap-4">
                   <div>
                     <p class="text-xs text-muted-foreground mb-1">
-                      {safeT("name")}
+                      {translations.name}
                     </p>
                     <p class="text-sm font-medium text-foreground">
                       {getPayload($jwt).displayName}
@@ -380,7 +401,7 @@
                   </div>
                   <div>
                     <p class="text-xs text-muted-foreground mb-1">
-                      {safeT("role")}
+                      {translations.role}
                     </p>
                     <p class="text-sm font-medium text-foreground capitalize">
                       {t(getPayload($jwt).role, $language)}
@@ -395,7 +416,7 @@
                   class="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2 border-b border-border cursor-pointer"
                 >
                   <UserCog class="w-4 h-4" />
-                  {safeT("accountManagement")}
+                  {translations.accountManagement}
                 </button>
               {/if}
 
@@ -404,7 +425,7 @@
                 class="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2 border-b border-border cursor-pointer"
               >
                 <Key class="w-4 h-4" />
-                {safeT("changePassword")}
+                {translations.changePassword}
               </button>
 
               <button
@@ -412,7 +433,7 @@
                 class="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2 border-b border-border cursor-pointer"
               >
                 <Settings class="w-4 h-4" />
-                {safeT("userSettings")}
+                {translations.userSettings}
               </button>
 
               <button
@@ -421,7 +442,7 @@
                 style="color: var(--status-critical);"
               >
                 <LogOut class="w-4 h-4" />
-                {safeT("logout")}
+                {translations.logout}
               </button>
             </div>
           {/if}
@@ -434,7 +455,7 @@
           aria-label="Login"
         >
           <LogIn class="w-4 h-4" />
-          <span class="font-medium">{safeT("login")}</span>
+          <span class="font-medium">{translations.login}</span>
         </button>
       {/if}
 
@@ -471,7 +492,7 @@
             for="mobile-forest-selector"
             class="block text-xs font-medium text-muted-foreground mb-2"
           >
-            {safeT("forest")}
+            {translations.forest}
           </label>
           <select
             id="mobile-forest-selector"
@@ -503,7 +524,7 @@
               : ''}"
           >
             <Home class="w-5 h-5" />
-            <span class="font-medium">{safeT("home")}</span>
+            <span class="font-medium">{translations.home}</span>
           </a>
 
           <a
@@ -516,7 +537,7 @@
               : ''}"
           >
             <Map class="w-5 h-5" />
-            <span class="font-medium">{safeT("mapView")}</span>
+            <span class="font-medium">{translations.mapView}</span>
           </a>
 
           <a
@@ -529,7 +550,7 @@
               : ''}"
           >
             <List class="w-5 h-5" />
-            <span class="font-medium">{safeT("plantsList")}</span>
+            <span class="font-medium">{translations.plantsList}</span>
           </a>
 
           <a
@@ -541,7 +562,7 @@
               : ''}"
           >
             <Leaf class="w-5 h-5" />
-            <span class="font-medium">{safeT("species")}</span>
+            <span class="font-medium">{translations.species}</span>
           </a>
 
           <a
@@ -554,7 +575,7 @@
               : ''}"
           >
             <MessageCircle class="w-5 h-5" />
-            <span class="font-medium">{safeT("messages")}</span>
+            <span class="font-medium">{translations.messages}</span>
           </a>
         </div>
 
@@ -563,7 +584,7 @@
           <div class="border-t border-border px-4 py-3 space-y-2">
             <div class="pb-2 mb-2 border-b border-border">
               <p class="text-xs text-muted-foreground">
-                {safeT("name")}
+                {translations.name}
               </p>
               <p class="text-sm font-medium text-foreground">
                 {getPayload($jwt).displayName}
@@ -579,7 +600,7 @@
                 class="w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer text-left"
               >
                 <UserCog class="w-5 h-5" />
-                {safeT("accountManagement")}
+                {translations.accountManagement}
               </button>
             {/if}
 
@@ -591,7 +612,7 @@
               class="w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer text-left"
             >
               <Key class="w-5 h-5" />
-              {safeT("changePassword")}
+              {translations.changePassword}
             </button>
 
             <button
@@ -602,7 +623,7 @@
               class="w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer text-left"
             >
               <Settings class="w-5 h-5" />
-              {safeT("userSettings")}
+              {translations.userSettings}
             </button>
 
             <button
@@ -614,7 +635,7 @@
               style="color: var(--status-critical);"
             >
               <LogOut class="w-5 h-5" />
-              {safeT("logout")}
+              {translations.logout}
             </button>
           </div>
         {:else}
@@ -627,7 +648,7 @@
               class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-colors bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
             >
               <LogIn class="w-5 h-5" />
-              <span class="font-medium">{safeT("login")}</span>
+              <span class="font-medium">{translations.login}</span>
             </button>
           </div>
         {/if}

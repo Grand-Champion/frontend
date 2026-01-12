@@ -3,6 +3,7 @@
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import { theme } from "$lib/stores/theme";
+  import { language, t } from "$lib/stores/language";
   import { Search } from "lucide-svelte";
 
   let { data } = $props();
@@ -31,7 +32,7 @@
 
 <div class="messages-page">
   <div class="page-header">
-    <h1 class="page-title">Messages</h1>
+    <h1 class="page-title">{t("messages", $language)}</h1>
     <button
       class="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
       onclick={handleCreateMessage}
@@ -49,7 +50,7 @@
       >
         <path d="M12 5v14M5 12h14" />
       </svg>
-      New Message
+      {t("newMessage", $language)}
     </button>
   </div>
 
@@ -58,7 +59,7 @@
     <input
       type="text"
       bind:value={searchQuery}
-      placeholder="Search messages..."
+      placeholder={t("searchMessages", $language)}
       class="search-input"
     />
   </div>
@@ -82,12 +83,14 @@
           />
         </svg>
         <h3>
-          {searchQuery ? "No messages match your search" : "No messages yet"}
+          {searchQuery
+            ? t("noMessagesMatch", $language)
+            : t("noMessagesYet", $language)}
         </h3>
         <p>
           {searchQuery
-            ? "Try a different search term"
-            : "Be the first to start a conversation"}
+            ? t("tryDifferentSearch", $language)
+            : t("beFirstToStart", $language)}
         </p>
       </div>
     {:else}

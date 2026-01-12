@@ -21,7 +21,7 @@ export const translations = {
         forest: 'Forest',
         mapView: 'Map View',
         plantsList: 'Plants List',
-        species: 'Species',
+        species: 'Species List',
         createSpecies: 'Create Species',
         editSpecies: 'Edit Species',
         update: 'Update',
@@ -224,7 +224,12 @@ export const translations = {
         message: "Message",
         messages: "Messages",
         createMessage: "Create Message",
-        selectImage: "Select image",
+        selectImage: "Select image", newMessage: "New Message",
+        searchMessages: "Search messages...",
+        noMessagesMatch: "No messages match your search",
+        tryDifferentSearch: "Try a different search term",
+        noMessagesYet: "No messages yet",
+        beFirstToStart: "Be the first to start a conversation",
     },
     nl: {
         // Navigation
@@ -436,6 +441,12 @@ export const translations = {
         messages: "Berichten",
         createMessage: "Schrijf een bericht",
         selectImage: "Selecteer afbeelding",
+        newMessage: "Nieuw Bericht",
+        searchMessages: "Zoek berichten...",
+        noMessagesMatch: "Geen berichten komen overeen met je zoekopdracht",
+        tryDifferentSearch: "Probeer een andere zoekterm",
+        noMessagesYet: "Nog geen berichten",
+        beFirstToStart: "Wees de eerste om een gesprek te starten",
     }
 };
 
