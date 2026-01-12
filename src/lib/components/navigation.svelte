@@ -107,6 +107,7 @@
     species: t("species", $language),
     messages: t("messages", $language),
     forest: t("forest", $language),
+    forestManagement: t("forestManagement", $language),
     name: t("name", $language),
     role: t("role", $language),
     accountManagement: t("accountManagement", $language),
@@ -428,7 +429,7 @@
                   class="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2 border-b border-border cursor-pointer"
                 >
                   <Settings class="w-4 h-4" />
-                  {safeT("forestManagement")}
+                  {translations.forestManagement}
                 </button>
               {/if}
 
