@@ -1,7 +1,7 @@
 <script>
   import { language, t } from "$lib/stores/language";
   let { image, name } = $props();
-  let imgElt;
+  let imgElt = $state();
   let imgUrl;
   let showPreview = $state(false);
   async function change(e) {
@@ -32,7 +32,8 @@
   <img
     src={image}
     bind:this={imgElt}
-    alt="Selected image preview"
+    alt=""
     class="max-w-[60vh] max-h-[60vh] mt-4"
   />
 {/if}
+<input type="hidden" bind:this={imgUrl} name={name || "image"} />

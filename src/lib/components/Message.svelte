@@ -40,7 +40,13 @@
     {message.message}
   </p>
 
-  <img src={message.image} alt="" />
+  {#if message.image}
+    <img
+      src={message.image}
+      alt=""
+      class="mt-4 max-w-full rounded-lg border border-border"
+    />
+  {/if}
 </article>
 
 <style>
