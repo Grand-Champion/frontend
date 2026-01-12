@@ -88,7 +88,7 @@
                             <button
                                 onclick={() => goto(`/forests/${forest.id}/edit`)}
                                 class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm transition-colors cursor-pointer"
-                                style="color: white; background-color: var(--action-icon);"
+                                style="color: var(--foreground); background-color: color-mix(in oklch, var(--action-icon) 12%, transparent); background-opacity: 50%;"
                                 aria-label="Edit forest"
                             >
                                 <Pencil class="w-4 h-4" />
