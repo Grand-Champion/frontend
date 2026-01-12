@@ -1,6 +1,9 @@
 <script>
   import { Trees, ListTree, Sprout, Leaf } from "lucide-svelte";
   import { language, t } from "$lib/stores/language";
+  import { jwt } from "$lib/stores/jwt";
+  import { getPayload } from "$lib/Auth";
+    import { goto } from "$app/navigation";
   export let data;
   $: forestId = data.forestId;
   $: forestData = data.forestData?.data;
@@ -16,6 +19,14 @@
   <div class="container mx-auto px-3 sm:px-4 md:px-6 py-8 sm:py-12 md:py-16">
     <!-- Header -->
     <div class="text-center mb-10 sm:mb-14 md:mb-16">
+      {#if (getPayload($jwt).id === forestData.ownerId || getPayload($jwt).role === "admin" )}
+        <button
+          onclick={goto("/forests/"+ forestData.id+ "/edit")}
+          class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer float-right"
+        >
+          {t("edit", $language)}
+        </button>
+      {/if}
       <div class="flex justify-center mb-4 sm:mb-6">
         <div class="relative">
           <Trees class="w-16 h-16 sm:w-20 sm:h-20 text-primary" />
