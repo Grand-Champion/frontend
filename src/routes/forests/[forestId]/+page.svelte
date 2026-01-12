@@ -3,7 +3,7 @@
   import { language, t } from "$lib/stores/language";
   import { jwt } from "$lib/stores/jwt";
   import { getPayload } from "$lib/Auth";
-    import { goto } from "$app/navigation";
+  import { goto } from "$app/navigation";
   export let data;
   $: forestId = data.forestId;
   $: forestData = data.forestData?.data;
@@ -192,10 +192,10 @@
       </div>
 
       <!-- Edit Button -->
-      {#if (getPayload($jwt).id === forestData.ownerId || getPayload($jwt).role === "admin" )}
+      {#if getPayload($jwt).id === forestData.ownerId || getPayload($jwt).role === "admin"}
         <div class="mt-8 flex justify-center">
           <button
-            onclick={goto("/forests/"+ forestData.id+ "/edit")}
+            onclick={goto("/forests/" + forestData.id + "/edit")}
             class="bg-primary text-primary-foreground px-8 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer min-w-48"
           >
             {t("edit", $language)}
