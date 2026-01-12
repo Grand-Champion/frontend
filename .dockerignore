@@ -6,5 +6,4 @@ build
 .git
 .vscode
 npm-debug.log
-.env
-.env.*
+

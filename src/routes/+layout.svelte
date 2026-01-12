@@ -2,16 +2,16 @@
   import "../app.css";
   import Navigation from "$lib/components/navigation.svelte";
   import { page } from "$app/stores";
-  import { onMount } from "svelte";
+  import { getContext, onMount, setContext } from "svelte";
   import { theme } from "$lib/stores/theme";
 
-  // Make plant detail pages and home page scrollable
-  $: isPlantPage = $page.url.pathname.startsWith("/plant/");
-  $: isHomePage = $page.url.pathname === "/";
-  $: isManagementPage = $page.url.pathname === "/management";
-  $: isLoginPage = $page.url.pathname === "/login";
-  $: isScrollable =
-    isPlantPage || isHomePage || isManagementPage || isLoginPage;
+  // Make plant detail pages, species pages, home page, and management page scrollable
+  $: isScrollable = !$page.url.pathname.endsWith("/map");
+
+  export let data;
+
+  $: forests = data.forestsData?.data;
+  $: forestId = data.forestId;
 
   // Initialize theme on mount
   onMount(() => {
@@ -36,13 +36,20 @@
   </script>
 </svelte:head>
 
-<div class="h-screen w-full flex flex-col">
-  <Navigation />
-  <main
-    class="flex-1"
-    class:overflow-auto={isScrollable}
-    class:overflow-hidden={!isScrollable}
-  >
+<div class="h-screen w-full flex flex-col overflow-hidden">
+  <Navigation {forests} {forestId} />
+  <main class="flex-1 overflow-hidden" class:overflow-y-auto={isScrollable}>
     <slot />
   </main>
 </div>
+
+<style global>
+  :global(body) {
+    margin: 0;
+    padding: 0;
+  }
+
+  :global(html) {
+    overflow: hidden;
+  }
+</style>

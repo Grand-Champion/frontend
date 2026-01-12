@@ -3,6 +3,7 @@
   import { goto } from "$app/navigation";
   import { browser } from "$app/environment";
   import { language, t } from "$lib/stores/language";
+  import { PUBLIC_API_URL } from '$env/static/public';
   import {
     Leaf,
     Trees,
@@ -17,14 +18,34 @@
     MessageCircle,
     Send,
   } from "lucide-svelte";
-  import { PUBLIC_API_URL } from '$env/static/public';
+  import { onMount } from 'svelte';
+  import { jwt } from "$lib/stores/jwt.js";
+  import { getPayload, headers } from "$lib/Auth.js";
+  import { getStatus, getStatusColor } from "$lib/utils/plant-helpers.js";
 
   export let data;
+  let plantData = data?.plantData ?? null;
 
   //Pak plant, species en conditions uit de API data
-  $: plant = data.plantData?.data;
+  $: plant = plantData?.data;
   $: species = plant?.species;
   $: conditions = plant?.conditions[0] ?? {};
+
+  
+  async function fetchLatest() {
+    try {
+      const res = await fetch(`${PUBLIC_API_URL}/forests/api/v1/plants/${plant?.id}`);
+      if (!res.ok) return;
+      plantData = await res.json();
+    } catch (err) {
+      console.error('Error fetching latest plant data', err);
+    }
+  }
+
+  onMount(() => {
+     const interval = setInterval(fetchLatest, 5000);
+    return () => clearInterval(interval);
+  });
 
   // Gebruik backend species types (Tree, Shrub, Plant)
   $: categoryConfig = {
@@ -38,12 +59,12 @@
       icon: Sprout,
       color: "var(--category-shrub)",
     },
-    herb: {
+    Herb: {
       label: t("herbs", $language),
       icon: Leaf,
       color: "var(--category-herb)",
     },
-    vegetable: {
+    Vegetable: {
       label: t("vegetables", $language),
       icon: Flower2,
       color: "var(--category-vegetable)",
@@ -59,78 +80,6 @@
   if (!date) return "Unknown";
   return date.toLocaleString();
 }
-
-  function calculateStatus() {
-    if (!conditions || !species) return "critical";
-
-    let issueCount = 0;
-    let criticalCount = 0;
-
-    const tempDiff = Math.max(
-      species.minTemperature - conditions.temperature,
-      conditions.temperature - species.maxTemperature,
-      0,
-    );
-    if (tempDiff > 0) {
-      if (tempDiff > 5) criticalCount++;
-      else issueCount++;
-    }
-
-    const humidityDiff = Math.max(
-      species.minHumidity - conditions.humidity,
-      conditions.humidity - species.maxHumidity,
-      0,
-    );
-    if (humidityDiff > 0) {
-      if (humidityDiff > 15) criticalCount++;
-      else issueCount++;
-    }
-
-    const phDiff = Math.max(
-      species.minSoilPH - conditions.soilPH,
-      conditions.soilPH - species.maxSoilPH,
-      0,
-    );
-    if (phDiff > 0) {
-      if (phDiff > 0.5) criticalCount++;
-      else issueCount++;
-    }
-
-    const moistureDiff = Math.max(
-      species.minSoilMoisture - conditions.soilMoisture,
-      conditions.soilMoisture - species.maxSoilMoisture,
-      0,
-    );
-    if (moistureDiff > 0) {
-      if (moistureDiff > 20) criticalCount++;
-      else issueCount++;
-    }
-
-    const sunlightDiff = Math.max(
-      species.minSunlight - conditions.sunlight,
-      conditions.sunlight - species.maxSunlight,
-      0,
-    );
-    if (sunlightDiff > 0) {
-      if (sunlightDiff > 2) criticalCount++;
-      else issueCount++;
-    }
-
-    if (criticalCount >= 2) return "critical";
-    if (criticalCount >= 1 || issueCount >= 2) return "attention";
-    return "good";
-  }
-
-  function getStatusColor(status) {
-    switch (status) {
-      case "good":
-        return "var(--status-good)";
-      case "attention":
-        return "var(--status-attention)";
-      case "critical":
-        return "var(--status-critical)";
-    }
-  }
 
   const statusBg = (color) => `color-mix(in oklch, ${color} 12%, transparent)`;
   const statusBorder = (color) =>
@@ -163,11 +112,6 @@
       advice.push(t("adviceHumidityTooHigh", $language));
     }
 
-    if (conditions.soilPH < species.minSoilPH) {
-      advice.push(t("adviceSoilTooAcidic", $language));
-    } else if (conditions.soilPH > species.maxSoilPH) {
-      advice.push(t("adviceSoilTooAlkaline", $language));
-    }
 
     if (conditions.soilMoisture < species.minSoilMoisture) {
       advice.push(t("adviceSoilTooDry", $language));
@@ -184,12 +128,12 @@
     return advice.length > 0 ? advice : [t("adviceOptimal", $language)];
   }
 
-  function getConditionColor(current, min, max, criticalThreshold) {
-    if (current >= min && current <= max) return getStatusColor("good");
-    const midpoint = (min + max) / 2;
-    return Math.abs(current - midpoint) > criticalThreshold
-      ? getStatusColor("critical")
-      : getStatusColor("attention");
+  function getConditionColor(current, min, max) {
+    // Groen als de condition binnen de range zit, rood als buiten range is
+    if (current >= min && current <= max) {
+      return getStatusColor("optimal");
+    }
+    return getStatusColor("critical");
   }
 
   function addComment() {
@@ -207,24 +151,22 @@
     }
   }
 
-  $: if (plant) {
-    overallStatus = calculateStatus(
-      plant.currentConditions,
-      plant.optimalConditions,
-    );
+  $: if (plant && conditions) {
+    overallStatus = getStatus(plant);
     overallColor = getStatusColor(overallStatus);
   } else {
-    overallStatus = null;
-    overallColor = null;
+    overallStatus = "unknown";
+    overallColor = getStatusColor("unknown");
   }
 
   $: pageTitle = `${plant?.name || "Plant"} - Food Forest`;
 
   async function deletePlant(){
-    if(confirm("Weet je het zeker?")){
+    if(confirm(t("confirmDeletePlant", $language))){
       const request = await fetch(PUBLIC_API_URL + "/forests/api/v1/plants/" + plant.id, {
         body: data,
-        method: "DELETE"
+        method: "DELETE",
+        headers: headers($jwt)
       });
       if(!request.ok){
         alert(request.statusText);
@@ -253,20 +195,21 @@
         {t("back", $language)}
       </button>
       <div class="float-right flex gap-6">
-        <button
-          onclick={goto("/plant/"+ plant.id+ "/edit")}
-          class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
-        >
-          {t("edit", $language)}
-        </button>
-
-        
-        <button
-          onclick={deletePlant}
-          class="bg-[red] text-primary-foreground px-4 py-2 rounded-lg hover:bg-[#f00a] transition-colors cursor-pointer"
-        >
-          {t("delete", $language)}
-        </button>
+        {#if (getPayload($jwt).id === data.forestData.data.ownerId || getPayload($jwt).role === "admin" )}
+          <button
+            onclick={goto("/plants/"+ plant.id+ "/edit")}
+            class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
+          >
+            {t("edit", $language)}
+          </button>
+          
+          <button
+            onclick={deletePlant}
+            class="bg-(--status-critical) text-primary-foreground px-4 py-2 rounded-lg hover:bg-(--status-critical)/90 transition-colors cursor-pointer"
+          >
+            {t("delete", $language)}
+          </button>
+        {/if}
       </div>
 
       <!-- Header -->
@@ -376,7 +319,7 @@
                 class="px-3 py-1 rounded-lg text-sm font-semibold text-white"
                 style={`background-color: ${overallColor || "var(--status-good)"};`}
               >
-                {overallStatus === "good"
+                {overallStatus === "optimal"
                   ? t("optimal", $language)
                   : overallStatus === "attention"
                     ? t("needsAttention", $language)
@@ -389,7 +332,7 @@
                   {t("currentStage", $language)}
                 </p>
                 <p class="text-lg font-semibold capitalize text-foreground">
-                  {formatStage(plant?.plantStage)}
+                  {formatStage(plant?.stage)}
                 </p>
               </div>
               <div class="bg-background/50 rounded-lg p-3 border border-border">
@@ -429,7 +372,6 @@
                     plant.conditions[0]?.temperature ?? 0,
                     plant.species?.minTemperature ?? 0,
                     plant.species?.maxTemperature ?? 0,
-                    5,
                   )}`}
                 >
                   {plant.conditions[0]?.temperature ?? "—"}°C
@@ -449,32 +391,12 @@
                     plant.conditions[0]?.humidity ?? 0,
                     plant.species?.minHumidity ?? 0,
                     plant.species?.maxHumidity ?? 0,
-                    15,
                   )}`}
                 >
                   {plant.conditions[0]?.humidity ?? "—"}%
                 </span>
               </div>
 
-              <div
-                class="flex items-center justify-between rounded-lg bg-muted p-4"
-              >
-                <div class="flex items-center gap-3">
-                  <FlaskConical class="h-5 w-5 text-muted-foreground" />
-                  <span class="font-medium">{t("soilPH", $language)}</span>
-                </div>
-                <span
-                  class="text-lg font-semibold"
-                  style={`color: ${getConditionColor(
-                    plant.conditions[0]?.soilPH ?? 0,
-                    plant.species?.minSoilPH ?? 0,
-                    plant.species?.maxSoilPH ?? 0,
-                    0.5,
-                  )}`}
-                >
-                  {plant.conditions[0]?.soilPH ?? "—"}
-                </span>
-              </div>
 
               <div
                 class="flex items-center justify-between rounded-lg bg-muted p-4"
@@ -490,7 +412,6 @@
                     plant.conditions[0]?.soilMoisture ?? 0,
                     plant.species?.minSoilMoisture ?? 0,
                     plant.species?.maxSoilMoisture ?? 0,
-                    20,
                   )}`}
                 >
                   {plant.conditions[0]?.soilMoisture ?? "—"}%
@@ -510,10 +431,9 @@
                     plant.conditions[0]?.sunlight ?? 0,
                     plant.species?.minSunlight ?? 0,
                     plant.species?.maxSunlight ?? 0,
-                    2,
                   )}`}
                 >
-                  {plant.conditions[0]?.sunlight ?? "—"}h/day
+                  {plant.conditions[0]?.sunlight ?? "—"}%
                 </span>
               </div>
             </div>

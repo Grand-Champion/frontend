@@ -15,5 +15,5 @@
   }
 </script>
 <label for="filePicker">{t("selectImage", $language)}</label> <input type="file" accept="image/*" onchange={change} id="filePicker" />
-<img src={image} bind:this={imgElt} class="max-w-[60vh] max-h-[60vh]" />
+<img src={image} bind:this={imgElt} alt="Selected image preview" class="max-w-[60vh] max-h-[60vh]" />
 <input type="hidden" bind:this={imgUrl} name={name || "image"}/>
