@@ -11,6 +11,7 @@
     Columns,
     Grid2x2,
     Grid3x3,
+    Search,
   } from "lucide-svelte";
   import { selectedCategories, selectedStatus } from "$lib/stores/filters";
   import { goto } from "$app/navigation";
@@ -161,12 +162,17 @@
 
       <!-- Search and Layout Controls -->
       <div class="flex flex-row gap-3 items-center">
-        <input
-          type="text"
-          bind:value={searchQuery}
-          placeholder="{t('search', $language)}..."
-          class="flex-1 px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-        />
+        <div
+          class="flex items-center gap-2 px-3 py-2 border border-border rounded-lg bg-background text-foreground flex-1"
+        >
+          <Search class="h-4 w-4 text-muted-foreground" />
+          <input
+            type="text"
+            bind:value={searchQuery}
+            placeholder={t("searchPlants", $language)}
+            class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground text-sm"
+          />
+        </div>
 
         <!-- Desktop Card Size Toggle (hidden on mobile) -->
         <div
