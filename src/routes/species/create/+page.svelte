@@ -11,7 +11,6 @@
   $: pageTitle = `${t("createSpecies", $language)} - Food Forest`;
 
   let errorMessage = "";
-  let successMessage = "";
   let isSubmitting = false;
 
   function goBack() {
@@ -25,7 +24,6 @@
   let formulier;
   async function stuurUpdate() {
     errorMessage = "";
-    successMessage = "";
     isSubmitting = true;
 
     try {
@@ -40,13 +38,7 @@
         errorMessage =
           t("errorCreatingSpecies", $language) || "Error creating species";
       } else {
-        successMessage =
-          t("speciesCreatedSuccessfully", $language) ||
-          "Species created successfully!";
-        // Auto-hide success message and redirect after 2 seconds
-        setTimeout(() => {
-          goto("/species");
-        }, 2000);
+        goto("/species");
       }
     } catch (error) {
       errorMessage = t("networkError", $language) || "Network error occurred";
@@ -85,15 +77,6 @@
         style={`background-color: color-mix(in oklch, var(--status-critical) 12%, transparent); border: 1px solid color-mix(in oklch, var(--status-critical) 32%, transparent); color: var(--status-critical);`}
       >
         {errorMessage}
-      </div>
-    {/if}
-
-    {#if successMessage}
-      <div
-        class="mb-6 px-4 py-3 rounded-lg"
-        style={`background-color: color-mix(in oklch, var(--status-good) 12%, transparent); border: 1px solid color-mix(in oklch, var(--status-good) 32%, transparent); color: var(--status-good);`}
-      >
-        {successMessage}
       </div>
     {/if}
 
