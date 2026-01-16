@@ -10,6 +10,8 @@ on:
             - main
             - development
     workflow_dispatch:
+env:
+    PUBLIC_API_URL = http://localhost:3011 #deze bestaat niet echt, maar het moet gedefiniëerd zijn
 
 jobs: 
     build:
