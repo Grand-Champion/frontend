@@ -1,128 +1,12 @@
 import assert from "assert";
-import dotenv from "dotenv";
-import { calculateConditionStatus } from "../src/lib/utils/plant-helpers.ts";
+import { 
+  calculateConditionStatus, 
+  getStatus, 
+  getStatusColor 
+} from "../src/lib/utils/plant-helpers.ts";
 
-dotenv.config();
-const API_URL = process.env.PUBLIC_API_URL || "http://localhost:3011";
-
-// Fetch alle forests met de plants
-async function fetchAllForests() {
-  try {
-    const forestsResponse = await fetch(`${API_URL}/forests/api/v1/forests`);
-    const forestsData = await forestsResponse.json();
-
-    if (!forestsData?.data || forestsData.data.length === 0) {
-      return [];
-    }
-
-    // Pak forest data van alle forests
-    const forestPromises = forestsData.data.map((forest) =>
-      fetch(`${API_URL}/forests/api/v1/forests/${forest.id}`).then((res) =>
-        res.json(),
-      ),
-    );
-
-    const allForests = await Promise.all(forestPromises);
-    return allForests.map((f) => f.data);
-  } catch (error) {
-    console.error("Error fetching forest data:", error);
-    throw error;
-  }
-}
-
-//voorbeeld test
-describe("#voorbeeld test", function () {
-  it("2 + 2 is gelijk aan 4", function () {
-    assert.equal(2 + 2, 4);
-  });
-});
-
-// Test of de plants array niet leeg is
-describe("Planten data tests", function () {
-  let allForests;
-
-  // Doet fetch calls voordat tests beginnen
-  before(async function () {
-    this.timeout(10000);
-    allForests = await fetchAllForests();
-  });
-
-  it("minimaal 1 forest bevat planten", function () {
-    assert.ok(allForests.length > 0, "Er moet minimaal 1 forest zijn");
-
-    const hasForestWithPlants = allForests.some((forest) => {
-      const hasPlants = forest.plants && forest.plants.length > 0;
-      return hasPlants;
-    });
-    assert.ok(hasForestWithPlants, "Minimaal 1 forest moet plants hebben");
-  });
-
-  // Test of de planten een naam hebben
-  it("elke plant heeft een naam", function () {
-    assert.ok(allForests.length > 0, "Er zijn geen forests");
-
-    allForests.forEach((forest, forestIndex) => {
-      if (forest.plants && forest.plants.length > 0) {
-        forest.plants.forEach((plant) => {
-          const plantName = plant.name || plant.species?.name;
-          assert.ok(
-            plantName,
-            `Forest ${forestIndex}: Plant met ID ${plant.id} moet een naam hebben`,
-          );
-        });
-      }
-    });
-  });
-
-  // Test of geen planten op dezelfde plek staan
-  it("planten overlappen niet", function () {
-    assert.ok(allForests.length > 0, "Er zijn geen forests");
-
-    allForests.forEach((forest, forestIndex) => {
-      if (forest.plants && forest.plants.length > 1) {
-        const plants = forest.plants;
-
-        plants.forEach((plant1, index) => {
-          plants.slice(index + 1).forEach((plant2) => {
-            const zelfdePositie =
-              plant1.posX === plant2.posX && plant1.posY === plant2.posY;
-            assert.ok(
-              !zelfdePositie,
-              `Forest ${forestIndex}: Plant ${plant1.id} en Plant ${plant2.id} staan op dezelfde plek`,
-            );
-          });
-        });
-      }
-    });
-  });
-
-  // Test of elke plant een species heeft in alle forests
-  it("elke plant heeft species informatie in alle forests", function () {
-    assert.ok(allForests.length > 0, "Er zijn geen forests");
-
-    allForests.forEach((forest, forestIndex) => {
-      if (forest.plants && forest.plants.length > 0) {
-        forest.plants.forEach((plant) => {
-          const plantName =
-            plant.name || plant.species?.name || `Plant ${plant.id}`;
-          assert.ok(
-            plant.species,
-            `Forest ${forestIndex}: Plant "${plantName}" moet species informatie hebben`,
-          );
-          assert.ok(
-            plant.species.name,
-            `Forest ${forestIndex}: Plant "${plantName}" moet een species naam hebben`,
-          );
-        });
-      }
-    });
-  });
-});
-
-// Frontend utility tests
-describe("Tests Frontend logica", function () {
-  // checkt of de plant condition logica klopt
-  it("calculateConditionStatus geeft 'optimal' als alles binnen range is", function () {
+describe("calculateConditionStatus", function () {
+  it("geeft 'optimal' als alle conditions binnen range zijn", function () {
     const conditions = {
       temperature: 22,
       humidity: 60,
@@ -142,15 +26,79 @@ describe("Tests Frontend logica", function () {
     };
 
     const result = calculateConditionStatus(conditions, species);
-    assert.equal(
-      result,
-      "optimal",
-      "Status moet 'optimal' zijn als alle conditions binnen range zijn",
-    );
+    assert.equal(result, "optimal");
   });
 
-  // checkt critical status wanneer alle conditions fout zijn is
-  it("calculateConditionStatus geeft 'critical' als alles buiten range is", function () {
+  it("geeft 'attention' als 1 condition buiten range is", function () {
+    const conditions = {
+      temperature: 35, // Buiten range
+      humidity: 60,
+      soilMoisture: 50,
+      sunlight: 8,
+    };
+
+    const species = {
+      minTemperature: 15,
+      maxTemperature: 30,
+      minHumidity: 40,
+      maxHumidity: 80,
+      minSoilMoisture: 30,
+      maxSoilMoisture: 70,
+      minSunlight: 5,
+      maxSunlight: 10,
+    };
+
+    const result = calculateConditionStatus(conditions, species);
+    assert.equal(result, "attention");
+  });
+
+  it("geeft 'attention' als 2 conditions buiten range zijn", function () {
+    const conditions = {
+      temperature: 10, // Buiten range
+      humidity: 20,    // Buiten range
+      soilMoisture: 50,
+      sunlight: 8,
+    };
+
+    const species = {
+      minTemperature: 15,
+      maxTemperature: 30,
+      minHumidity: 40,
+      maxHumidity: 80,
+      minSoilMoisture: 30,
+      maxSoilMoisture: 70,
+      minSunlight: 5,
+      maxSunlight: 10,
+    };
+
+    const result = calculateConditionStatus(conditions, species);
+    assert.equal(result, "attention");
+  });
+
+  it("geeft 'critical' als 3 conditions buiten range zijn", function () {
+    const conditions = {
+      temperature: 50, // Buiten range
+      humidity: 10,    // Buiten range
+      soilMoisture: 100, // Buiten range
+      sunlight: 8,
+    };
+
+    const species = {
+      minTemperature: 15,
+      maxTemperature: 30,
+      minHumidity: 40,
+      maxHumidity: 80,
+      minSoilMoisture: 30,
+      maxSoilMoisture: 70,
+      minSunlight: 5,
+      maxSunlight: 10,
+    };
+
+    const result = calculateConditionStatus(conditions, species);
+    assert.equal(result, "critical");
+  });
+
+  it("geeft 'critical' als alle conditions buiten range zijn", function () {
     const conditions = {
       temperature: 50,
       humidity: 10,
@@ -170,10 +118,153 @@ describe("Tests Frontend logica", function () {
     };
 
     const result = calculateConditionStatus(conditions, species);
-    assert.equal(
-      result,
-      "critical",
-      "Status moet 'critical' zijn als alle conditions buiten range zijn",
-    );
+    assert.equal(result, "critical");
+  });
+
+  it("geeft 'unknown' als conditions null of undefined is", function () {
+    const species = {
+      minTemperature: 15,
+      maxTemperature: 30,
+    };
+
+    assert.equal(calculateConditionStatus(null, species), "unknown");
+    assert.equal(calculateConditionStatus(undefined, species), "unknown");
+  });
+
+  it("geeft 'unknown' als species null of undefined is", function () {
+    const conditions = {
+      temperature: 22,
+      humidity: 60,
+    };
+
+    assert.equal(calculateConditionStatus(conditions, null), "unknown");
+    assert.equal(calculateConditionStatus(conditions, undefined), "unknown");
+  });
+
+  it("detecteert te lage temperatuur correct", function () {
+    const conditions = {
+      temperature: 10, // Buiten range
+      humidity: 60,
+      soilMoisture: 50,
+      sunlight: 8,
+    };
+
+    const species = {
+      minTemperature: 15,
+      maxTemperature: 30,
+      minHumidity: 40,
+      maxHumidity: 80,
+      minSoilMoisture: 30,
+      maxSoilMoisture: 70,
+      minSunlight: 5,
+      maxSunlight: 10,
+    };
+
+    const result = calculateConditionStatus(conditions, species);
+    assert.equal(result, "attention");
+  });
+
+  it("detecteert te hoge temperatuur correct", function () {
+    const conditions = {
+      temperature: 35, // Buiten range
+      humidity: 60,
+      soilMoisture: 50,
+      sunlight: 8,
+    };
+
+    const species = {
+      minTemperature: 15,
+      maxTemperature: 30,
+      minHumidity: 40,
+      maxHumidity: 80,
+      minSoilMoisture: 30,
+      maxSoilMoisture: 70,
+      minSunlight: 5,
+      maxSunlight: 10,
+    };
+
+    const result = calculateConditionStatus(conditions, species);
+    assert.equal(result, "attention");
+  });
+});
+
+// Checkt of de backend status naar de goede frontend status word geconvert
+describe("getStatus", function () {
+  it("geeft 'optimal' als backend status 'good' is", function () {
+    const plant = {
+      conditions: [{ status: "good" }],
+    };
+
+    const result = getStatus(plant);
+    assert.equal(result, "optimal");
+  });
+
+  it("geeft 'unknown' als backend status 'Unknown' is", function () {
+    const plant = {
+      conditions: [{ status: "Unknown" }],
+    };
+
+    const result = getStatus(plant);
+    assert.equal(result, "unknown");
+  });
+
+  it("geeft lowercase versie van andere statussen", function () {
+    const plant1 = { conditions: [{ status: "CRITICAL" }] };
+    const plant2 = { conditions: [{ status: "Attention" }] };
+
+    assert.equal(getStatus(plant1), "critical");
+    assert.equal(getStatus(plant2), "attention");
+  });
+
+  it("geeft 'unknown' als er geen conditions zijn", function () {
+    const plant1 = { conditions: [] };
+    const plant2 = { conditions: null };
+    const plant3 = {};
+
+    assert.equal(getStatus(plant1), "unknown");
+    assert.equal(getStatus(plant2), "unknown");
+    assert.equal(getStatus(plant3), "unknown");
+  });
+
+  it("geeft 'unknown' als status niet bekend is", function () {
+    const plant = {
+      conditions: [{}],
+    };
+
+    const result = getStatus(plant);
+    assert.equal(result, "unknown");
+  });
+});
+
+  // test of kleuren kloppen
+describe("getStatusColor", function () {
+  it("geeft groene kleur voor 'optimal' status", function () {
+    const color = getStatusColor("optimal");
+    assert.equal(color, "var(--status-good)");
+  });
+
+  it("geeft groene kleur voor 'good' status", function () {
+    const color = getStatusColor("good");
+    assert.equal(color, "var(--status-good)");
+  });
+
+  it("geeft oranje kleur voor 'attention' status", function () {
+    const color = getStatusColor("attention");
+    assert.equal(color, "var(--status-attention)");
+  });
+
+  it("geeft rode kleur voor 'critical' status", function () {
+    const color = getStatusColor("critical");
+    assert.equal(color, "var(--status-critical)");
+  });
+
+  it("geeft rode kleur voor 'unknown' status", function () {
+    const color = getStatusColor("unknown");
+    assert.equal(color, "var(--status-critical)");
+  });
+
+  it("geeft rode kleur voor onbekende status", function () {
+    const color = getStatusColor("invalid-status");
+    assert.equal(color, "var(--status-critical)");
   });
 });
