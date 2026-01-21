@@ -4,10 +4,14 @@ on:
     push:
         branches:
             - main
+            - development
     pull_request:
         branches:
             - main
+            - development
     workflow_dispatch:
+env:
+    PUBLIC_API_URL: http://localhost:3011 #deze bestaat niet echt, maar het moet gedefiniëerd zijn
 
 jobs: 
     build:
@@ -22,11 +26,15 @@ jobs:
             - run: npm ci
             # Runs the linter
             - run: npm run lint
+              if: always()
             # Checks typescript types
             - run: npm run check
+              if: always()
             # Runs Tests
             - run: npm test
+              if: always()
             - run: npm run build
+              if: always()
     report:
         name: Teams integratie
         needs: [build]

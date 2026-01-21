@@ -3,7 +3,7 @@
   import { goto } from "$app/navigation";
   import { browser } from "$app/environment";
   import { language, t } from "$lib/stores/language";
-  import { PUBLIC_API_URL } from '$env/static/public';
+  import { PUBLIC_API_URL } from "$env/static/public";
   import {
     Leaf,
     Trees,
@@ -18,7 +18,7 @@
     MessageCircle,
     Send,
   } from "lucide-svelte";
-  import { onMount } from 'svelte';
+  import { onMount } from "svelte";
   import { jwt } from "$lib/stores/jwt.js";
   import { getPayload, headers } from "$lib/Auth.js";
   import { getStatus, getStatusColor } from "$lib/utils/plant-helpers.js";
@@ -31,19 +31,20 @@
   $: species = plant?.species;
   $: conditions = plant?.conditions[0] ?? {};
 
-  
   async function fetchLatest() {
     try {
-      const res = await fetch(`${PUBLIC_API_URL}/forests/api/v1/plants/${plant?.id}`);
+      const res = await fetch(
+        `${PUBLIC_API_URL}/forests/api/v1/plants/${plant?.id}`,
+      );
       if (!res.ok) return;
       plantData = await res.json();
     } catch (err) {
-      console.error('Error fetching latest plant data', err);
+      console.error("Error fetching latest plant data", err);
     }
   }
 
   onMount(() => {
-     const interval = setInterval(fetchLatest, 5000);
+    const interval = setInterval(fetchLatest, 5000);
     return () => clearInterval(interval);
   });
 
@@ -77,9 +78,16 @@
   let overallColor = null;
 
   function formatLastUpdate(date) {
-  if (!date) return "Unknown";
-  return date.toLocaleString();
-}
+    if (!date) return "Unknown";
+    return date.toLocaleString("nl-NL", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  }
 
   const statusBg = (color) => `color-mix(in oklch, ${color} 12%, transparent)`;
   const statusBorder = (color) =>
@@ -111,7 +119,6 @@
     } else if (conditions.humidity > species.maxHumidity) {
       advice.push(t("adviceHumidityTooHigh", $language));
     }
-
 
     if (conditions.soilMoisture < species.minSoilMoisture) {
       advice.push(t("adviceSoilTooDry", $language));
@@ -161,22 +168,23 @@
 
   $: pageTitle = `${plant?.name || "Plant"} - Food Forest`;
 
-  async function deletePlant(){
-    if(confirm(t("confirmDeletePlant", $language))){
-      const request = await fetch(PUBLIC_API_URL + "/forests/api/v1/plants/" + plant.id, {
-        body: data,
-        method: "DELETE",
-        headers: headers($jwt)
-      });
-      if(!request.ok){
+  async function deletePlant() {
+    if (confirm(t("confirmDeletePlant", $language))) {
+      const request = await fetch(
+        PUBLIC_API_URL + "/forests/api/v1/plants/" + plant.id,
+        {
+          body: data,
+          method: "DELETE",
+          headers: headers($jwt),
+        },
+      );
+      if (!request.ok) {
         alert(request.statusText);
       } else {
         goBack();
       }
     }
-
   }
-
 </script>
 
 <svelte:head>
@@ -195,14 +203,14 @@
         {t("back", $language)}
       </button>
       <div class="float-right flex gap-6">
-        {#if (getPayload($jwt).id === data.forestData.data.ownerId || getPayload($jwt).role === "admin" )}
+        {#if getPayload($jwt).id === data.forestData.data.ownerId || getPayload($jwt).role === "admin"}
           <button
-            onclick={goto("/plants/"+ plant.id+ "/edit")}
+            onclick={goto("/plants/" + plant.id + "/edit")}
             class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
           >
             {t("edit", $language)}
           </button>
-          
+
           <button
             onclick={deletePlant}
             class="bg-(--status-critical) text-primary-foreground px-4 py-2 rounded-lg hover:bg-(--status-critical)/90 transition-colors cursor-pointer"
@@ -354,9 +362,9 @@
             <!-- Last sensor update -->
             <p class="mb-4 text-sm text-muted-foreground">
               {t("lastUpdated", $language) || "Last updated"}:
-                <span class="font-medium text-foreground">
-                  {formatLastUpdate(new Date(conditions.createdAt))}
-                </span>
+              <span class="font-medium text-foreground">
+                {formatLastUpdate(new Date(conditions.createdAt))}
+              </span>
             </p>
             <div class="space-y-3">
               <div
@@ -396,7 +404,6 @@
                   {plant.conditions[0]?.humidity ?? "—"}%
                 </span>
               </div>
-
 
               <div
                 class="flex items-center justify-between rounded-lg bg-muted p-4"
